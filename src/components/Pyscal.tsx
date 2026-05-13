@@ -644,7 +644,9 @@ const DEFAULT_SHORTCUTS = {
 function shortcutToString(s) {
   if (!s) return '';
   const parts = [];
-  if (s.mod) parts.push(navigator.platform.includes('Mac') ? '⌘' : 'Ctrl');
+  const isMac = typeof navigator !== 'undefined'
+    && /Mac|iPhone|iPad|iPod/.test((navigator.platform || navigator.userAgent || ''));
+  if (s.mod) parts.push(isMac ? '⌘' : 'Ctrl');
   if (s.shift) parts.push('Shift');
   if (s.alt) parts.push('Alt');
   parts.push(s.key.toUpperCase());
@@ -670,8 +672,31 @@ const DEFAULT_STATE = {
   customLot: false, customLots: [],
 };
 
-function loadState() {
+// One-time migration from legacy SCALC keys → PYSCAL keys (idempotent).
+function migrateLegacyKeys() {
+  if (typeof window === 'undefined') return;
+  const map = {
+    scalc_state: 'pyscal_state',
+    scalc_presets: 'pyscal_presets',
+    scalc_history: 'pyscal_history',
+    scalc_shortcuts: 'pyscal_shortcuts',
+    scalc_theme: 'pyscal_theme',
+  };
   try {
+    for (const [oldK, newK] of Object.entries(map)) {
+      const oldV = localStorage.getItem(oldK);
+      if (oldV != null && localStorage.getItem(newK) == null) {
+        localStorage.setItem(newK, oldV);
+      }
+      if (oldV != null) localStorage.removeItem(oldK);
+    }
+  } catch {}
+}
+
+function loadState() {
+  if (typeof window === 'undefined') return DEFAULT_STATE;
+  try {
+    migrateLegacyKeys();
     const s = JSON.parse(localStorage.getItem('pyscal_state') || 'null');
     if (!s) return DEFAULT_STATE;
     return { ...DEFAULT_STATE, ...s };
@@ -679,6 +704,7 @@ function loadState() {
 }
 
 function loadShortcuts() {
+  if (typeof window === 'undefined') return DEFAULT_SHORTCUTS;
   try {
     const s = JSON.parse(localStorage.getItem('pyscal_shortcuts') || 'null');
     if (!s) return DEFAULT_SHORTCUTS;
@@ -864,7 +890,9 @@ function SwipeableCard({ children, canSwipe, onDelete, className = '', style = {
 
 /* ==================== MAIN COMPONENT ==================== */
 export default function PYSCAL() {
-  const [theme, setTheme] = useState(() => localStorage.getItem('pyscal_theme') || 'light');
+  const [theme, setTheme] = useState(() =>
+    (typeof window !== 'undefined' && localStorage.getItem('pyscal_theme')) || 'light'
+  );
   const initial = loadState();
 
   const [baseLot, setBaseLot] = useState(initial.baseLot);
@@ -932,6 +960,7 @@ export default function PYSCAL() {
 
   // Presets
   const [presets, setPresets] = useState(() => {
+    if (typeof window === 'undefined') return [];
     try { return JSON.parse(localStorage.getItem('pyscal_presets') || '[]'); } catch { return []; }
   });
   const [presetName, setPresetName] = useState("");
@@ -1041,6 +1070,7 @@ export default function PYSCAL() {
 
   // History
   const [history, setHistory] = useState(() => {
+    if (typeof window === 'undefined') return [];
     try { return JSON.parse(localStorage.getItem('pyscal_history') || '[]'); } catch { return []; }
   });
   const persistHistory = (next) => {
