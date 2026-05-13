@@ -975,7 +975,7 @@ export default function PYSCAL() {
     const a = document.createElement('a');
     const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
     a.href = url;
-    a.download = `scalc-presets-${date}.json`;
+    a.download = `pyscal-presets-${date}.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -1413,7 +1413,7 @@ export default function PYSCAL() {
               <div className="logo"><BoltIcon /></div>
               <div className="brand">
                 <h1>PYSCAL</h1>
-                <span>Pyramid Bid Engine</span>
+                <span>Pyramid Bid Calculator</span>
               </div>
               <div className="hdr-r" ref={settingsRef}>
                 <button className="gear-btn" onClick={() => setShowHistory(true)} title={`History (${shortcutToString(shortcuts.showHistory)})`}>
