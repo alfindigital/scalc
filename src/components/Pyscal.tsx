@@ -1,0 +1,1943 @@
+import { useState, useMemo, useCallback, useEffect, useRef } from "react";
+
+/* ==================== COMPUTE LOGIC ==================== */
+const getTickSize = (p) => p < 200 ? 1 : p < 500 ? 2 : p < 2000 ? 5 : p < 5000 ? 10 : 25;
+const ceilTick = (price, tick) => { const r = Math.ceil(price / tick) * tick; return r <= price ? r + tick : r; };
+
+// Check if a given lot at bid price meets profit target.
+// Tick size is computed from the resulting avg (matches actual IDX trading rules).
+function checkLot(aV, aL, bp, lot, targetTicks, profitMul) {
+  const nV = aV + bp * lot, nL = aL + lot, avg = nV / nL;
+  const tick = getTickSize(avg);
+  const sell = ceilTick(avg, tick) + (targetTicks - 1) * tick;
+  return sell >= avg * profitMul;
+}
+
+/**
+ * Compute pyramid rows.
+ * @param {number[]} bidPrices - bid awal + bid tambahan
+ * @param {number} baseLot - lot layer 1
+ * @param {object} existing - { avg, lot } existing position (for Position Mode), null for Entry Mode
+ * @param {number[]|null} customLots - if provided, use these lots directly (Custom Lot mode)
+ */
+function computeRows(bidPrices, baseLot, targetTicks, targetProfitPct, feeBuy, feeSell, existing = null, customLots = null) {
+  if (!bidPrices.length || bidPrices[0] <= 0) return { results: [] };
+  const profitMul = ((1 + feeBuy) / (1 - feeSell)) * (1 + targetProfitPct / 100);
+  const results = [];
+
+  let aV = 0, aL = 0, prevLot = baseLot;
+
+  // Initialize with existing position (raw avg, before fee)
+  if (existing && existing.lot > 0 && existing.avg > 0) {
+    const avgRaw = existing.avg / (1 + feeBuy); // convert broker avg back to raw
+    aV = avgRaw * existing.lot;
+    aL = existing.lot;
+    prevLot = existing.lot;
+
+    // Display existing as row 0 - tick from avg
+    const tickE = getTickSize(avgRaw);
+    const sell = ceilTick(avgRaw, tickE) + (targetTicks - 1) * tickE;
+    const cost = aV * 100 * (1 + feeBuy);
+    const rev = sell * aL * 100 * (1 - feeSell);
+    const pl = rev - cost;
+    results.push({
+      layer: 'E', isExisting: true, bid: existing.avg, lot: existing.lot,
+      avg: existing.avg, sell, cost, pl, pct: pl / cost * 100,
+    });
+  }
+
+  for (let i = 0; i < bidPrices.length; i++) {
+    const bp = bidPrices[i];
+    if (bp <= 0) break;
+
+    let layerLot;
+    // Custom lot mode: use user-supplied lot directly, bypass pyramid/target constraints
+    if (customLots && customLots[i] !== undefined && customLots[i] !== null && customLots[i] > 0) {
+      layerLot = customLots[i];
+    } else if (i === 0 && !existing) {
+      layerLot = baseLot;
+    } else if (i === 0 && existing) {
+      // First buy in position mode - find min lot
+      const minLot = baseLot; // user's intended base lot is minimum
+      const maxLot = Math.max(baseLot * 100000, prevLot * 10000);
+      let found = -1;
+      let lo = minLot, hi = maxLot;
+      while (lo <= hi) {
+        const mid = Math.floor((lo + hi) / 2);
+        if (checkLot(aV, aL, bp, mid, targetTicks, profitMul)) { found = mid; hi = mid - 1; }
+        else lo = mid + 1;
+      }
+      layerLot = found !== -1 ? found : baseLot;
+    } else {
+      const minLot = prevLot;
+      const maxLot = Math.max(baseLot * 100000, prevLot * 10000);
+      let found = -1;
+      let lo = minLot, hi = maxLot;
+      while (lo <= hi) {
+        const mid = Math.floor((lo + hi) / 2);
+        if (checkLot(aV, aL, bp, mid, targetTicks, profitMul)) { found = mid; hi = mid - 1; }
+        else lo = mid + 1;
+      }
+      layerLot = found !== -1 ? found : prevLot;
+    }
+
+    aV += bp * layerLot;
+    aL += layerLot;
+    const avg = aV / aL;
+    const tick = getTickSize(avg); // tick from final avg, not first bid
+    const sell = ceilTick(avg, tick) + (targetTicks - 1) * tick;
+    const costLayer = bp * layerLot * 100 * (1 + feeBuy);
+    const costAccum = aV * 100 * (1 + feeBuy);
+    const rev = sell * aL * 100 * (1 - feeSell);
+    const pl = rev - costAccum;
+
+    results.push({
+      layer: i + 1, bid: bp, lot: layerLot,
+      avg: avg * (1 + feeBuy), sell, cost: costLayer,
+      pl, pct: pl / costAccum * 100,
+    });
+    prevLot = layerLot;
+  }
+  return { results };
+}
+
+/* ==================== FORMAT HELPERS ==================== */
+const n = (v) => Math.round(v).toLocaleString("id-ID");
+const nDec = (v) => v.toLocaleString("id-ID", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const nShort = (v) => {
+  const abs = Math.abs(v);
+  if (abs >= 1e12) return (v / 1e12).toFixed(1).replace(/\.0$/, '') + 'T';
+  if (abs >= 1e9) return (v / 1e9).toFixed(1).replace(/\.0$/, '') + 'mlr';
+  if (abs >= 1e6) return (v / 1e6).toFixed(1).replace(/\.0$/, '') + 'jt';
+  if (abs >= 1e3) return (v / 1e3).toFixed(0) + 'rb';
+  return Math.round(v).toString();
+};
+const terbilang = (v) => {
+  if (!v || v <= 0) return '';
+  const trillions = Math.floor(v / 1e12);
+  const billions = Math.floor((v % 1e12) / 1e9);
+  const millions = Math.floor((v % 1e9) / 1e6);
+  const thousands = Math.floor((v % 1e6) / 1e3);
+  const ones = Math.floor(v % 1e3);
+  const parts = [];
+  if (trillions > 0) parts.push(`${trillions} triliun`);
+  if (billions > 0) parts.push(`${billions} miliar`);
+  if (millions > 0) parts.push(`${millions} juta`);
+  if (thousands > 0) parts.push(`${thousands} ribu`);
+  if (ones > 0 && trillions === 0 && billions === 0 && millions === 0) parts.push(ones.toString());
+  return parts.join(' ');
+};
+const fmtPct = (v) => v.toFixed(2) + '%';
+const fmtPL = (v) => nDec(v);
+const fmtTime = (ts) => {
+  const d = new Date(ts);
+  const now = Date.now();
+  const diff = now - ts;
+  if (diff < 60000) return 'baru saja';
+  if (diff < 3600000) return Math.floor(diff / 60000) + 'm lalu';
+  if (diff < 86400000) return Math.floor(diff / 3600000) + 'j lalu';
+  if (diff < 604800000) return Math.floor(diff / 86400000) + 'h lalu';
+  return d.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+};
+
+/* ==================== ICONS ==================== */
+const BoltIcon = () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>;
+const GearIcon = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>;
+const PlusIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>;
+const XIcon = () => <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>;
+const CopyIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>;
+const CheckIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>;
+const RefreshIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>;
+const SunIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>;
+const MoonIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>;
+const BookmarkIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>;
+const HistoryIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/><polyline points="12 7 12 12 16 14"/></svg>;
+const KeyboardIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><line x1="6" y1="10" x2="6" y2="10"/><line x1="10" y1="10" x2="10" y2="10"/><line x1="14" y1="10" x2="14" y2="10"/><line x1="18" y1="10" x2="18" y2="10"/><line x1="6" y1="14" x2="18" y2="14"/></svg>;
+const LockIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>;
+const UnlockIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>;
+
+/* ==================== STYLES ==================== */
+const CSS = `
+@import url('https://fonts.googleapis.com/css2?family=Funnel+Display:wght@500;600;700;800&family=Funnel+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+.scalc[data-theme="dark"]{
+  --bg:#0A0A0A;--surface:#141414;--surface-hover:#1C1C1C;--border:#262626;--border-strong:#404040;
+  --text:#FAFAFA;--text2:#D4D4D4;--text-m:#737373;--text-d:#525252;
+  --inp-bg:#0A0A0A;--brand:#EAB308;--brand-h:#FACC15;--brand-d:rgba(234,179,8,0.12);--brand-text:#0A0A0A;
+  --green:#22C55E;--green-d:rgba(34,197,94,0.12);--red:#EF4444;--red-d:rgba(239,68,68,0.12);
+  --modal-bg:rgba(0,0,0,0.7);
+}
+.scalc[data-theme="light"]{
+  --bg:#FAFAFA;--surface:#FFFFFF;--surface-hover:#F5F5F5;--border:#E5E5E5;--border-strong:#D4D4D4;
+  --text:#0A0A0A;--text2:#262626;--text-m:#737373;--text-d:#A3A3A3;
+  --inp-bg:#FFFFFF;--brand:#CA8A04;--brand-h:#A16207;--brand-d:rgba(202,138,4,0.10);--brand-text:#FFFFFF;
+  --green:#16A34A;--green-d:rgba(22,163,74,0.10);--red:#DC2626;--red-d:rgba(220,38,38,0.08);
+  --modal-bg:rgba(0,0,0,0.4);
+}
+
+.scalc{font-family:'Funnel Sans',system-ui,sans-serif;background:var(--bg);color:var(--text);
+  min-height:100vh;-webkit-font-smoothing:antialiased;transition:background .25s,color .25s}
+.scalc-inner{min-height:100vh;padding:24px 16px 56px}
+.ctn{max-width:880px;margin:0 auto}
+
+/* header */
+.hdr{display:flex;align-items:center;gap:12px;margin-bottom:20px;position:relative}
+.logo{width:42px;height:42px;background:var(--brand);display:flex;align-items:center;justify-content:center;
+  color:var(--brand-text);flex-shrink:0}
+.brand h1{font-family:'Funnel Display',sans-serif;font-size:22px;font-weight:800;color:var(--text);
+  letter-spacing:-1px;line-height:1}
+.brand span{font-size:12px;color:var(--text-m);font-weight:500;display:block;margin-top:2px}
+.hdr-r{margin-left:auto;display:flex;gap:6px;position:relative}
+.gear-btn{width:38px;height:38px;border:1px solid var(--border);background:var(--surface);
+  color:var(--text-m);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s}
+.gear-btn:hover,.gear-btn.active{border-color:var(--brand);color:var(--brand)}
+
+/* mode toggle */
+.mode-toggle{display:flex;background:var(--surface);border:1px solid var(--border);margin-bottom:14px}
+.mode-toggle button{flex:1;background:none;border:none;color:var(--text-m);
+  font-family:'Funnel Sans',sans-serif;font-size:13px;font-weight:600;padding:11px 14px;
+  cursor:pointer;transition:all .15s;letter-spacing:0.2px}
+.mode-toggle button.active{background:var(--brand);color:var(--brand-text)}
+.mode-toggle button:hover:not(.active){background:var(--surface-hover);color:var(--text)}
+
+/* settings panel */
+.settings-panel{position:absolute;top:calc(100% + 8px);right:0;width:360px;max-width:calc(100vw - 32px);
+  background:var(--surface);border:1px solid var(--border);z-index:50;
+  animation:si .15s ease;box-shadow:0 8px 32px rgba(0,0,0,0.12);max-height:80vh;overflow-y:auto}
+.sp-section{padding:18px;border-bottom:1px solid var(--border)}
+.sp-section:last-child{border-bottom:none}
+.sp-title{font-family:'Funnel Sans',sans-serif;font-size:11px;font-weight:700;color:var(--text-m);
+  text-transform:uppercase;letter-spacing:0.8px;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.sp-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.sp-input{width:100%;background:var(--inp-bg);border:1px solid var(--border);color:var(--text);
+  font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;padding:10px 12px;outline:none;transition:border-color .15s}
+.sp-input:focus{border-color:var(--brand)}
+.sp-label{font-size:10px;font-weight:600;color:var(--text-m);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px}
+.terbilang{font-family:'Funnel Sans',sans-serif;font-size:12px;color:var(--text-m);margin-top:6px;line-height:1.4}
+.terbilang strong{color:var(--brand);font-weight:700}
+
+.theme-pill{display:flex;gap:4px;background:var(--inp-bg);padding:3px;border:1px solid var(--border)}
+.theme-pill button{flex:1;background:transparent;border:none;padding:7px 10px;cursor:pointer;
+  color:var(--text-m);font-family:'Funnel Sans',sans-serif;font-size:12px;font-weight:600;
+  display:flex;align-items:center;justify-content:center;gap:6px;transition:all .15s}
+.theme-pill button.active{background:var(--brand);color:var(--brand-text)}
+
+.sp-presets{display:flex;flex-direction:column;gap:6px;margin-bottom:10px;max-height:180px;overflow-y:auto}
+.sp-preset-item{display:flex;align-items:stretch;border:1px solid var(--border);background:var(--inp-bg)}
+.sp-preset-load{flex:1;background:none;border:none;color:var(--text);text-align:left;
+  font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;padding:8px 12px;cursor:pointer;transition:background .15s}
+.sp-preset-load:hover{background:var(--surface-hover)}
+.sp-preset-x{background:none;border:none;border-left:1px solid var(--border);color:var(--text-d);
+  cursor:pointer;padding:0 10px;display:flex;align-items:center;transition:all .15s}
+.sp-preset-x:hover{background:var(--red);color:#fff;border-color:var(--red)}
+.sp-preset-save{display:flex;border:1px solid var(--border)}
+.sp-preset-save input{flex:1;background:var(--inp-bg);border:none;outline:none;
+  font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:var(--text);padding:10px 12px;min-width:0}
+.sp-preset-save input::placeholder{color:var(--text-d)}
+.sp-preset-save button{background:var(--brand);border:none;color:var(--brand-text);
+  padding:0 16px;cursor:pointer;font-family:'Funnel Sans',sans-serif;font-size:12px;font-weight:700;transition:background .15s}
+.sp-preset-save button:hover{background:var(--brand-h)}
+.sp-preset-save button:disabled{opacity:.4;cursor:default}
+.sp-empty{font-size:12px;color:var(--text-d);padding:8px 0;font-style:italic}
+
+.sp-import-export{display:flex;gap:6px;margin-top:8px}
+.sp-ie-btn{flex:1;background:transparent;border:1px solid var(--border);color:var(--text-m);
+  font-family:'Funnel Sans',sans-serif;font-size:11px;font-weight:600;padding:8px 10px;cursor:pointer;
+  transition:all .15s;letter-spacing:0.3px}
+.sp-ie-btn:hover{border-color:var(--brand);color:var(--brand)}
+
+/* shortcut list in settings */
+.kbd-list{display:flex;flex-direction:column;gap:6px}
+.kbd-row{display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:8px 0;font-size:12px;color:var(--text-m)}
+.kbd-row label{flex:1;color:var(--text2)}
+.kbd-input{background:var(--inp-bg);border:1px solid var(--border);color:var(--text);
+  font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;padding:5px 8px;width:120px;
+  text-align:center;outline:none;cursor:pointer;transition:all .15s;text-transform:uppercase;letter-spacing:0.5px}
+.kbd-input:focus,.kbd-input.recording{border-color:var(--brand);background:var(--brand-d);color:var(--brand)}
+.kbd-reset{background:none;border:none;color:var(--text-d);cursor:pointer;font-size:11px;
+  font-family:'Funnel Sans',sans-serif;text-decoration:underline;padding:2px 4px}
+.kbd-reset:hover{color:var(--brand)}
+
+/* settings actions */
+.sp-action-btn{display:flex;align-items:center;gap:10px;padding:11px 14px;background:var(--inp-bg);
+  border:1px solid var(--border);color:var(--text);cursor:pointer;width:100%;text-align:left;
+  font-family:'Funnel Sans',sans-serif;font-size:13px;font-weight:600;transition:all .15s;margin-bottom:6px}
+.sp-action-btn:last-child{margin-bottom:0}
+.sp-action-btn:hover{border-color:var(--brand);color:var(--brand)}
+
+/* caution */
+.caution{display:flex;align-items:center;gap:12px;padding:14px 18px;
+  background:var(--brand-d);border:1px solid var(--brand);border-left:4px solid var(--brand);
+  margin-bottom:16px;font-family:'Funnel Sans',sans-serif;font-size:13px;font-weight:500;
+  color:var(--text);line-height:1.5;animation:si .2s ease}
+.caution-icon{color:var(--brand);font-size:16px;flex-shrink:0;font-weight:700}
+.caution-text{flex:1}
+.caution-val{font-weight:700;color:var(--brand)}
+.caution-red{background:var(--red-d);border-color:var(--red);border-left-color:var(--red)}
+.caution-red .caution-icon,.caution-red .caution-val{color:var(--red)}
+
+/* preset chips */
+.preset-bar{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;align-items:center}
+.preset-chip{background:var(--surface);border:1px solid var(--border);color:var(--text);
+  font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;
+  padding:8px 14px;cursor:pointer;transition:all .15s}
+.preset-chip:hover{border-color:var(--brand);color:var(--brand)}
+.preset-chip.active{background:var(--brand);color:var(--brand-text);border-color:var(--brand)}
+
+/* card */
+.card{background:var(--surface);border:1px solid var(--border);padding:24px;margin-bottom:16px}
+.ig{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.ig-2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--border)}
+.il{font-family:'Funnel Sans',sans-serif;font-size:11px;font-weight:600;color:var(--text-m);
+  text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.if{width:100%;background:var(--inp-bg);border:1px solid var(--border);color:var(--text);
+  font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:600;padding:13px 14px;
+  outline:none;transition:border-color .15s;letter-spacing:-0.3px}
+.if:focus{border-color:var(--brand)}
+
+/* papan bar */
+.papan-bar{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border)}
+.papan-label{font-family:'Funnel Sans',sans-serif;font-size:12px;font-weight:700;color:var(--text-m);
+  text-transform:uppercase;letter-spacing:0.5px}
+.papan-actions{display:flex;align-items:center;gap:8px}
+.ibtn{width:34px;height:34px;border:1px solid var(--border);background:var(--surface);color:var(--text-m);
+  display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s}
+.ibtn:hover{border-color:var(--brand);color:var(--brand)}
+.ibtn:active{transform:scale(0.94)}
+.ibtn.primary{border-color:var(--brand);background:var(--brand);color:var(--brand-text)}
+.ibtn.primary:hover{background:var(--brand-h);border-color:var(--brand-h)}
+.ibtn.danger:hover{border-color:var(--red);color:var(--red);background:var(--red-d)}
+.ibtn.success{color:var(--green);border-color:var(--green)}
+.ibtn-active-amber{background:var(--brand)!important;color:var(--brand-text)!important;border-color:var(--brand)!important}
+.ibtn-active-amber:hover{background:var(--brand-h)!important;border-color:var(--brand-h)!important}
+
+/* custom lot badge */
+.papan-label-wrap{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.custom-lot-badge{font-family:'Funnel Sans',sans-serif;font-size:9px;font-weight:700;
+  letter-spacing:0.8px;color:var(--brand-text);background:var(--brand);padding:3px 7px;
+  border:1px solid var(--brand);animation:badgePulse 2s ease-in-out infinite}
+@keyframes badgePulse{0%,100%{opacity:1}50%{opacity:0.72}}
+
+/* lot-edit inputs (custom lot mode) */
+.lot-edit{background:var(--inp-bg);border:1px solid var(--brand);color:var(--text);
+  font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;letter-spacing:-0.3px;
+  padding:6px 8px;width:80px;text-align:right;outline:none;transition:all .15s;-moz-appearance:textfield}
+.lot-edit::-webkit-outer-spin-button,.lot-edit::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.lot-edit:focus{border-color:var(--brand-h);background:var(--brand-d)}
+.lot-edit-m{border-color:var(--brand)!important}
+
+/* table */
+.dt{overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none}
+.dt::-webkit-scrollbar{display:none}
+table{width:100%;border-collapse:collapse;min-width:560px}
+thead th{font-family:'Funnel Sans',sans-serif;font-size:10px;font-weight:700;color:var(--text-m);
+  text-transform:uppercase;letter-spacing:0.6px;padding:14px 14px;text-align:right;
+  border-bottom:1px solid var(--border);white-space:nowrap}
+thead th:first-child{text-align:center;width:1%;padding:14px 8px}
+thead th:last-child{width:1%;padding:14px 8px}
+tbody tr{transition:background .12s;animation:rs .25s ease both}
+tbody tr:hover{background:var(--surface-hover)}
+tbody td{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:500;padding:14px 14px;
+  text-align:right;border-bottom:1px solid var(--border);color:var(--text);letter-spacing:-0.3px;white-space:nowrap}
+tbody td:first-child{text-align:center;color:var(--text-d);font-family:'Funnel Sans',sans-serif;
+  font-weight:600;font-size:11px;padding:14px 8px;width:1%}
+tbody td:last-child{padding:14px 8px;width:1%}
+
+/* existing row in position mode - border-left instead of bg */
+.row-existing td{border-left:none}
+.row-existing td:first-child{color:var(--text-m)!important;font-style:italic;font-size:10px;
+  border-left:2px solid var(--text-m)}
+.row-existing .c-bid-static{color:var(--text);font-weight:700}
+
+/* bid - primary text, no color */
+.c-bid{color:var(--text)!important;font-weight:700!important}
+.bid-edit{background:transparent;border:1px solid transparent;color:var(--text);
+  font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;letter-spacing:-0.3px;
+  padding:6px 8px;width:80px;text-align:right;outline:none;transition:all .15s;
+  -moz-appearance:textfield}
+.bid-edit::-webkit-outer-spin-button,.bid-edit::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.bid-edit:hover{border-color:var(--border)}
+.bid-edit:focus{border-color:var(--brand);background:var(--inp-bg)}
+.bid-edit-w{color:var(--text-m)!important;opacity:.8}
+
+/* bid step buttons - show on hover/focus */
+.bid-step-wrap{display:inline-flex;align-items:center;position:relative}
+.bid-step-btns{display:flex;flex-direction:column;opacity:0;pointer-events:none;transition:opacity .12s;
+  margin-left:2px;justify-content:center;gap:1px}
+.bid-step-wrap:hover .bid-step-btns,.bid-step-wrap.focused .bid-step-btns{opacity:1;pointer-events:auto}
+.bid-step-btn{background:var(--surface);border:1px solid var(--border);color:var(--text-m);
+  width:16px;height:14px;display:flex;align-items:center;justify-content:center;
+  font-size:8px;line-height:1;cursor:pointer;padding:0;transition:all .12s;user-select:none;
+  font-family:'Funnel Sans',sans-serif}
+.bid-step-btn:hover{background:var(--brand);color:var(--brand-text);border-color:var(--brand)}
+.bid-step-btn:active{transform:scale(0.88);transition:transform .08s ease}
+.bid-step-btn.is-disabled,.bid-step-btn:disabled{opacity:0.3;cursor:not-allowed;pointer-events:none}
+.bid-step-btn.is-disabled:hover,.bid-step-btn:disabled:hover{background:var(--surface);color:var(--text-m);border-color:var(--border)}
+
+/* mobile variant: buttons always visible, bigger */
+.bid-step-mobile{display:flex;align-items:center}
+.bid-step-mobile .bid-step-btns{opacity:1;pointer-events:auto;margin-left:4px;gap:2px}
+.bid-step-mobile .bid-step-btn{width:22px;height:18px;font-size:10px}
+
+/* lot, sell - primary text bold. avg, cost - muted */
+.c-lot{color:var(--text)!important;font-weight:700!important}
+.c-avg{color:var(--text-m)!important;font-weight:500!important}
+.c-sell{color:var(--text)!important;font-weight:700!important}
+.c-cost{color:var(--text-m)!important;font-weight:500!important;font-size:13px!important}
+
+/* profit & % - ONLY semantic color in the table */
+.c-plp{color:var(--green)!important;font-weight:700!important}
+.c-pln{color:var(--red)!important;font-weight:700!important}
+.pp{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;display:inline-block}
+.pp-g{color:var(--green)}
+.pp-r{color:var(--red)}
+.pp-u{color:var(--text-m);display:inline-flex;align-items:center;gap:4px;font-weight:600}
+.pp-icon{font-size:10px;line-height:1;color:var(--brand)}
+
+/* under-target - subtle border-left accent */
+.row-under td:first-child{border-left:2px solid var(--brand)}
+.row-under:hover{background:var(--surface-hover)}
+
+.row-x{background:transparent;border:none;color:var(--text-d);cursor:pointer;padding:4px;
+  display:flex;align-items:center;margin-left:auto;transition:color .15s}
+.row-x:hover{color:var(--red)}
+
+.total-row td{border-top:1px solid var(--border-strong)!important;border-bottom:none!important;
+  font-weight:700!important;color:var(--text)!important;padding-top:16px!important;font-size:14px!important;
+  background:transparent!important}
+.total-label{font-family:'Funnel Sans',sans-serif!important;font-size:11px!important;
+  text-transform:uppercase;letter-spacing:0.6px;color:var(--text-m)!important;font-weight:600!important}
+/* TOAST */
+.toast-container{position:fixed;bottom:20px;right:20px;z-index:200;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--brand);
+  padding:12px 16px;min-width:240px;max-width:380px;display:flex;align-items:center;gap:10px;
+  font-family:'Funnel Sans',sans-serif;font-size:13px;font-weight:500;color:var(--text);
+  box-shadow:0 4px 20px rgba(0,0,0,0.15);animation:toastIn .25s ease;pointer-events:auto}
+.toast.toast-out{animation:toastOut .25s ease forwards}
+.toast-icon{color:var(--brand);flex-shrink:0;display:flex;align-items:center}
+.toast-success .toast-icon{color:var(--green)}
+.toast-success{border-left-color:var(--green)}
+.toast-error .toast-icon{color:var(--red)}
+.toast-error{border-left-color:var(--red)}
+.toast-text{flex:1;line-height:1.4}
+.toast-text strong{font-weight:700;color:var(--text)}
+.toast-action{background:transparent;border:1px solid var(--brand);color:var(--brand);
+  font-family:'Funnel Sans',sans-serif;font-size:11px;font-weight:700;padding:5px 12px;cursor:pointer;
+  letter-spacing:0.5px;text-transform:uppercase;flex-shrink:0;transition:all .15s}
+.toast-action:hover{background:var(--brand);color:var(--brand-text)}
+@keyframes toastIn{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:translateX(0)}}
+@keyframes toastOut{from{opacity:1;transform:translateX(0)}to{opacity:0;transform:translateX(40px)}}
+
+/* SWIPEABLE CARD */
+.swipe-wrap{position:relative;overflow:hidden}
+.swipe-bg{position:absolute;top:0;right:0;bottom:0;width:100%;background:var(--red);
+  display:flex;align-items:center;justify-content:flex-end;padding:0 24px;
+  font-family:'Funnel Sans',sans-serif;font-size:13px;font-weight:700;color:#fff;letter-spacing:0.5px}
+
+/* PRESET CHIP FLASH */
+@keyframes chipFlash{0%{background:var(--brand);color:var(--brand-text);transform:scale(1)}
+  40%{background:var(--brand-h);transform:scale(1.05)}
+  100%{background:var(--brand);color:var(--brand-text);transform:scale(1)}}
+.preset-chip.flash{animation:chipFlash .5s ease}
+
+@media(max-width:700px){
+  .toast-container{right:12px;left:12px;bottom:16px;align-items:stretch}
+  .toast{min-width:0;max-width:none;font-size:12px;padding:11px 14px}
+}
+
+.util{color:var(--text-m);font-size:12px;font-weight:500;margin-left:4px}
+
+/* mobile cards - 2-row compact layout */
+.mc{display:none}
+.mk{background:var(--surface);border:1px solid var(--border);padding:14px 14px;
+  position:relative;animation:rs .3s ease both}
+.mk-under{border-left:2px solid var(--brand)}
+.mk-existing{border-left:2px solid var(--text-m)}
+.mk-existing::before{content:'EXISTING';position:absolute;top:10px;right:14px;
+  font-family:'Funnel Sans',sans-serif;font-size:9px;font-weight:700;color:var(--text-m);
+  letter-spacing:0.8px;font-style:italic}
+.mk-existing{padding-top:28px}
+.m-remove{position:absolute;top:10px;right:10px;background:transparent;border:none;color:var(--text-d);
+  cursor:pointer;padding:6px;display:flex;align-items:center;transition:color .15s;z-index:2}
+.m-remove:hover{color:var(--red)}
+
+/* Row 1: Bid, Lot, Sell */
+.mh{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+.mhi{min-width:0}
+.mhi label{font-family:'Funnel Sans',sans-serif;font-size:9px;font-weight:600;color:var(--text-m);
+  text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:4px}
+.mhi span{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:17px;letter-spacing:-0.5px;display:block;color:var(--text);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mhi-inp{background:transparent;border:1px solid var(--border);color:var(--text);
+  font-family:'JetBrains Mono',monospace;font-weight:700;font-size:17px;letter-spacing:-0.5px;
+  padding:3px 7px;width:100%;max-width:82px;outline:none;-moz-appearance:textfield}
+.mhi-inp::-webkit-outer-spin-button,.mhi-inp::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.mhi-inp:focus{border-color:var(--brand)}
+
+/* Row 2: Avg, Cost, Profit, % - 4 cols compact */
+.mg{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.mgi{min-width:0}
+.mgi label{font-family:'Funnel Sans',sans-serif;font-size:9px;font-weight:600;color:var(--text-m);
+  text-transform:uppercase;letter-spacing:0.4px;display:block;margin-bottom:3px}
+.mgi span{font-family:'JetBrains Mono',monospace;font-size:12.5px;font-weight:500;color:var(--text-m);
+  letter-spacing:-0.3px;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mgi-profit span{color:var(--text)!important;font-weight:700}
+.mgi-pct span{font-weight:700}
+
+.mt{background:transparent;border-top:1px solid var(--border-strong);padding:14px 16px;
+  display:flex;align-items:center;justify-content:space-between}
+.mt-label{font-family:'Funnel Sans',sans-serif;font-size:10px;font-weight:600;color:var(--text-m);
+  text-transform:uppercase;letter-spacing:0.6px}
+.mt-val{font-family:'JetBrains Mono',monospace;font-size:17px;font-weight:700;color:var(--text);
+  letter-spacing:-0.5px;margin-top:2px}
+.util-m{color:var(--text-m);font-size:12px;font-weight:500;margin-left:6px}
+
+/* modal */
+.modal-overlay{position:fixed;inset:0;background:var(--modal-bg);z-index:100;
+  display:flex;align-items:flex-start;justify-content:center;padding:24px 16px;overflow-y:auto;
+  animation:fadeIn .2s ease;backdrop-filter:blur(4px)}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal{background:var(--bg);border:1px solid var(--border);width:100%;max-width:720px;
+  animation:si .25s ease}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid var(--border)}
+.modal-title{font-family:'Funnel Display',sans-serif;font-size:18px;font-weight:700;color:var(--text);letter-spacing:-0.3px}
+.modal-close{background:transparent;border:none;color:var(--text-m);cursor:pointer;padding:6px;
+  display:flex;align-items:center;transition:color .15s}
+.modal-close:hover{color:var(--red)}
+.modal-body{padding:20px}
+
+.btn-secondary{background:transparent;border:1px solid var(--border);color:var(--text);
+  font-family:'Funnel Sans',sans-serif;font-size:13px;font-weight:600;padding:10px 18px;cursor:pointer;transition:all .15s}
+.btn-secondary:hover{border-color:var(--brand);color:var(--brand)}
+
+/* history list - avg-as-title */
+.history-list{display:flex;flex-direction:column;gap:8px;max-height:60vh;overflow-y:auto}
+.history-item{background:var(--surface);border:1px solid var(--border);padding:14px 16px;cursor:pointer;
+  display:flex;align-items:center;gap:12px;transition:all .15s}
+.history-item:hover{border-color:var(--brand)}
+.history-info{flex:1;min-width:0}
+.history-avg{font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:var(--text);
+  letter-spacing:-0.3px;margin-bottom:4px}
+.history-meta{font-family:'Funnel Sans',sans-serif;font-size:12px;color:var(--text-m);margin-bottom:3px;line-height:1.4}
+.history-time{font-family:'Funnel Sans',sans-serif;font-size:11px;color:var(--text-d)}
+.history-del{background:transparent;border:none;color:var(--text-d);cursor:pointer;padding:6px;
+  display:flex;align-items:center;transition:color .15s;flex-shrink:0}
+.history-del:hover{color:var(--red)}
+.history-empty{text-align:center;padding:40px 20px;color:var(--text-d);font-style:italic}
+
+.history-detail{padding:0}
+.hd-section{padding:18px 20px;border-bottom:1px solid var(--border)}
+.hd-section:last-child{border-bottom:none}
+.hd-section-title{font-family:'Funnel Sans',sans-serif;font-size:11px;font-weight:700;color:var(--text-m);
+  text-transform:uppercase;letter-spacing:0.8px;margin-bottom:14px}
+.hd-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.hd-field label{font-size:10px;font-weight:600;color:var(--text-m);text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:4px}
+.hd-field span{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;color:var(--text);display:block}
+.hd-mini-table{font-size:12px;color:var(--text-m);font-family:'JetBrains Mono',monospace}
+.hd-mini-table div{padding:6px 0;display:flex;justify-content:space-between;border-bottom:1px solid var(--border)}
+.hd-mini-table div:last-child{border-bottom:none}
+
+@media(max-width:700px){
+  .scalc-inner{padding:20px 12px 48px}
+  .dt{display:none}
+  .mc{display:flex;flex-direction:column;gap:10px}
+  .ig{grid-template-columns:1fr 1fr;gap:12px}
+  .ig > div:nth-child(odd):last-child{grid-column:span 2}
+  .ig-2{grid-template-columns:1fr 1fr}
+  .hdr{margin-bottom:18px}
+  .logo{width:38px;height:38px}
+  .brand h1{font-size:19px;letter-spacing:-0.5px}
+  .brand span{font-size:11px}
+  .card{padding:16px}
+  .if{font-size:16px;padding:13px}
+  .il{font-size:10px;letter-spacing:0.4px;margin-bottom:6px}
+  .mode-toggle button{font-size:13px;padding:12px 10px}
+  .preset-bar{margin-bottom:12px}
+  .preset-chip{font-size:12px;padding:7px 12px}
+  .caution{padding:12px 14px;font-size:12px;gap:10px;line-height:1.45}
+  .papan-bar{padding:14px 14px}
+  .papan-label{font-size:11px}
+  .settings-panel{width:calc(100vw - 24px);right:-6px}
+  .modal-body{padding:16px}
+  .hd-grid{grid-template-columns:1fr}
+  .modal-overlay{padding:12px 8px}
+
+  /* Mobile result cards */
+  .mk{padding:16px 14px}
+  .mb{width:26px;height:26px;font-size:11px;top:12px;right:12px}
+  .m-remove{top:13px;right:46px}
+  .mh{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px;padding-bottom:12px;align-items:end}
+  .mhi{min-width:0}
+  .mhi label{font-size:9px;letter-spacing:0.5px;margin-bottom:4px}
+  .mhi span{font-size:16px;letter-spacing:-0.4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .mhi-inp{font-size:16px;width:100%;max-width:72px;padding:3px 6px}
+  .mg{grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px}
+  .mgi label{font-size:9px;letter-spacing:0.4px}
+  .mgi span{font-size:13px}
+  .mt{padding:14px 16px}
+  .mt-label{font-size:10px}
+  .mt-val{font-size:16px}
+}
+
+@media(max-width:420px){
+  .scalc-inner{padding:16px 10px 40px}
+  .card{padding:14px}
+  .hdr{gap:10px}
+  .logo{width:36px;height:36px}
+  .brand h1{font-size:18px}
+  .brand span{font-size:10px}
+  .ibtn{width:32px;height:32px}
+  .ig{gap:10px}
+  .if{font-size:16px;padding:12px}
+  .mode-toggle button{font-size:12px;padding:11px 8px}
+  .preset-chip{font-size:12px;padding:6px 10px}
+  .caution{padding:11px 12px;font-size:11.5px}
+  .papan-bar{padding:12px 12px}
+  .papan-label{font-size:10.5px}
+  .papan-actions{gap:6px}
+  .mk{padding:14px 12px}
+  .mh{gap:8px}
+  .mhi label{font-size:9px}
+  .mhi span{font-size:15px}
+  .mhi-inp{font-size:15px;max-width:66px;padding:3px 5px}
+  .mg{gap:8px}
+  .mgi label{font-size:8.5px}
+  .mgi span{font-size:12.5px}
+  .total-row td{padding:14px 8px!important;font-size:12.5px!important}
+}
+
+@keyframes rs{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+@keyframes si{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+`;
+
+/* ==================== KEYBOARD SHORTCUTS ==================== */
+const DEFAULT_SHORTCUTS = {
+  addPapan: { key: 'n', mod: true, label: 'Tambah Papan' },
+  copyResults: { key: 'c', mod: true, shift: true, label: 'Copy Hasil' },
+  resetPapan: { key: 'r', mod: true, shift: true, label: 'Reset Papan' },
+  toggleSettings: { key: ',', mod: true, label: 'Buka/Tutup Settings' },
+  saveTrade: { key: 's', mod: true, shift: true, label: 'Simpan ke History' },
+  showHistory: { key: 'h', mod: true, shift: true, label: 'Buka History' },
+  focusBidAwal: { key: 'k', mod: true, label: 'Focus Bid Awal' },
+  undo: { key: 'z', mod: true, label: 'Undo' },
+  redo: { key: 'z', mod: true, shift: true, label: 'Redo' },
+};
+
+function shortcutToString(s) {
+  if (!s) return '';
+  const parts = [];
+  if (s.mod) parts.push(navigator.platform.includes('Mac') ? '⌘' : 'Ctrl');
+  if (s.shift) parts.push('Shift');
+  if (s.alt) parts.push('Alt');
+  parts.push(s.key.toUpperCase());
+  return parts.join(' + ');
+}
+
+function eventMatchesShortcut(e, s) {
+  if (!s) return false;
+  const modOK = s.mod ? (e.ctrlKey || e.metaKey) : !(e.ctrlKey || e.metaKey);
+  const shiftOK = !!s.shift === e.shiftKey;
+  const altOK = !!s.alt === e.altKey;
+  const keyOK = e.key.toLowerCase() === s.key.toLowerCase();
+  return modOK && shiftOK && altOK && keyOK;
+}
+
+/* ==================== STATE ==================== */
+const DEFAULT_STATE = {
+  baseLot: 100, targetTicks: 1, targetProfit: 0.5,
+  feeBuy: 0.15, feeSell: 0.25,
+  bids: [100], balance: 0,
+  mode: 'entry', // 'entry' | 'position'
+  existingAvg: 0, existingLot: 0,
+  customLot: false, customLots: [],
+};
+
+function loadState() {
+  try {
+    const s = JSON.parse(localStorage.getItem('scalc_state') || 'null');
+    if (!s) return DEFAULT_STATE;
+    return { ...DEFAULT_STATE, ...s };
+  } catch { return DEFAULT_STATE; }
+}
+
+function loadShortcuts() {
+  try {
+    const s = JSON.parse(localStorage.getItem('scalc_shortcuts') || 'null');
+    if (!s) return DEFAULT_SHORTCUTS;
+    return { ...DEFAULT_SHORTCUTS, ...s };
+  } catch { return DEFAULT_SHORTCUTS; }
+}
+
+/* ==================== TOAST COMPONENT ==================== */
+function ToastContainer({ toasts, onRemove }) {
+  return (
+    <div className="toast-container">
+      {toasts.map(t => (
+        <div key={t.id} className={`toast ${t.type ? 'toast-' + t.type : ''} ${t.leaving ? 'toast-out' : ''}`}
+          onAnimationEnd={() => { if (t.leaving) onRemove(t.id); }}>
+          <span className="toast-icon">
+            {t.type === 'success' && <CheckIcon />}
+            {t.type === 'error' && '⚠'}
+            {!t.type && '•'}
+          </span>
+          <span className="toast-text" dangerouslySetInnerHTML={{ __html: t.text }} />
+          {t.action && (
+            <button className="toast-action" onClick={() => { t.action.handler(); onRemove(t.id); }}>
+              {t.action.label}
+            </button>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/* ==================== BID STEP INPUT ==================== */
+function BidStepInput({ value, onChange, onFocus, disabled, className = '', variant = 'desktop' }) {
+  const inputRef = useRef(null);
+  const [focused, setFocused] = useState(false);
+
+  const haptic = () => {
+    // Haptic feedback only for touch interaction (mobile devices)
+    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+      try { navigator.vibrate(10); } catch {}
+    }
+  };
+
+  const stepUp = (fromTouch = false) => {
+    const tick = getTickSize(value || 1);
+    const next = Math.max(1, (value || 0) + tick);
+    onChange(next);
+    if (fromTouch) haptic();
+  };
+  const stepDown = (fromTouch = false) => {
+    if ((value || 0) <= 1) return; // already at min
+    const tick = getTickSize(value || 1);
+    const next = Math.max(1, (value || 0) - tick);
+    onChange(next);
+    if (fromTouch) haptic();
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      stepUp(false);
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      stepDown(false);
+    }
+  };
+
+  const downDisabled = (value || 0) <= 1;
+
+  return (
+    <div className={`bid-step-wrap ${variant === 'mobile' ? 'bid-step-mobile' : ''} ${focused ? 'focused' : ''}`}>
+      <input
+        ref={inputRef}
+        type="number"
+        className={className}
+        value={value}
+        min={1}
+        disabled={disabled}
+        onChange={e => onChange(+e.target.value)}
+        onFocus={e => { setFocused(true); e.target.select(); if (onFocus) onFocus(e); }}
+        onBlur={() => setFocused(false)}
+        onKeyDown={handleKeyDown}
+      />
+      <div className="bid-step-btns">
+        <button type="button" className="bid-step-btn" tabIndex={-1}
+          onMouseDown={e => { e.preventDefault(); stepUp(false); }}
+          onTouchStart={e => { e.preventDefault(); stepUp(true); }}>▲</button>
+        <button type="button" className={`bid-step-btn ${downDisabled ? 'is-disabled' : ''}`} tabIndex={-1}
+          disabled={downDisabled}
+          onMouseDown={e => { e.preventDefault(); if (!downDisabled) stepDown(false); }}
+          onTouchStart={e => { e.preventDefault(); if (!downDisabled) stepDown(true); }}>▼</button>
+      </div>
+    </div>
+  );
+}
+
+/* ==================== SWIPEABLE CARD ==================== */
+function SwipeableCard({ children, canSwipe, onDelete, className = '', style = {} }) {
+  const [translate, setTranslate] = useState(0);
+  const [swiping, setSwiping] = useState(false);
+  const startXRef = useRef(0);
+  const startYRef = useRef(0);
+  const lastXRef = useRef(0);
+  const axisRef = useRef(null); // 'x' | 'y' | null
+  const cardRef = useRef(null);
+
+  const reset = () => {
+    setTranslate(0);
+    setSwiping(false);
+    axisRef.current = null;
+  };
+
+  const handleTouchStart = (e) => {
+    if (!canSwipe) return;
+    const t = e.touches[0];
+    startXRef.current = t.clientX;
+    startYRef.current = t.clientY;
+    lastXRef.current = t.clientX;
+    axisRef.current = null;
+    setSwiping(true);
+  };
+
+  const handleTouchMove = (e) => {
+    if (!canSwipe || !swiping) return;
+    const t = e.touches[0];
+    const dx = t.clientX - startXRef.current;
+    const dy = t.clientY - startYRef.current;
+
+    // Detect dominant axis on first significant movement (>8px)
+    if (axisRef.current === null) {
+      if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
+      axisRef.current = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
+    }
+
+    if (axisRef.current === 'y') return; // user is scrolling vertically, don't intercept
+
+    // Horizontal swipe - only allow leftward (negative dx)
+    e.preventDefault();
+    lastXRef.current = t.clientX;
+    setTranslate(Math.min(0, dx));
+  };
+
+  const handleTouchEnd = () => {
+    if (!canSwipe || !swiping) { reset(); return; }
+    if (axisRef.current !== 'x') { reset(); return; }
+
+    const cardWidth = cardRef.current ? cardRef.current.offsetWidth : 300;
+    const threshold = cardWidth * 0.5;
+    if (Math.abs(translate) > threshold) {
+      // Animate out then delete
+      setTranslate(-cardWidth);
+      setTimeout(() => { onDelete(); reset(); }, 180);
+    } else {
+      reset();
+    }
+  };
+
+  return (
+    <div className="swipe-wrap" ref={cardRef}>
+      {canSwipe && translate < -10 && (
+        <div className="swipe-bg">
+          <span>Hapus</span>
+        </div>
+      )}
+      <div
+        className={className}
+        style={{
+          ...style,
+          transform: `translateX(${translate}px)`,
+          transition: swiping ? 'none' : 'transform 0.18s ease-out',
+          touchAction: canSwipe ? 'pan-y' : 'auto',
+        }}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        onTouchCancel={() => reset()}
+      >
+        {children}
+      </div>
+    </div>
+  );
+}
+
+/* ==================== MAIN COMPONENT ==================== */
+export default function SCALC() {
+  const [theme, setTheme] = useState(() => localStorage.getItem('scalc_theme') || 'light');
+  const initial = loadState();
+
+  const [baseLot, setBaseLot] = useState(initial.baseLot);
+  const [targetTicks, setTargetTicks] = useState(initial.targetTicks);
+  const [targetProfit, setTargetProfit] = useState(initial.targetProfit);
+  const [feeBuy, setFeeBuy] = useState(initial.feeBuy);
+  const [feeSell, setFeeSell] = useState(initial.feeSell);
+  const [balance, setBalance] = useState(initial.balance);
+  const [bids, setBids] = useState(initial.bids);
+  const [mode, setMode] = useState(initial.mode);
+  const [existingAvg, setExistingAvg] = useState(initial.existingAvg);
+  const [existingLot, setExistingLot] = useState(initial.existingLot);
+  const [customLot, setCustomLot] = useState(initial.customLot || false); // Custom Lot Override mode
+  const [customLots, setCustomLots] = useState(initial.customLots || []); // array matching bids, lot per papan
+
+  const [showSettings, setShowSettings] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
+  const [viewingTradeId, setViewingTradeId] = useState(null);
+  const settingsRef = useRef(null);
+  const bidAwalRef = useRef(null);
+
+  // Undo/Redo (memory only, cap 50)
+  const undoStackRef = useRef([]);
+  const redoStackRef = useRef([]);
+  const debounceTimerRef = useRef(null);
+  const lastSnapshotRef = useRef(null);
+
+  // Toast system
+  const [toasts, setToasts] = useState([]);
+  const toastIdRef = useRef(0);
+  const showToast = useCallback((text, type = 'success', opts = {}) => {
+    const id = ++toastIdRef.current;
+    const { action = null, timeout = 2500 } = opts;
+    setToasts(prev => [...prev, { id, text, type, leaving: false, action }]);
+    setTimeout(() => {
+      setToasts(prev => prev.map(t => t.id === id ? { ...t, leaving: true } : t));
+    }, timeout);
+  }, []);
+  const removeToast = useCallback((id) => {
+    setToasts(prev => prev.filter(t => t.id !== id));
+  }, []);
+
+  // Flashing preset (load feedback)
+  const [flashingPreset, setFlashingPreset] = useState(null);
+
+  // Auto-save
+  useEffect(() => {
+    const state = { baseLot, targetTicks, targetProfit, feeBuy, feeSell, bids, balance, mode, existingAvg, existingLot, customLot, customLots };
+    try { localStorage.setItem('scalc_state', JSON.stringify(state)); } catch {}
+  }, [baseLot, targetTicks, targetProfit, feeBuy, feeSell, bids, balance, mode, existingAvg, existingLot, customLot, customLots]);
+
+  useEffect(() => {
+    try { localStorage.setItem('scalc_theme', theme); } catch {}
+  }, [theme]);
+
+  // Click outside settings
+  useEffect(() => {
+    if (!showSettings) return;
+    const onClick = (e) => {
+      if (settingsRef.current && !settingsRef.current.contains(e.target)) setShowSettings(false);
+    };
+    document.addEventListener('mousedown', onClick);
+    return () => document.removeEventListener('mousedown', onClick);
+  }, [showSettings]);
+
+  // Presets
+  const [presets, setPresets] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('scalc_presets') || '[]'); } catch { return []; }
+  });
+  const [presetName, setPresetName] = useState("");
+  const [activePreset, setActivePreset] = useState(null);
+
+  const persistPresets = (next) => {
+    setPresets(next);
+    try { localStorage.setItem('scalc_presets', JSON.stringify(next)); } catch {}
+  };
+
+  const savePreset = () => {
+    const name = presetName.trim().toUpperCase();
+    if (!name) return;
+    const isUpdate = presets.some(p => p.name === name);
+    const preset = { name, baseLot, targetTicks, targetProfit, bids: [...bids], balance, mode, existingAvg, existingLot };
+    persistPresets([...presets.filter(p => p.name !== name), preset]);
+    setPresetName("");
+    setActivePreset(name);
+    showToast(`Preset <strong>${name}</strong> ${isUpdate ? 'diupdate' : 'tersimpan'}`);
+  };
+
+  const loadPreset = (p) => {
+    setBaseLot(p.baseLot);
+    setTargetTicks(p.targetTicks);
+    setTargetProfit(p.targetProfit);
+    setBids(p.bids && p.bids.length ? [...p.bids] : [100]);
+    if (p.balance !== undefined) setBalance(p.balance);
+    if (p.mode) setMode(p.mode);
+    if (p.existingAvg !== undefined) setExistingAvg(p.existingAvg);
+    if (p.existingLot !== undefined) setExistingLot(p.existingLot);
+    setActivePreset(p.name);
+    // Flash animation
+    setFlashingPreset(p.name);
+    setTimeout(() => setFlashingPreset(null), 500);
+  };
+
+  const deletePreset = (name) => {
+    persistPresets(presets.filter(p => p.name !== name));
+    if (activePreset === name) setActivePreset(null);
+    showToast(`Preset <strong>${name}</strong> dihapus`);
+  };
+
+  const exportPresets = useCallback(() => {
+    if (presets.length === 0) {
+      showToast('Belum ada preset untuk di-export', 'error');
+      return;
+    }
+    const payload = {
+      version: 1,
+      exported_at: new Date().toISOString(),
+      presets: presets,
+    };
+    const json = JSON.stringify(payload, null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+    a.href = url;
+    a.download = `scalc-presets-${date}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast(`${presets.length} preset di-export`);
+  }, [presets, showToast]);
+
+  const importPresets = useCallback((file) => {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const payload = JSON.parse(e.target.result);
+        if (!payload.presets || !Array.isArray(payload.presets)) {
+          showToast('Format file invalid', 'error');
+          return;
+        }
+        const valid = payload.presets.filter(p => p.name && typeof p.name === 'string');
+        if (valid.length === 0) {
+          showToast('Tidak ada preset valid dalam file', 'error');
+          return;
+        }
+        const hasConflict = valid.some(p => presets.some(existing => existing.name === p.name));
+        if (hasConflict) {
+          if (!confirm(`Import ${valid.length} preset. Nama yang sama akan di-overwrite. Lanjutkan?`)) return;
+        }
+        // Merge: incoming overrides existing by name
+        const byName = new Map();
+        presets.forEach(p => byName.set(p.name, p));
+        valid.forEach(p => byName.set(p.name, p));
+        const merged = Array.from(byName.values());
+        persistPresets(merged);
+        showToast(`${valid.length} preset di-import`);
+      } catch (err) {
+        showToast('File tidak bisa dibaca (bukan JSON valid)', 'error');
+      }
+    };
+    reader.readAsText(file);
+  }, [presets, showToast]);
+
+  // Shortcuts state
+  const [shortcuts, setShortcuts] = useState(loadShortcuts);
+  const persistShortcuts = (next) => {
+    setShortcuts(next);
+    try { localStorage.setItem('scalc_shortcuts', JSON.stringify(next)); } catch {}
+  };
+  const [recordingShortcut, setRecordingShortcut] = useState(null);
+
+  // History
+  const [history, setHistory] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('scalc_history') || '[]'); } catch { return []; }
+  });
+  const persistHistory = (next) => {
+    setHistory(next);
+    try { localStorage.setItem('scalc_history', JSON.stringify(next)); } catch {}
+  };
+
+  // ==================== UNDO / REDO ====================
+  // Snapshot captures the undo-able state shape
+  const makeSnapshot = useCallback(() => ({
+    baseLot, targetTicks, targetProfit, bids: [...bids], mode, existingAvg, existingLot,
+    customLot, customLots: [...customLots],
+  }), [baseLot, targetTicks, targetProfit, bids, mode, existingAvg, existingLot, customLot, customLots]);
+
+  const applySnapshot = useCallback((snap) => {
+    // Set lastSnapshotRef BEFORE state changes so the change-tracker effect
+    // sees no diff and skips push (more robust than timing flag)
+    lastSnapshotRef.current = snap;
+    setBaseLot(snap.baseLot);
+    setTargetTicks(snap.targetTicks);
+    setTargetProfit(snap.targetProfit);
+    setBids([...snap.bids]);
+    setMode(snap.mode);
+    setExistingAvg(snap.existingAvg);
+    setExistingLot(snap.existingLot);
+    if (snap.customLot !== undefined) setCustomLot(snap.customLot);
+    if (snap.customLots !== undefined) setCustomLots([...snap.customLots]);
+  }, []);
+
+  // Push snapshot (with optional debounce for input edits)
+  const pushSnapshot = useCallback((debounce = false) => {
+    const snap = makeSnapshot();
+    // Dedupe: don't push if identical to last
+    const last = undoStackRef.current[undoStackRef.current.length - 1];
+    if (last && JSON.stringify(last) === JSON.stringify(snap)) return;
+
+    if (debounce) {
+      if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+      debounceTimerRef.current = setTimeout(() => {
+        undoStackRef.current.push(snap);
+        if (undoStackRef.current.length > 50) undoStackRef.current.shift();
+        redoStackRef.current = [];
+      }, 800);
+    } else {
+      undoStackRef.current.push(snap);
+      if (undoStackRef.current.length > 50) undoStackRef.current.shift();
+      redoStackRef.current = [];
+    }
+  }, [makeSnapshot]);
+
+  // Initialize: push first snapshot on mount
+  useEffect(() => {
+    if (undoStackRef.current.length === 0) {
+      undoStackRef.current.push(makeSnapshot());
+      lastSnapshotRef.current = makeSnapshot();
+    }
+    // eslint-disable-next-line
+  }, []);
+
+  // Track changes: decide debounce based on what changed
+  useEffect(() => {
+    const current = makeSnapshot();
+    const last = lastSnapshotRef.current;
+    if (!last) { lastSnapshotRef.current = current; return; }
+
+    // If applySnapshot just ran, lastSnapshotRef === current snapshot,
+    // so dedupe in pushSnapshot will skip. No flag needed.
+    if (JSON.stringify(last) === JSON.stringify(current)) return;
+
+    // Detect what changed
+    const structuralChange = last.mode !== current.mode ||
+                              last.bids.length !== current.bids.length ||
+                              last.customLot !== current.customLot;
+
+    // Immediate push for structural changes; debounced for input edits
+    if (structuralChange) {
+      pushSnapshot(false);
+    } else {
+      pushSnapshot(true);
+    }
+    lastSnapshotRef.current = current;
+  }, [baseLot, targetTicks, targetProfit, bids, mode, existingAvg, existingLot, customLot, customLots, makeSnapshot, pushSnapshot]);
+
+  const undo = useCallback(() => {
+    // Flush any pending debounced push first
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+      debounceTimerRef.current = null;
+      const snap = makeSnapshot();
+      const last = undoStackRef.current[undoStackRef.current.length - 1];
+      if (!last || JSON.stringify(last) !== JSON.stringify(snap)) {
+        undoStackRef.current.push(snap);
+      }
+    }
+    if (undoStackRef.current.length <= 1) {
+      showToast('Tidak ada yang bisa di-undo', 'error');
+      return;
+    }
+    const popped = undoStackRef.current.pop();
+    redoStackRef.current.push(popped);
+    const prev = undoStackRef.current[undoStackRef.current.length - 1];
+    applySnapshot(prev);
+    lastSnapshotRef.current = prev;
+  }, [applySnapshot, makeSnapshot, showToast]);
+
+  const redo = useCallback(() => {
+    if (redoStackRef.current.length === 0) {
+      showToast('Tidak ada yang bisa di-redo', 'error');
+      return;
+    }
+    const snap = redoStackRef.current.pop();
+    undoStackRef.current.push(snap);
+    applySnapshot(snap);
+    lastSnapshotRef.current = snap;
+  }, [applySnapshot, showToast]);
+
+  // Compute
+  const data = useMemo(() => {
+    if (!bids.length || bids[0] <= 0 || baseLot < 1) return null;
+    const existing = mode === 'position' && existingAvg > 0 && existingLot > 0
+      ? { avg: existingAvg, lot: existingLot }
+      : null;
+    const customArr = customLot ? customLots : null;
+    return computeRows(bids, baseLot, targetTicks, targetProfit, feeBuy / 100, feeSell / 100, existing, customArr);
+  }, [bids, baseLot, targetTicks, targetProfit, feeBuy, feeSell, mode, existingAvg, existingLot, customLot, customLots]);
+
+  // Handlers
+  const setBidAt = useCallback((i, v) => {
+    setBids(prev => { const next = [...prev]; next[i] = v; return next; });
+  }, []);
+
+  const setLotAt = useCallback((i, v) => {
+    setCustomLots(prev => {
+      const next = [...prev];
+      next[i] = Math.max(1, v || 0);
+      return next;
+    });
+  }, []);
+
+  const addPapan = useCallback(() => {
+    setBids(prev => {
+      const lastBid = prev[prev.length - 1];
+      const tick = getTickSize(prev[0] || 100);
+      const newBid = Math.max(1, lastBid - tick);
+      return [...prev, newBid];
+    });
+    setCustomLots(prev => {
+      // In custom mode, seed new papan with last lot value (or baseLot fallback)
+      if (prev.length === 0) return prev;
+      return [...prev, prev[prev.length - 1]];
+    });
+  }, []);
+
+  const removePapan = useCallback((i) => {
+    if (i === 0) return;
+    let removedBid, removedLot;
+    setBids(prev => {
+      removedBid = prev[i];
+      return prev.filter((_, idx) => idx !== i);
+    });
+    setCustomLots(prev => {
+      removedLot = prev[i];
+      return prev.filter((_, idx) => idx !== i);
+    });
+    // Toast with undo action
+    showToast(`Papan ${i + 1} dihapus`, 'success', {
+      timeout: 4000,
+      action: {
+        label: 'Undo',
+        handler: () => {
+          setBids(prev => {
+            const next = [...prev];
+            next.splice(i, 0, removedBid);
+            return next;
+          });
+          setCustomLots(prev => {
+            if (prev.length === 0) return prev;
+            const next = [...prev];
+            next.splice(i, 0, removedLot !== undefined ? removedLot : prev[prev.length - 1] || 100);
+            return next;
+          });
+        },
+      },
+    });
+  }, [showToast]);
+
+  const resetPapan = useCallback(() => {
+    setBids(prev => [prev[0]]);
+    setCustomLots(prev => prev.length > 0 ? [prev[0]] : []);
+  }, []);
+
+  // Toggle custom lot mode (no confirm - instant lock/unlock)
+  const toggleCustomLot = useCallback(() => {
+    if (customLot) {
+      // Turn OFF: clear customLots, recompute auto
+      setCustomLot(false);
+      setCustomLots([]);
+      showToast('Custom Lot dimatikan');
+    } else {
+      // Turn ON: seed customLots from current computed lots
+      if (data && data.results.length) {
+        const currentLots = data.results
+          .filter(r => !r.isExisting)
+          .map(r => r.lot);
+        setCustomLots(currentLots);
+      }
+      setCustomLot(true);
+      showToast('Custom Lot aktif');
+    }
+  }, [customLot, data, showToast]);
+
+  // Safety: sync customLots length to bids.length
+  useEffect(() => {
+    if (!customLot) return;
+    setCustomLots(prev => {
+      if (prev.length === bids.length) return prev;
+      if (prev.length > bids.length) {
+        // Trim
+        return prev.slice(0, bids.length);
+      }
+      // Pad with last value or 100
+      const pad = prev.length > 0 ? prev[prev.length - 1] : 100;
+      const next = [...prev];
+      while (next.length < bids.length) next.push(pad);
+      return next;
+    });
+  }, [bids.length, customLot]);
+
+  // Validation
+  const bidRiseWarnings = useMemo(() => {
+    const warns = [];
+    for (let i = 1; i < bids.length; i++) {
+      if (bids[i] >= bids[i - 1]) warns.push(i + 1);
+    }
+    return warns;
+  }, [bids]);
+
+  // Filter results to only buy rows for under-target check
+  const buyRows = data ? data.results.filter(r => !r.isExisting) : [];
+  const underTarget = buyRows.filter(r => r.pct < targetProfit - 0.001);
+
+  const totalLot = data ? data.results.reduce((s, r) => s + r.lot, 0) : 0;
+  const totalBuyLot = buyRows.reduce((s, r) => s + r.lot, 0);
+  const totalBuyCost = buyRows.reduce((s, r) => s + r.cost, 0);
+
+  // Copy
+  const [copyState, setCopyState] = useState('idle');
+  const copyResults = useCallback(() => {
+    if (!data || !data.results.length) return;
+    const lines = [];
+    lines.push(`📊 SCALC · ${mode === 'position' ? 'Position Mode' : 'Entry Mode'} · ${bids.length} papan`);
+    if (mode === 'position' && existingAvg > 0) {
+      lines.push(`Existing: ${existingLot} lot @ avg ${existingAvg}`);
+    }
+    lines.push(`Bid Awal: ${bids[0]} · Lot: ${baseLot} · Target: +${targetTicks} tick · Min profit: ${targetProfit}%`);
+    lines.push('');
+    data.results.forEach(r => {
+      const label = r.isExisting ? 'EXISTING' : `${r.layer}.`;
+      lines.push(`${label} Bid ${r.bid} × ${n(r.lot)} lot → Avg ${r.avg.toFixed(2)}, Sell ${r.sell}, P/L ${nDec(r.pl)} (${r.pct.toFixed(2)}%)`);
+    });
+    lines.push('');
+    lines.push(`Total beli: ${n(totalBuyLot)} lot · Cost ${nShort(totalBuyCost)}`);
+    if (balance > 0) lines.push(`Balance util: ${Math.round(totalBuyCost / balance * 100)}%`);
+    const text = lines.join('\n');
+
+    const fallback = () => {
+      const ta = document.createElement('textarea');
+      ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); } catch {}
+      document.body.removeChild(ta);
+    };
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).catch(fallback);
+    } else fallback();
+    setCopyState('copied');
+    setTimeout(() => setCopyState('idle'), 1500);
+  }, [data, bids, baseLot, targetTicks, targetProfit, totalBuyLot, totalBuyCost, balance, mode, existingAvg, existingLot]);
+
+  // Save trade - 1 click, no modal
+  const saveTrade = useCallback(() => {
+    if (!data || !data.results.length) return;
+    const trade = {
+      id: 'tr_' + Date.now(),
+      timestamp: Date.now(),
+      mode,
+      baseLot, targetTicks, targetProfit, feeBuy, feeSell, balance,
+      bids: [...bids], existingAvg, existingLot,
+      planned: {
+        totalLot: totalBuyLot,
+        totalCost: totalBuyCost,
+        avgFinal: data.results.length ? data.results[data.results.length - 1].avg : 0,
+        sellFinal: data.results.length ? data.results[data.results.length - 1].sell : 0,
+        plFinal: data.results.length ? data.results[data.results.length - 1].pl : 0,
+      },
+    };
+    const next = [trade, ...history].slice(0, 500);
+    persistHistory(next);
+    showToast(`Avg <strong>${trade.planned.avgFinal.toFixed(2)}</strong> tersimpan di History`);
+  }, [data, bids, baseLot, targetTicks, targetProfit, feeBuy, feeSell, balance, mode, existingAvg, existingLot, totalBuyLot, totalBuyCost, history, showToast]);
+
+  const deleteTrade = (id) => {
+    const t = history.find(x => x.id === id);
+    persistHistory(history.filter(t => t.id !== id));
+    if (viewingTradeId === id) setViewingTradeId(null);
+    if (t) showToast(`Trade ${fmtTime(t.timestamp)} dihapus`);
+  };
+
+  /* ==================== KEYBOARD HANDLER ==================== */
+  useEffect(() => {
+    const onKeyDown = (e) => {
+      // Esc handling
+      if (e.key === 'Escape') {
+        if (viewingTradeId) { setViewingTradeId(null); return; }
+        if (showHistory) { setShowHistory(false); return; }
+        if (showSettings) { setShowSettings(false); return; }
+        if (recordingShortcut) { setRecordingShortcut(null); return; }
+        return;
+      }
+
+      // Recording shortcut
+      if (recordingShortcut) {
+        e.preventDefault();
+        // Skip standalone modifier keys
+        if (['Control', 'Meta', 'Shift', 'Alt'].includes(e.key)) return;
+        const newShortcut = {
+          key: e.key.toLowerCase(),
+          mod: e.ctrlKey || e.metaKey,
+          shift: e.shiftKey,
+          alt: e.altKey,
+          label: shortcuts[recordingShortcut].label,
+        };
+        persistShortcuts({ ...shortcuts, [recordingShortcut]: newShortcut });
+        setRecordingShortcut(null);
+        return;
+      }
+
+      // Match shortcuts - redo checked BEFORE undo (shift variant must come first)
+      if (eventMatchesShortcut(e, shortcuts.redo)) {
+        e.preventDefault(); redo(); return;
+      }
+      if (eventMatchesShortcut(e, shortcuts.undo)) {
+        e.preventDefault(); undo(); return;
+      }
+      if (eventMatchesShortcut(e, shortcuts.toggleSettings)) {
+        e.preventDefault(); setShowSettings(v => !v); return;
+      }
+      if (eventMatchesShortcut(e, shortcuts.addPapan)) {
+        e.preventDefault(); addPapan(); return;
+      }
+      if (eventMatchesShortcut(e, shortcuts.copyResults)) {
+        e.preventDefault(); copyResults(); return;
+      }
+      if (eventMatchesShortcut(e, shortcuts.resetPapan)) {
+        e.preventDefault(); if (bids.length > 1) resetPapan(); return;
+      }
+      if (eventMatchesShortcut(e, shortcuts.saveTrade)) {
+        e.preventDefault(); saveTrade(); return;
+      }
+      if (eventMatchesShortcut(e, shortcuts.showHistory)) {
+        e.preventDefault(); setShowHistory(true); return;
+      }
+      if (eventMatchesShortcut(e, shortcuts.focusBidAwal)) {
+        e.preventDefault();
+        if (bidAwalRef.current) { bidAwalRef.current.focus(); bidAwalRef.current.select(); }
+        return;
+      }
+    };
+
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [shortcuts, recordingShortcut, addPapan, copyResults, resetPapan, saveTrade, bids.length, viewingTradeId, showHistory, showSettings, undo, redo]);
+
+  /* ==================== RENDER ==================== */
+  return (
+    <>
+      <style>{CSS}</style>
+      <div className="scalc" data-theme={theme}>
+        <div className="scalc-inner">
+          <div className="ctn">
+
+            {/* Header */}
+            <div className="hdr">
+              <div className="logo"><BoltIcon /></div>
+              <div className="brand">
+                <h1>SCALC</h1>
+                <span>Pyramid Bid Engine</span>
+              </div>
+              <div className="hdr-r" ref={settingsRef}>
+                <button className="gear-btn" onClick={() => setShowHistory(true)} title={`History (${shortcutToString(shortcuts.showHistory)})`}>
+                  <HistoryIcon />
+                </button>
+                <button className={`gear-btn ${showSettings ? 'active' : ''}`}
+                  onClick={() => setShowSettings(v => !v)}
+                  title={`Settings (${shortcutToString(shortcuts.toggleSettings)})`}>
+                  <GearIcon />
+                </button>
+                {showSettings && (
+                  <SettingsPanel {...{
+                    theme, setTheme, balance, setBalance,
+                    feeBuy, setFeeBuy, feeSell, setFeeSell,
+                    presets, presetName, setPresetName, savePreset, deletePreset, loadPreset,
+                    exportPresets, importPresets,
+                    shortcuts, setShortcuts: persistShortcuts,
+                    recordingShortcut, setRecordingShortcut,
+                  }} />
+                )}
+              </div>
+            </div>
+
+            {/* Mode toggle */}
+            <div className="mode-toggle">
+              <button className={mode === 'entry' ? 'active' : ''} onClick={() => setMode('entry')}>
+                New
+              </button>
+              <button className={mode === 'position' ? 'active' : ''} onClick={() => setMode('position')}>
+                Existing
+              </button>
+            </div>
+
+            {/* Preset chips */}
+            {presets.length > 0 && (
+              <div className="preset-bar">
+                {presets.map(p => (
+                  <button key={p.name}
+                    className={`preset-chip ${activePreset === p.name ? 'active' : ''} ${flashingPreset === p.name ? 'flash' : ''}`}
+                    onClick={() => loadPreset(p)}>
+                    {p.name}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Input card */}
+            <div className="card">
+              {mode === 'position' && (
+                <div className="ig-2">
+                  <div>
+                    <div className="il">Avg Existing (inc fee)</div>
+                    <input className="if" type="number" value={existingAvg || ''} min={0} step={0.01}
+                      onChange={e => setExistingAvg(+e.target.value || 0)} />
+                  </div>
+                  <div>
+                    <div className="il">Lot Existing</div>
+                    <input className="if" type="number" value={existingLot || ''} min={0}
+                      onChange={e => setExistingLot(+e.target.value || 0)} />
+                  </div>
+                </div>
+              )}
+              <div className="ig">
+                <div>
+                  <div className="il">{mode === 'position' ? 'Bid Awal (beli baru)' : 'Bid Awal'}</div>
+                  <input ref={bidAwalRef} className="if" type="number" value={bids[0] || ''} min={1}
+                    onChange={e => setBidAt(0, +e.target.value)} />
+                </div>
+                <div>
+                  <div className="il">Lot</div>
+                  <input className="if" type="number" value={baseLot} min={1}
+                    onChange={e => setBaseLot(+e.target.value)} />
+                </div>
+                <div>
+                  <div className="il">Target Tick</div>
+                  <input className="if" type="number" value={targetTicks} min={1} max={10}
+                    onChange={e => setTargetTicks(+e.target.value)} />
+                </div>
+                <div>
+                  <div className="il">Min Profit %</div>
+                  <input className="if" type="number" value={targetProfit} min={0} step={0.1}
+                    onChange={e => setTargetProfit(+e.target.value)} />
+                </div>
+              </div>
+            </div>
+
+            {/* Banners */}
+            {mode === 'position' && (existingAvg <= 0 || existingLot <= 0) && (
+              <div className="caution">
+                <span className="caution-icon">⚠</span>
+                <div className="caution-text">
+                  Isi <span className="caution-val">avg existing</span> dan <span className="caution-val">lot existing</span> dulu untuk hitung pyramid avg-down.
+                </div>
+              </div>
+            )}
+            {balance > 0 && totalBuyCost > balance && (
+              <div className="caution caution-red">
+                <span className="caution-icon">⚠</span>
+                <div className="caution-text">
+                  Total cost beli baru <span className="caution-val">Rp{nShort(totalBuyCost)}</span> melebihi balance <span className="caution-val">Rp{nShort(balance)}</span>.
+                </div>
+              </div>
+            )}
+            {underTarget.length > 0 && (
+              <div className="caution">
+                <span className="caution-icon">⚠</span>
+                <div className="caution-text">
+                  Target <span className="caution-val">{targetProfit}%</span> tidak tercapai di <span className="caution-val">{underTarget.length} papan</span>.
+                  Turunkan min profit atau naikkan target tick.
+                </div>
+              </div>
+            )}
+            {bidRiseWarnings.length > 0 && (
+              <div className="caution">
+                <span className="caution-icon">⚠</span>
+                <div className="caution-text">
+                  Papan <span className="caution-val">{bidRiseWarnings.join(', ')}</span> bid-nya naik (bukan avg down).
+                </div>
+              </div>
+            )}
+
+            {/* Results */}
+            {data && data.results.length > 0 && (
+              <div className="card" style={{ padding: 0 }}>
+                <div className="papan-bar">
+                  <div className="papan-label-wrap">
+                    <span className="papan-label">Papan · {bids.length}</span>
+                    {customLot && <span className="custom-lot-badge">CUSTOM LOT</span>}
+                  </div>
+                  <div className="papan-actions">
+                    <button className={`ibtn ${customLot ? 'ibtn-active-amber' : ''}`}
+                      onClick={toggleCustomLot}
+                      title={customLot ? 'Matikan Custom Lot' : 'Aktifkan Custom Lot (edit lot manual)'}>
+                      {customLot ? <UnlockIcon /> : <LockIcon />}
+                    </button>
+                    <button className="ibtn" onClick={saveTrade} title={`Simpan ke History (${shortcutToString(shortcuts.saveTrade)})`}>
+                      <BookmarkIcon />
+                    </button>
+                    <button className={`ibtn ${copyState === 'copied' ? 'success' : ''}`}
+                      onClick={copyResults} title={`Copy (${shortcutToString(shortcuts.copyResults)})`}>
+                      {copyState === 'copied' ? <CheckIcon /> : <CopyIcon />}
+                    </button>
+                    {bids.length > 1 && (
+                      <button className="ibtn danger" onClick={resetPapan} title={`Reset (${shortcutToString(shortcuts.resetPapan)})`}>
+                        <RefreshIcon />
+                      </button>
+                    )}
+                    <button className="ibtn primary" onClick={addPapan} title={`Tambah Papan (${shortcutToString(shortcuts.addPapan)})`}>
+                      <PlusIcon />
+                    </button>
+                  </div>
+                </div>
+
+                <ResultsTable
+                  results={data.results}
+                  bidRiseWarnings={bidRiseWarnings}
+                  targetProfit={targetProfit}
+                  totalLot={totalBuyLot}
+                  totalCost={totalBuyCost}
+                  balance={balance}
+                  setBidAt={setBidAt}
+                  setLotAt={setLotAt}
+                  customLot={customLot}
+                  removePapan={removePapan}
+                  bidsCount={bids.length}
+                />
+              </div>
+            )}
+
+          </div>
+        </div>
+
+        {/* History Modal */}
+        {showHistory && (
+          <HistoryModal
+            history={history} viewingId={viewingTradeId} setViewingId={setViewingTradeId}
+            onClose={() => { setShowHistory(false); setViewingTradeId(null); }}
+            onDelete={deleteTrade}
+          />
+        )}
+
+        {/* Toast */}
+        <ToastContainer toasts={toasts} onRemove={removeToast} />
+      </div>
+    </>
+  );
+}
+
+/* ==================== SETTINGS PANEL ==================== */
+function SettingsPanel({
+  theme, setTheme, balance, setBalance, feeBuy, setFeeBuy, feeSell, setFeeSell,
+  presets, presetName, setPresetName, savePreset, deletePreset, loadPreset,
+  exportPresets, importPresets,
+  shortcuts, setShortcuts, recordingShortcut, setRecordingShortcut,
+}) {
+  const fileInputRef = useRef(null);
+  return (
+    <div className="settings-panel">
+      <div className="sp-section">
+        <div className="sp-title">Tampilan</div>
+        <div className="theme-pill">
+          <button className={theme === 'light' ? 'active' : ''} onClick={() => setTheme('light')}>
+            <SunIcon /> Light
+          </button>
+          <button className={theme === 'dark' ? 'active' : ''} onClick={() => setTheme('dark')}>
+            <MoonIcon /> Dark
+          </button>
+        </div>
+      </div>
+
+      <div className="sp-section">
+        <div className="sp-title">Trading Balance</div>
+        <input className="sp-input" type="number" value={balance || ''} min={0}
+          placeholder="Kosongkan jika tidak dibutuhkan"
+          onChange={e => setBalance(+e.target.value || 0)} />
+        {balance > 0 && (
+          <div className="terbilang"><strong>{terbilang(balance)}</strong> rupiah</div>
+        )}
+      </div>
+
+      <div className="sp-section">
+        <div className="sp-title">Fee Broker</div>
+        <div className="sp-row">
+          <div>
+            <div className="sp-label">Buy Fee %</div>
+            <input className="sp-input" type="number" value={feeBuy} step={0.01}
+              onChange={e => setFeeBuy(+e.target.value)} />
+          </div>
+          <div>
+            <div className="sp-label">Sell Fee %</div>
+            <input className="sp-input" type="number" value={feeSell} step={0.01}
+              onChange={e => setFeeSell(+e.target.value)} />
+          </div>
+        </div>
+      </div>
+
+      <div className="sp-section">
+        <div className="sp-title">Preset</div>
+        {presets.length > 0 ? (
+          <div className="sp-presets">
+            {presets.map(p => (
+              <div key={p.name} className="sp-preset-item">
+                <button className="sp-preset-load" onClick={() => loadPreset(p)}>{p.name}</button>
+                <button className="sp-preset-x" onClick={() => deletePreset(p.name)}><XIcon /></button>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="sp-empty">Belum ada preset</div>
+        )}
+        <div className="sp-preset-save">
+          <input placeholder="BRIS" value={presetName} maxLength={6}
+            onChange={e => setPresetName(e.target.value.toUpperCase())}
+            onKeyDown={e => { if (e.key === 'Enter') savePreset(); }} />
+          <button onClick={savePreset} disabled={!presetName.trim()}>Simpan</button>
+        </div>
+        <div className="sp-import-export">
+          <button className="sp-ie-btn" onClick={exportPresets}>↓ Export</button>
+          <button className="sp-ie-btn" onClick={() => fileInputRef.current?.click()}>↑ Import</button>
+          <input ref={fileInputRef} type="file" accept="application/json,.json"
+            style={{ display: 'none' }}
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) importPresets(file);
+              e.target.value = '';
+            }} />
+        </div>
+      </div>
+
+      <div className="sp-section">
+        <div className="sp-title"><KeyboardIcon /> Shortcut</div>
+        <div className="kbd-list">
+          {Object.entries(shortcuts).map(([key, s]) => (
+            <div key={key} className="kbd-row">
+              <label>{s.label}</label>
+              <input
+                className={`kbd-input ${recordingShortcut === key ? 'recording' : ''}`}
+                value={recordingShortcut === key ? 'TEKAN...' : shortcutToString(s)}
+                readOnly
+                onFocus={() => setRecordingShortcut(key)}
+                onBlur={() => setRecordingShortcut(null)}
+              />
+            </div>
+          ))}
+          <button className="kbd-reset" onClick={() => setShortcuts(DEFAULT_SHORTCUTS)}>
+            Reset ke default
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ==================== RESULTS TABLE ==================== */
+function ResultsTable({ results, bidRiseWarnings, targetProfit, totalLot, totalCost, balance, setBidAt, setLotAt, customLot, removePapan, bidsCount }) {
+  const layerIndex = (r, idx) => r.isExisting ? -1 : idx - (results[0]?.isExisting ? 1 : 0);
+
+  return (
+    <>
+      {/* Desktop */}
+      <div className="dt">
+        <table>
+          <thead>
+            <tr>
+              {["#","Bid","Lot","Avg","Sell","Cost","Profit","%",""].map((h,i) => <th key={i}>{h}</th>)}
+            </tr>
+          </thead>
+          <tbody>
+            {results.map((r, i) => {
+              const li = layerIndex(r, i);
+              const isWarn = !r.isExisting && bidRiseWarnings.includes(li + 1);
+              const isUnder = !r.isExisting && r.pct < targetProfit - 0.001;
+              return (
+                <tr key={i} className={r.isExisting ? "row-existing" : (isUnder ? "row-under" : "")} style={{ animationDelay: `${i * 50}ms` }}>
+                  <td>{r.layer}</td>
+                  <td className="c-bid">
+                    {r.isExisting ? (
+                      <span className="c-bid-static">{r.bid}</span>
+                    ) : (
+                      <BidStepInput
+                        className={`bid-edit ${isWarn ? 'bid-edit-w' : ''}`}
+                        value={r.bid}
+                        onChange={v => setBidAt(li, v)}
+                      />
+                    )}
+                  </td>
+                  <td className="c-lot">
+                    {customLot && !r.isExisting ? (
+                      <input type="number" className="lot-edit"
+                        value={r.lot} min={1} step={100}
+                        onChange={e => setLotAt(li, +e.target.value)}
+                        onFocus={e => e.target.select()} />
+                    ) : n(r.lot)}
+                  </td>
+                  <td className="c-avg">{r.avg.toFixed(2)}</td>
+                  <td className="c-sell">{r.sell}</td>
+                  <td className="c-cost">{n(r.cost)}</td>
+                  <td className={r.pl >= 0 ? "c-plp" : "c-pln"}>{fmtPL(r.pl)}</td>
+                  <td>
+                    <span className={`pp ${isUnder ? "pp-u" : (r.pct >= 0 ? "pp-g" : "pp-r")}`}>
+                      {isUnder && <span className="pp-icon">⚠</span>}
+                      {fmtPct(r.pct)}
+                    </span>
+                  </td>
+                  <td>
+                    {!r.isExisting && li > 0 && (
+                      <button className="row-x" onClick={() => removePapan(li)}><XIcon /></button>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
+            <tr className="total-row">
+              <td className="total-label">Total Beli</td><td></td>
+              <td className="c-lot">{n(totalLot)}</td><td></td><td></td>
+              <td style={{ fontFamily: "'JetBrains Mono', monospace" }} title={n(totalCost)}>
+                {nShort(totalCost)}
+                {balance > 0 && <span className="util"> ({Math.round(totalCost / balance * 100)}%)</span>}
+              </td>
+              <td></td><td></td><td></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      {/* Mobile */}
+      <div className="mc">
+        <div style={{ display: "flex", flexDirection: "column", gap: "10px", padding: "12px" }}>
+          {results.map((r, i) => {
+            const li = layerIndex(r, i);
+            const isUnder = !r.isExisting && r.pct < targetProfit - 0.001;
+            const canSwipe = !r.isExisting && li > 0;
+            return (
+              <SwipeableCard
+                key={i}
+                canSwipe={canSwipe}
+                onDelete={() => removePapan(li)}
+                className={`mk ${r.isExisting ? 'mk-existing' : (isUnder ? 'mk-under' : '')}`}
+                style={{ animationDelay: `${i * 60}ms` }}
+              >
+                {!r.isExisting && li > 0 && <button className="m-remove" onClick={() => removePapan(li)}><XIcon /></button>}
+                <div className="mh">
+                  <div className="mhi">
+                    <label>Bid</label>
+                    {r.isExisting ? (
+                      <span>{r.bid}</span>
+                    ) : (
+                      <BidStepInput
+                        className="mhi-inp"
+                        variant="mobile"
+                        value={r.bid}
+                        onChange={v => setBidAt(li, v)}
+                      />
+                    )}
+                  </div>
+                  <div className="mhi">
+                    <label>Lot</label>
+                    {customLot && !r.isExisting ? (
+                      <input type="number" className="mhi-inp lot-edit-m" value={r.lot} min={1} step={100}
+                        onChange={e => setLotAt(li, +e.target.value)}
+                        onFocus={e => e.target.select()} />
+                    ) : <span>{n(r.lot)}</span>}
+                  </div>
+                  <div className="mhi"><label>Sell</label><span>{r.sell}</span></div>
+                </div>
+                <div className="mg">
+                  <div className="mgi"><label>Avg</label><span>{r.avg.toFixed(2)}</span></div>
+                  <div className="mgi"><label>Cost</label><span>{n(r.cost)}</span></div>
+                  <div className="mgi mgi-profit">
+                    <label>Profit</label>
+                    <span style={{ color: r.pl >= 0 ? "var(--green)" : "var(--red)" }}>{fmtPL(r.pl)}</span>
+                  </div>
+                  <div className="mgi mgi-pct">
+                    <label>%</label>
+                    <span style={{ color: isUnder ? "var(--brand)" : (r.pct >= 0 ? "var(--green)" : "var(--red)") }}>
+                      {isUnder && '⚠ '}{fmtPct(r.pct)}
+                    </span>
+                  </div>
+                </div>
+              </SwipeableCard>
+            );
+          })}
+          <div className="mt">
+            <div>
+              <div className="mt-label">Total Cost Beli</div>
+              <div className="mt-val" title={n(totalCost)}>
+                {nShort(totalCost)}
+                {balance > 0 && <span className="util-m"> {Math.round(totalCost / balance * 100)}%</span>}
+              </div>
+            </div>
+            <div style={{ textAlign: "right" }}>
+              <div className="mt-label">Total Lot Beli</div>
+              <div className="mt-val">{n(totalLot)}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
+/* ==================== HISTORY MODAL ==================== */
+function HistoryModal({ history, viewingId, setViewingId, onClose, onDelete }) {
+  const trade = viewingId ? history.find(t => t.id === viewingId) : null;
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <div className="modal-title">
+            {trade ? (
+              <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <button className="modal-close" onClick={() => setViewingId(null)} style={{ padding: '4px' }}>←</button>
+                Avg {trade.planned.avgFinal.toFixed(2)}
+                <span style={{ fontSize: '12px', color: 'var(--text-m)', fontWeight: 500 }}>{fmtTime(trade.timestamp)}</span>
+              </span>
+            ) : `History · ${history.length} trade`}
+          </div>
+          <button className="modal-close" onClick={onClose}><XIcon /></button>
+        </div>
+        <div className="modal-body">
+          {trade ? (
+            <TradeDetail trade={trade} onDelete={() => { onDelete(trade.id); }} />
+          ) : history.length === 0 ? (
+            <div className="history-empty">Belum ada trade tersimpan</div>
+          ) : (
+            <div className="history-list">
+              {history.map(t => (
+                <div key={t.id} className="history-item" onClick={() => setViewingId(t.id)}>
+                  <div className="history-info">
+                    <div className="history-avg">Avg {t.planned.avgFinal.toFixed(2)}</div>
+                    <div className="history-meta">
+                      {t.bids.length} papan · {n(t.planned.totalLot)} lot · {nShort(t.planned.totalCost)} · {t.mode === 'position' ? 'Existing' : 'New'}
+                    </div>
+                    <div className="history-time">{fmtTime(t.timestamp)}</div>
+                  </div>
+                  <button className="history-del" onClick={(e) => { e.stopPropagation(); onDelete(t.id); }}>
+                    <XIcon />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ==================== TRADE DETAIL ==================== */
+function TradeDetail({ trade, onDelete }) {
+  return (
+    <div className="history-detail">
+      <div className="hd-section">
+        <div className="hd-section-title">Plan Snapshot</div>
+        <div className="hd-grid">
+          <div className="hd-field"><label>Mode</label><span>{trade.mode === 'position' ? 'Existing' : 'New'}</span></div>
+          <div className="hd-field"><label>Bid Awal</label><span>{trade.bids[0]}</span></div>
+          <div className="hd-field"><label>Papan</label><span>{trade.bids.length}</span></div>
+          <div className="hd-field"><label>Target Tick</label><span>+{trade.targetTicks}</span></div>
+          <div className="hd-field"><label>Min Profit</label><span>{trade.targetProfit}%</span></div>
+          <div className="hd-field"><label>Total Lot Beli</label><span>{n(trade.planned.totalLot)}</span></div>
+          <div className="hd-field"><label>Total Cost</label><span>{nShort(trade.planned.totalCost)}</span></div>
+          <div className="hd-field"><label>Avg Final</label><span>{trade.planned.avgFinal.toFixed(2)}</span></div>
+          <div className="hd-field"><label>Sell Target</label><span>{trade.planned.sellFinal}</span></div>
+          <div className="hd-field"><label>Est. Profit</label><span style={{ color: trade.planned.plFinal >= 0 ? 'var(--green)' : 'var(--red)' }}>{fmtPL(trade.planned.plFinal)}</span></div>
+        </div>
+        {trade.mode === 'position' && trade.existingAvg > 0 && (
+          <div style={{ marginTop: '10px', fontSize: '12px', color: 'var(--text-m)' }}>
+            Existing: {n(trade.existingLot)} lot @ {trade.existingAvg}
+          </div>
+        )}
+        <div className="hd-mini-table" style={{ marginTop: '14px' }}>
+          {trade.bids.map((b, i) => (
+            <div key={i}><span>Papan {i + 1}</span><span style={{ color: 'var(--text)', fontWeight: 700 }}>Bid {b}</span></div>
+          ))}
+        </div>
+      </div>
+
+      <div className="hd-section" style={{ display: 'flex', justifyContent: 'flex-end' }}>
+        <button className="btn-secondary" onClick={() => { if (confirm(`Hapus trade ini?`)) onDelete(); }}
+          style={{ borderColor: 'var(--red)', color: 'var(--red)' }}>
+          Hapus Trade
+        </button>
+      </div>
+    </div>
+  );
+}
