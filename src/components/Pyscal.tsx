@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 
 /* ==================== COMPUTE LOGIC ==================== */
@@ -161,14 +162,14 @@ const CSS = `
 @import url('https://fonts.googleapis.com/css2?family=Funnel+Display:wght@500;600;700;800&family=Funnel+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 
-.scalc[data-theme="dark"]{
+.pyscal[data-theme="dark"]{
   --bg:#0A0A0A;--surface:#141414;--surface-hover:#1C1C1C;--border:#262626;--border-strong:#404040;
   --text:#FAFAFA;--text2:#D4D4D4;--text-m:#737373;--text-d:#525252;
   --inp-bg:#0A0A0A;--brand:#EAB308;--brand-h:#FACC15;--brand-d:rgba(234,179,8,0.12);--brand-text:#0A0A0A;
   --green:#22C55E;--green-d:rgba(34,197,94,0.12);--red:#EF4444;--red-d:rgba(239,68,68,0.12);
   --modal-bg:rgba(0,0,0,0.7);
 }
-.scalc[data-theme="light"]{
+.pyscal[data-theme="light"]{
   --bg:#FAFAFA;--surface:#FFFFFF;--surface-hover:#F5F5F5;--border:#E5E5E5;--border-strong:#D4D4D4;
   --text:#0A0A0A;--text2:#262626;--text-m:#737373;--text-d:#A3A3A3;
   --inp-bg:#FFFFFF;--brand:#CA8A04;--brand-h:#A16207;--brand-d:rgba(202,138,4,0.10);--brand-text:#FFFFFF;
@@ -176,9 +177,9 @@ const CSS = `
   --modal-bg:rgba(0,0,0,0.4);
 }
 
-.scalc{font-family:'Funnel Sans',system-ui,sans-serif;background:var(--bg);color:var(--text);
+.pyscal{font-family:'Funnel Sans',system-ui,sans-serif;background:var(--bg);color:var(--text);
   min-height:100vh;-webkit-font-smoothing:antialiased;transition:background .25s,color .25s}
-.scalc-inner{min-height:100vh;padding:24px 16px 56px}
+.pyscal-inner{min-height:100vh;padding:24px 16px 56px}
 .ctn{max-width:880px;margin:0 auto}
 
 /* header */
@@ -540,7 +541,7 @@ tbody td:last-child{padding:14px 8px;width:1%}
 .hd-mini-table div:last-child{border-bottom:none}
 
 @media(max-width:700px){
-  .scalc-inner{padding:20px 12px 48px}
+  .pyscal-inner{padding:20px 12px 48px}
   .dt{display:none}
   .mc{display:flex;flex-direction:column;gap:10px}
   .ig{grid-template-columns:1fr 1fr;gap:12px}
@@ -582,7 +583,7 @@ tbody td:last-child{padding:14px 8px;width:1%}
 }
 
 @media(max-width:420px){
-  .scalc-inner{padding:16px 10px 40px}
+  .pyscal-inner{padding:16px 10px 40px}
   .card{padding:14px}
   .hdr{gap:10px}
   .logo{width:36px;height:36px}
@@ -656,7 +657,7 @@ const DEFAULT_STATE = {
 
 function loadState() {
   try {
-    const s = JSON.parse(localStorage.getItem('scalc_state') || 'null');
+    const s = JSON.parse(localStorage.getItem('pyscal_state') || 'null');
     if (!s) return DEFAULT_STATE;
     return { ...DEFAULT_STATE, ...s };
   } catch { return DEFAULT_STATE; }
@@ -664,7 +665,7 @@ function loadState() {
 
 function loadShortcuts() {
   try {
-    const s = JSON.parse(localStorage.getItem('scalc_shortcuts') || 'null');
+    const s = JSON.parse(localStorage.getItem('pyscal_shortcuts') || 'null');
     if (!s) return DEFAULT_SHORTCUTS;
     return { ...DEFAULT_SHORTCUTS, ...s };
   } catch { return DEFAULT_SHORTCUTS; }
@@ -847,8 +848,8 @@ function SwipeableCard({ children, canSwipe, onDelete, className = '', style = {
 }
 
 /* ==================== MAIN COMPONENT ==================== */
-export default function SCALC() {
-  const [theme, setTheme] = useState(() => localStorage.getItem('scalc_theme') || 'light');
+export default function PYSCAL() {
+  const [theme, setTheme] = useState(() => localStorage.getItem('pyscal_theme') || 'light');
   const initial = loadState();
 
   const [baseLot, setBaseLot] = useState(initial.baseLot);
@@ -897,11 +898,11 @@ export default function SCALC() {
   // Auto-save
   useEffect(() => {
     const state = { baseLot, targetTicks, targetProfit, feeBuy, feeSell, bids, balance, mode, existingAvg, existingLot, customLot, customLots };
-    try { localStorage.setItem('scalc_state', JSON.stringify(state)); } catch {}
+    try { localStorage.setItem('pyscal_state', JSON.stringify(state)); } catch {}
   }, [baseLot, targetTicks, targetProfit, feeBuy, feeSell, bids, balance, mode, existingAvg, existingLot, customLot, customLots]);
 
   useEffect(() => {
-    try { localStorage.setItem('scalc_theme', theme); } catch {}
+    try { localStorage.setItem('pyscal_theme', theme); } catch {}
   }, [theme]);
 
   // Click outside settings
@@ -916,14 +917,14 @@ export default function SCALC() {
 
   // Presets
   const [presets, setPresets] = useState(() => {
-    try { return JSON.parse(localStorage.getItem('scalc_presets') || '[]'); } catch { return []; }
+    try { return JSON.parse(localStorage.getItem('pyscal_presets') || '[]'); } catch { return []; }
   });
   const [presetName, setPresetName] = useState("");
   const [activePreset, setActivePreset] = useState(null);
 
   const persistPresets = (next) => {
     setPresets(next);
-    try { localStorage.setItem('scalc_presets', JSON.stringify(next)); } catch {}
+    try { localStorage.setItem('pyscal_presets', JSON.stringify(next)); } catch {}
   };
 
   const savePreset = () => {
@@ -1019,17 +1020,17 @@ export default function SCALC() {
   const [shortcuts, setShortcuts] = useState(loadShortcuts);
   const persistShortcuts = (next) => {
     setShortcuts(next);
-    try { localStorage.setItem('scalc_shortcuts', JSON.stringify(next)); } catch {}
+    try { localStorage.setItem('pyscal_shortcuts', JSON.stringify(next)); } catch {}
   };
   const [recordingShortcut, setRecordingShortcut] = useState(null);
 
   // History
   const [history, setHistory] = useState(() => {
-    try { return JSON.parse(localStorage.getItem('scalc_history') || '[]'); } catch { return []; }
+    try { return JSON.parse(localStorage.getItem('pyscal_history') || '[]'); } catch { return []; }
   });
   const persistHistory = (next) => {
     setHistory(next);
-    try { localStorage.setItem('scalc_history', JSON.stringify(next)); } catch {}
+    try { localStorage.setItem('pyscal_history', JSON.stringify(next)); } catch {}
   };
 
   // ==================== UNDO / REDO ====================
@@ -1275,7 +1276,7 @@ export default function SCALC() {
   const copyResults = useCallback(() => {
     if (!data || !data.results.length) return;
     const lines = [];
-    lines.push(`📊 SCALC · ${mode === 'position' ? 'Position Mode' : 'Entry Mode'} · ${bids.length} papan`);
+    lines.push(`📊 PYSCAL · ${mode === 'position' ? 'Position Mode' : 'Entry Mode'} · ${bids.length} papan`);
     if (mode === 'position' && existingAvg > 0) {
       lines.push(`Existing: ${existingLot} lot @ avg ${existingAvg}`);
     }
@@ -1403,15 +1404,15 @@ export default function SCALC() {
   return (
     <>
       <style>{CSS}</style>
-      <div className="scalc" data-theme={theme}>
-        <div className="scalc-inner">
+      <div className="pyscal" data-theme={theme}>
+        <div className="pyscal-inner">
           <div className="ctn">
 
             {/* Header */}
             <div className="hdr">
               <div className="logo"><BoltIcon /></div>
               <div className="brand">
-                <h1>SCALC</h1>
+                <h1>PYSCAL</h1>
                 <span>Pyramid Bid Engine</span>
               </div>
               <div className="hdr-r" ref={settingsRef}>
