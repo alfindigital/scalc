@@ -1542,6 +1542,7 @@ export default function PYSCAL() {
                     feeBuy, setFeeBuy, feeSell, setFeeSell,
                     presets, presetName, setPresetName, savePreset, deletePreset, loadPreset,
                     exportPresets, importPresets,
+                    exportAll, importAll,
                     shortcuts, setShortcuts: persistShortcuts,
                     recordingShortcut, setRecordingShortcut,
                   }} />
