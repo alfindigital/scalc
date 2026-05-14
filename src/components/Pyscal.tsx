@@ -1993,7 +1993,16 @@ function HistoryModal({ history, viewingId, setViewingId, onClose, onDelete, onR
           {trade ? (
             <TradeDetail trade={trade} onDelete={() => { onDelete(trade.id); }} />
           ) : history.length === 0 ? (
-            <div className="history-empty">Belum ada trade tersimpan</div>
+            <div className="history-empty">
+              <div style={{ fontSize: 32, marginBottom: 8, fontStyle: 'normal' }}>📒</div>
+              <div style={{ fontStyle: 'normal', color: 'var(--text)', fontWeight: 600, marginBottom: 4 }}>
+                Belum ada trade tersimpan
+              </div>
+              <div style={{ fontSize: 12 }}>
+                Hitung pyramid dulu, lalu klik <strong>tombol bookmark</strong> di header papan
+                — atau tekan <kbd style={{ fontFamily: 'JetBrains Mono,monospace', background: 'var(--inp-bg)', border: '1px solid var(--border)', padding: '1px 6px', borderRadius: 3 }}>Ctrl + Shift + S</kbd>
+              </div>
+            </div>
           ) : (
             <>
               <div className="history-search">
