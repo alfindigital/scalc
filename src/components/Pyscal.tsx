@@ -95,6 +95,41 @@ const CSS = `
 .mode-toggle button:hover:not(.active){background:var(--surface-hover);color:var(--text)}
 
 /* settings panel */
+/* === Onboarding hint === */
+.onboarding{position:relative;background:var(--surface);border:1px solid var(--border);
+  border-left:3px solid var(--brand);padding:18px 20px;margin-bottom:14px;
+  animation:si .25s ease}
+.onboarding-close{position:absolute;top:10px;right:10px;background:transparent;border:none;
+  color:var(--text-d);cursor:pointer;padding:8px;display:flex;align-items:center;justify-content:center;
+  min-width:32px;min-height:32px;transition:color .15s}
+.onboarding-close:hover{color:var(--red)}
+.onboarding-title{font-family:'Funnel Display',sans-serif;font-size:16px;font-weight:700;
+  color:var(--text);letter-spacing:-0.3px;margin-bottom:4px;padding-right:32px}
+.onboarding-sub{font-family:'Funnel Sans',sans-serif;font-size:13px;color:var(--text-m);
+  line-height:1.45;margin-bottom:14px}
+.onboarding-steps{list-style:none;padding:0;margin:0 0 14px 0;display:flex;flex-direction:column;gap:10px}
+.onboarding-steps li{display:flex;gap:12px;align-items:flex-start;
+  font-family:'Funnel Sans',sans-serif;font-size:13px;color:var(--text);line-height:1.5}
+.onboarding-steps strong{color:var(--text);font-weight:700}
+.ob-num{flex-shrink:0;width:22px;height:22px;border-radius:50%;background:var(--brand);
+  color:var(--brand-text);font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;margin-top:1px}
+.ob-kbd{display:inline-block;margin-left:8px;padding:2px 7px;font-family:'JetBrains Mono',monospace;
+  font-size:11px;font-weight:600;background:var(--inp-bg);border:1px solid var(--border);
+  color:var(--text-m);border-radius:3px;white-space:nowrap}
+.onboarding-actions{display:flex;justify-content:flex-end}
+.btn-primary-pyscal{background:var(--brand);color:var(--brand-text);border:none;
+  font-family:'Funnel Sans',sans-serif;font-size:13px;font-weight:700;padding:10px 18px;
+  cursor:pointer;transition:opacity .15s;letter-spacing:0.2px;min-height:40px}
+.btn-primary-pyscal:hover{opacity:.88}
+@media(max-width:700px){
+  .onboarding{padding:16px}
+  .onboarding-title{font-size:15px}
+  .onboarding-steps li{font-size:13px}
+  .ob-kbd{display:block;margin:6px 0 0 0;width:fit-content}
+  .btn-primary-pyscal{width:100%;min-height:44px}
+}
+
 .settings-panel{position:absolute;top:calc(100% + 8px);right:0;width:360px;max-width:calc(100vw - 32px);
   background:var(--surface);border:1px solid var(--border);z-index:50;
   animation:si .15s ease;box-shadow:0 8px 32px rgba(0,0,0,0.12);max-height:80vh;overflow-y:auto}
@@ -754,6 +789,14 @@ export default function PYSCAL() {
   const [showSettings, setShowSettings] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [viewingTradeId, setViewingTradeId] = useState(null);
+  const [showHint, setShowHint] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    try { return localStorage.getItem('pyscal_onboarded') !== '1'; } catch { return false; }
+  });
+  const dismissHint = useCallback(() => {
+    setShowHint(false);
+    try { localStorage.setItem('pyscal_onboarded', '1'); } catch {}
+  }, []);
   const settingsRef = useRef(null);
   const bidAwalRef = useRef(null);
 
@@ -1414,6 +1457,57 @@ export default function PYSCAL() {
               </button>
             </div>
 
+            {/* First-run hint */}
+            {showHint && (
+              <div className="onboarding" role="region" aria-label="Petunjuk singkat">
+                <button
+                  className="onboarding-close"
+                  onClick={dismissHint}
+                  aria-label="Tutup petunjuk"
+                  title="Tutup"
+                ><XIcon /></button>
+                <div className="onboarding-title">Selamat datang di PYSCAL</div>
+                <div className="onboarding-sub">
+                  Kalkulator pyramid bid untuk avg-down terukur. 4 hal yang perlu kamu tahu:
+                </div>
+                <ol className="onboarding-steps">
+                  <li>
+                    <span className="ob-num">1</span>
+                    <div>
+                      <strong>Isi Bid Awal &amp; Lot</strong> di kartu di bawah, lalu atur target
+                      tick &amp; min profit. Hasil hitung otomatis muncul.
+                    </div>
+                  </li>
+                  <li>
+                    <span className="ob-num">2</span>
+                    <div>
+                      <strong>Tambah papan</strong> untuk simulasi avg-down per layer.
+                      <span className="ob-kbd">{shortcutToString(shortcuts.addPapan)}</span>
+                    </div>
+                  </li>
+                  <li>
+                    <span className="ob-num">3</span>
+                    <div>
+                      <strong>Simpan ke History</strong> kalau plan sudah pas — bisa di-rename &amp; di-pin nanti.
+                      <span className="ob-kbd">{shortcutToString(shortcuts.saveTrade)}</span>
+                    </div>
+                  </li>
+                  <li>
+                    <span className="ob-num">4</span>
+                    <div>
+                      <strong>Settings</strong> untuk fee broker, balance, preset, theme &amp; backup JSON.
+                      <span className="ob-kbd">{shortcutToString(shortcuts.toggleSettings)}</span>
+                    </div>
+                  </li>
+                </ol>
+                <div className="onboarding-actions">
+                  <button className="btn-primary-pyscal" onClick={dismissHint}>
+                    Mengerti, mulai pakai
+                  </button>
+                </div>
+              </div>
+            )}
+
             {/* Preset chips */}
             {presets.length > 0 && (
               <div className="preset-bar">
@@ -1899,7 +1993,16 @@ function HistoryModal({ history, viewingId, setViewingId, onClose, onDelete, onR
           {trade ? (
             <TradeDetail trade={trade} onDelete={() => { onDelete(trade.id); }} />
           ) : history.length === 0 ? (
-            <div className="history-empty">Belum ada trade tersimpan</div>
+            <div className="history-empty">
+              <div style={{ fontSize: 32, marginBottom: 8, fontStyle: 'normal' }}>📒</div>
+              <div style={{ fontStyle: 'normal', color: 'var(--text)', fontWeight: 600, marginBottom: 4 }}>
+                Belum ada trade tersimpan
+              </div>
+              <div style={{ fontSize: 12 }}>
+                Hitung pyramid dulu, lalu klik <strong>tombol bookmark</strong> di header papan
+                — atau tekan <kbd style={{ fontFamily: 'JetBrains Mono,monospace', background: 'var(--inp-bg)', border: '1px solid var(--border)', padding: '1px 6px', borderRadius: 3 }}>Ctrl + Shift + S</kbd>
+              </div>
+            </div>
           ) : (
             <>
               <div className="history-search">
