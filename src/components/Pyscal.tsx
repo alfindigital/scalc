@@ -414,6 +414,15 @@ tbody td:last-child{padding:14px 8px;width:1%}
 .history-del:hover{color:var(--red)}
 .history-empty{text-align:center;padding:40px 20px;color:var(--text-d);font-style:italic}
 
+.history-search{margin-bottom:12px}
+.history-actions{display:flex;align-items:center;gap:2px;flex-shrink:0}
+.history-act{background:transparent;border:none;color:var(--text-d);cursor:pointer;
+  padding:8px;display:flex;align-items:center;justify-content:center;
+  font-size:14px;line-height:1;transition:color .15s,background .15s;min-width:32px;min-height:32px}
+.history-act:hover{color:var(--brand);background:var(--surface-hover)}
+.history-act[aria-pressed="true"]{color:var(--brand)}
+.history-item.pinned{border-left:3px solid var(--brand)}
+
 .history-detail{padding:0}
 .hd-section{padding:18px 20px;border-bottom:1px solid var(--border)}
 .hd-section:last-child{border-bottom:none}
@@ -1274,6 +1283,15 @@ export default function PYSCAL() {
     if (t) showToast(`Trade ${fmtTime(t.timestamp)} dihapus`);
   };
 
+  const renameTrade = (id, note) => {
+    const trimmed = (note || '').slice(0, 80);
+    persistHistory(history.map(t => t.id === id ? { ...t, note: trimmed } : t));
+  };
+
+  const togglePinTrade = (id) => {
+    persistHistory(history.map(t => t.id === id ? { ...t, pinned: !t.pinned } : t));
+  };
+
   /* ==================== KEYBOARD HANDLER ==================== */
   useEffect(() => {
     const onKeyDown = (e) => {
@@ -1539,6 +1557,8 @@ export default function PYSCAL() {
             history={history} viewingId={viewingTradeId} setViewingId={setViewingTradeId}
             onClose={() => { setShowHistory(false); setViewingTradeId(null); }}
             onDelete={deleteTrade}
+            onRename={renameTrade}
+            onTogglePin={togglePinTrade}
           />
         )}
 
@@ -1823,8 +1843,38 @@ function ResultsTable({ results, bidRiseWarnings, targetProfit, totalLot, totalC
 }
 
 /* ==================== HISTORY MODAL ==================== */
-function HistoryModal({ history, viewingId, setViewingId, onClose, onDelete }) {
+function HistoryModal({ history, viewingId, setViewingId, onClose, onDelete, onRename, onTogglePin }) {
   const trade = viewingId ? history.find(t => t.id === viewingId) : null;
+  const [query, setQuery] = useState('');
+  const [renamingId, setRenamingId] = useState(null);
+  const [renameDraft, setRenameDraft] = useState('');
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    const list = q
+      ? history.filter(t => {
+          const note = (t.note || '').toLowerCase();
+          const avg = String(t.planned?.avgFinal?.toFixed?.(2) ?? '');
+          const date = new Date(t.timestamp).toLocaleDateString('id-ID');
+          return note.includes(q) || avg.includes(q) || date.toLowerCase().includes(q);
+        })
+      : history.slice();
+    return list.sort((a, b) => {
+      const pa = a.pinned ? 1 : 0, pb = b.pinned ? 1 : 0;
+      if (pa !== pb) return pb - pa;
+      return b.timestamp - a.timestamp;
+    });
+  }, [history, query]);
+
+  const startRename = (t) => {
+    setRenamingId(t.id);
+    setRenameDraft(t.note || '');
+  };
+  const commitRename = () => {
+    if (renamingId) onRename(renamingId, renameDraft);
+    setRenamingId(null);
+    setRenameDraft('');
+  };
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -1833,13 +1883,13 @@ function HistoryModal({ history, viewingId, setViewingId, onClose, onDelete }) {
           <div className="modal-title">
             {trade ? (
               <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <button className="modal-close" onClick={() => setViewingId(null)} style={{ padding: '4px' }}>←</button>
-                Avg {trade.planned.avgFinal.toFixed(2)}
+                <button className="modal-close" onClick={() => setViewingId(null)} style={{ padding: '4px' }} aria-label="Kembali ke daftar">←</button>
+                {trade.note ? trade.note : `Avg ${trade.planned.avgFinal.toFixed(2)}`}
                 <span style={{ fontSize: '12px', color: 'var(--text-m)', fontWeight: 500 }}>{fmtTime(trade.timestamp)}</span>
               </span>
             ) : `History · ${history.length} trade`}
           </div>
-          <button className="modal-close" onClick={onClose}><XIcon /></button>
+          <button className="modal-close" onClick={onClose} aria-label="Tutup"><XIcon /></button>
         </div>
         <div className="modal-body">
           {trade ? (
@@ -1847,22 +1897,83 @@ function HistoryModal({ history, viewingId, setViewingId, onClose, onDelete }) {
           ) : history.length === 0 ? (
             <div className="history-empty">Belum ada trade tersimpan</div>
           ) : (
-            <div className="history-list">
-              {history.map(t => (
-                <div key={t.id} className="history-item" onClick={() => setViewingId(t.id)}>
-                  <div className="history-info">
-                    <div className="history-avg">Avg {t.planned.avgFinal.toFixed(2)}</div>
-                    <div className="history-meta">
-                      {t.bids.length} papan · {n(t.planned.totalLot)} lot · {nShort(t.planned.totalCost)} · {t.mode === 'position' ? 'Existing' : 'New'}
-                    </div>
-                    <div className="history-time">{fmtTime(t.timestamp)}</div>
-                  </div>
-                  <button className="history-del" onClick={(e) => { e.stopPropagation(); onDelete(t.id); }}>
-                    <XIcon />
-                  </button>
+            <>
+              <div className="history-search">
+                <input
+                  className="sp-input"
+                  type="search"
+                  inputMode="search"
+                  placeholder="Cari nama / avg / tanggal…"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  aria-label="Cari trade"
+                />
+              </div>
+              {filtered.length === 0 ? (
+                <div className="history-empty">Tidak ada trade cocok "{query}"</div>
+              ) : (
+                <div className="history-list">
+                  {filtered.map(t => {
+                    const isRenaming = renamingId === t.id;
+                    return (
+                      <div
+                        key={t.id}
+                        className={`history-item${t.pinned ? ' pinned' : ''}`}
+                        onClick={() => { if (!isRenaming) setViewingId(t.id); }}
+                      >
+                        <div className="history-info">
+                          <div className="history-avg" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                            {t.pinned && <span aria-label="Ter-pin" title="Ter-pin" style={{ color: 'var(--brand)' }}>📌</span>}
+                            {isRenaming ? (
+                              <input
+                                autoFocus
+                                className="sp-input"
+                                style={{ fontSize: 14, padding: '6px 8px', flex: 1 }}
+                                value={renameDraft}
+                                onClick={(e) => e.stopPropagation()}
+                                onChange={(e) => setRenameDraft(e.target.value)}
+                                onBlur={commitRename}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') { e.preventDefault(); commitRename(); }
+                                  if (e.key === 'Escape') { e.preventDefault(); setRenamingId(null); setRenameDraft(''); }
+                                }}
+                                placeholder="Beri nama trade…"
+                                maxLength={80}
+                                aria-label="Nama trade"
+                              />
+                            ) : (
+                              <span>{t.note ? t.note : `Avg ${t.planned.avgFinal.toFixed(2)}`}</span>
+                            )}
+                          </div>
+                          <div className="history-meta">
+                            {t.bids.length} papan · {n(t.planned.totalLot)} lot · {nShort(t.planned.totalCost)} · {t.mode === 'position' ? 'Existing' : 'New'}
+                          </div>
+                          <div className="history-time">{fmtTime(t.timestamp)}</div>
+                        </div>
+                        <div className="history-actions" onClick={(e) => e.stopPropagation()}>
+                          <button
+                            className="history-act"
+                            onClick={() => onTogglePin(t.id)}
+                            aria-pressed={!!t.pinned}
+                            aria-label={t.pinned ? 'Lepas pin' : 'Pin trade'}
+                            title={t.pinned ? 'Lepas pin' : 'Pin'}
+                          >📌</button>
+                          <button
+                            className="history-act"
+                            onClick={() => isRenaming ? commitRename() : startRename(t)}
+                            aria-label={isRenaming ? 'Simpan nama' : 'Rename trade'}
+                            title={isRenaming ? 'Simpan' : 'Rename'}
+                          >{isRenaming ? '✓' : '✎'}</button>
+                          <button className="history-del" onClick={() => onDelete(t.id)} aria-label="Hapus trade" title="Hapus">
+                            <XIcon />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
-              ))}
-            </div>
+              )}
+            </>
           )}
         </div>
       </div>
