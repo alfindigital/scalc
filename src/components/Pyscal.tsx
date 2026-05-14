@@ -446,10 +446,51 @@ tbody td:last-child{padding:14px 8px;width:1%}
   .caution{padding:12px 14px;font-size:12px;gap:10px;line-height:1.45}
   .papan-bar{padding:14px 14px}
   .papan-label{font-size:11px}
-  .settings-panel{width:calc(100vw - 24px);right:-6px}
-  .modal-body{padding:16px}
+
+  /* === Bottom-sheet: Settings === */
+  .settings-panel{
+    position:fixed;left:0;right:0;bottom:0;top:auto;
+    width:100%;max-width:100%;
+    max-height:85vh;overflow-y:auto;
+    border:none;border-top:1px solid var(--border);
+    border-radius:16px 16px 0 0;
+    box-shadow:0 -8px 32px rgba(0,0,0,0.18);
+    padding-bottom:env(safe-area-inset-bottom,0);
+    animation:sheetUp .22s cubic-bezier(.2,.8,.2,1);
+    z-index:90;
+  }
+  .settings-panel::before{
+    content:'';display:block;width:40px;height:4px;border-radius:2px;
+    background:var(--border);margin:10px auto 4px;
+  }
+  .sp-section{padding:16px 18px}
+
+  /* === Bottom-sheet: History modal === */
+  .modal-overlay{padding:0;align-items:flex-end}
+  .modal{
+    max-width:100%;width:100%;
+    max-height:92vh;display:flex;flex-direction:column;
+    border:none;border-top:1px solid var(--border);
+    border-radius:16px 16px 0 0;
+    box-shadow:0 -8px 32px rgba(0,0,0,0.18);
+    padding-bottom:env(safe-area-inset-bottom,0);
+    animation:sheetUp .25s cubic-bezier(.2,.8,.2,1);
+  }
+  .modal::before{
+    content:'';display:block;width:40px;height:4px;border-radius:2px;
+    background:var(--border);margin:10px auto 0;flex-shrink:0;
+  }
+  .modal-header{padding:14px 18px}
+  .modal-body{padding:16px;overflow-y:auto;flex:1;min-height:0}
+  .modal-close{padding:10px;min-width:44px;min-height:44px;justify-content:center}
   .hd-grid{grid-template-columns:1fr}
-  .modal-overlay{padding:12px 8px}
+  .history-list{max-height:none}
+  .history-item{padding:16px;min-height:44px}
+  .history-del{padding:10px;min-width:44px;min-height:44px;justify-content:center}
+}
+@keyframes sheetUp{from{transform:translateY(100%);opacity:.6}to{transform:translateY(0);opacity:1}}
+
+@media(max-width:700px){
 
   /* Mobile result cards */
   .mk{padding:16px 14px}
