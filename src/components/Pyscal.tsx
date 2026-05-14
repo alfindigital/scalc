@@ -754,6 +754,14 @@ export default function PYSCAL() {
   const [showSettings, setShowSettings] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [viewingTradeId, setViewingTradeId] = useState(null);
+  const [showHint, setShowHint] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    try { return localStorage.getItem('pyscal_onboarded') !== '1'; } catch { return false; }
+  });
+  const dismissHint = useCallback(() => {
+    setShowHint(false);
+    try { localStorage.setItem('pyscal_onboarded', '1'); } catch {}
+  }, []);
   const settingsRef = useRef(null);
   const bidAwalRef = useRef(null);
 
