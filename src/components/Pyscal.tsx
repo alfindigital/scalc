@@ -95,6 +95,41 @@ const CSS = `
 .mode-toggle button:hover:not(.active){background:var(--surface-hover);color:var(--text)}
 
 /* settings panel */
+/* === Onboarding hint === */
+.onboarding{position:relative;background:var(--surface);border:1px solid var(--border);
+  border-left:3px solid var(--brand);padding:18px 20px;margin-bottom:14px;
+  animation:si .25s ease}
+.onboarding-close{position:absolute;top:10px;right:10px;background:transparent;border:none;
+  color:var(--text-d);cursor:pointer;padding:8px;display:flex;align-items:center;justify-content:center;
+  min-width:32px;min-height:32px;transition:color .15s}
+.onboarding-close:hover{color:var(--red)}
+.onboarding-title{font-family:'Funnel Display',sans-serif;font-size:16px;font-weight:700;
+  color:var(--text);letter-spacing:-0.3px;margin-bottom:4px;padding-right:32px}
+.onboarding-sub{font-family:'Funnel Sans',sans-serif;font-size:13px;color:var(--text-m);
+  line-height:1.45;margin-bottom:14px}
+.onboarding-steps{list-style:none;padding:0;margin:0 0 14px 0;display:flex;flex-direction:column;gap:10px}
+.onboarding-steps li{display:flex;gap:12px;align-items:flex-start;
+  font-family:'Funnel Sans',sans-serif;font-size:13px;color:var(--text);line-height:1.5}
+.onboarding-steps strong{color:var(--text);font-weight:700}
+.ob-num{flex-shrink:0;width:22px;height:22px;border-radius:50%;background:var(--brand);
+  color:var(--brand-text);font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;margin-top:1px}
+.ob-kbd{display:inline-block;margin-left:8px;padding:2px 7px;font-family:'JetBrains Mono',monospace;
+  font-size:11px;font-weight:600;background:var(--inp-bg);border:1px solid var(--border);
+  color:var(--text-m);border-radius:3px;white-space:nowrap}
+.onboarding-actions{display:flex;justify-content:flex-end}
+.btn-primary-pyscal{background:var(--brand);color:var(--brand-text);border:none;
+  font-family:'Funnel Sans',sans-serif;font-size:13px;font-weight:700;padding:10px 18px;
+  cursor:pointer;transition:opacity .15s;letter-spacing:0.2px;min-height:40px}
+.btn-primary-pyscal:hover{opacity:.88}
+@media(max-width:700px){
+  .onboarding{padding:16px}
+  .onboarding-title{font-size:15px}
+  .onboarding-steps li{font-size:13px}
+  .ob-kbd{display:block;margin:6px 0 0 0;width:fit-content}
+  .btn-primary-pyscal{width:100%;min-height:44px}
+}
+
 .settings-panel{position:absolute;top:calc(100% + 8px);right:0;width:360px;max-width:calc(100vw - 32px);
   background:var(--surface);border:1px solid var(--border);z-index:50;
   animation:si .15s ease;box-shadow:0 8px 32px rgba(0,0,0,0.12);max-height:80vh;overflow-y:auto}
