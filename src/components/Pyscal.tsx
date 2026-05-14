@@ -414,6 +414,15 @@ tbody td:last-child{padding:14px 8px;width:1%}
 .history-del:hover{color:var(--red)}
 .history-empty{text-align:center;padding:40px 20px;color:var(--text-d);font-style:italic}
 
+.history-search{margin-bottom:12px}
+.history-actions{display:flex;align-items:center;gap:2px;flex-shrink:0}
+.history-act{background:transparent;border:none;color:var(--text-d);cursor:pointer;
+  padding:8px;display:flex;align-items:center;justify-content:center;
+  font-size:14px;line-height:1;transition:color .15s,background .15s;min-width:32px;min-height:32px}
+.history-act:hover{color:var(--brand);background:var(--surface-hover)}
+.history-act[aria-pressed="true"]{color:var(--brand)}
+.history-item.pinned{border-left:3px solid var(--brand)}
+
 .history-detail{padding:0}
 .hd-section{padding:18px 20px;border-bottom:1px solid var(--border)}
 .hd-section:last-child{border-bottom:none}
