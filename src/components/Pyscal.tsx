@@ -1274,6 +1274,15 @@ export default function PYSCAL() {
     if (t) showToast(`Trade ${fmtTime(t.timestamp)} dihapus`);
   };
 
+  const renameTrade = (id, note) => {
+    const trimmed = (note || '').slice(0, 80);
+    persistHistory(history.map(t => t.id === id ? { ...t, note: trimmed } : t));
+  };
+
+  const togglePinTrade = (id) => {
+    persistHistory(history.map(t => t.id === id ? { ...t, pinned: !t.pinned } : t));
+  };
+
   /* ==================== KEYBOARD HANDLER ==================== */
   useEffect(() => {
     const onKeyDown = (e) => {
@@ -1539,6 +1548,8 @@ export default function PYSCAL() {
             history={history} viewingId={viewingTradeId} setViewingId={setViewingTradeId}
             onClose={() => { setShowHistory(false); setViewingTradeId(null); }}
             onDelete={deleteTrade}
+            onRename={renameTrade}
+            onTogglePin={togglePinTrade}
           />
         )}
 
