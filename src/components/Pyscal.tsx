@@ -1720,9 +1720,11 @@ function SettingsPanel({
   theme, setTheme, balance, setBalance, feeBuy, setFeeBuy, feeSell, setFeeSell,
   presets, presetName, setPresetName, savePreset, deletePreset, loadPreset,
   exportPresets, importPresets,
+  exportAll, importAll,
   shortcuts, setShortcuts, recordingShortcut, setRecordingShortcut,
 }) {
   const fileInputRef = useRef(null);
+  const fullBackupInputRef = useRef(null);
   return (
     <div className="settings-panel">
       <div className="sp-section">
