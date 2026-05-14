@@ -1522,17 +1522,22 @@ export default function PYSCAL() {
 
             {/* Header */}
             <div className="hdr">
-              <div className="logo"><BoltIcon /></div>
+              <div className="logo" aria-hidden="true">
+                <img src={logoUrl} alt="" width={28} height={28}
+                  style={{ display: 'block', width: '70%', height: '70%', objectFit: 'contain', filter: theme === 'dark' ? 'invert(1)' : 'none' }} />
+              </div>
               <div className="brand">
                 <h1>PYSCAL</h1>
                 <span>Pyramid Bid Calculator</span>
               </div>
               <div className="hdr-r" ref={settingsRef}>
-                <button className="gear-btn" onClick={() => setShowHistory(true)} title={`History (${shortcutToString(shortcuts.showHistory)})`}>
+                <button className="gear-btn" onClick={() => setShowHistory(true)} aria-label="Buka History" title={`History (${shortcutToString(shortcuts.showHistory)})`}>
                   <HistoryIcon />
                 </button>
                 <button className={`gear-btn ${showSettings ? 'active' : ''}`}
                   onClick={() => setShowSettings(v => !v)}
+                  aria-label="Buka Settings"
+                  aria-expanded={showSettings}
                   title={`Settings (${shortcutToString(shortcuts.toggleSettings)})`}>
                   <GearIcon />
                 </button>
