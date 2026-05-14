@@ -1664,22 +1664,24 @@ export default function PYSCAL() {
                   <div className="papan-actions">
                     <button className={`ibtn ${customLot ? 'ibtn-active-amber' : ''}`}
                       onClick={toggleCustomLot}
+                      aria-label={customLot ? 'Matikan Custom Lot' : 'Aktifkan Custom Lot'}
+                      aria-pressed={customLot}
                       title={customLot ? 'Matikan Custom Lot' : 'Aktifkan Custom Lot (edit lot manual)'}>
                       {customLot ? <UnlockIcon /> : <LockIcon />}
                     </button>
-                    <button className="ibtn" onClick={saveTrade} title={`Simpan ke History (${shortcutToString(shortcuts.saveTrade)})`}>
+                    <button className="ibtn" onClick={saveTrade} aria-label="Simpan ke History" title={`Simpan ke History (${shortcutToString(shortcuts.saveTrade)})`}>
                       <BookmarkIcon />
                     </button>
                     <button className={`ibtn ${copyState === 'copied' ? 'success' : ''}`}
-                      onClick={copyResults} title={`Copy (${shortcutToString(shortcuts.copyResults)})`}>
+                      onClick={copyResults} aria-label="Copy hasil" title={`Copy (${shortcutToString(shortcuts.copyResults)})`}>
                       {copyState === 'copied' ? <CheckIcon /> : <CopyIcon />}
                     </button>
                     {bids.length > 1 && (
-                      <button className="ibtn danger" onClick={resetPapan} title={`Reset (${shortcutToString(shortcuts.resetPapan)})`}>
+                      <button className="ibtn danger" onClick={resetPapan} aria-label="Reset semua papan" title={`Reset (${shortcutToString(shortcuts.resetPapan)})`}>
                         <RefreshIcon />
                       </button>
                     )}
-                    <button className="ibtn primary" onClick={addPapan} title={`Tambah Papan (${shortcutToString(shortcuts.addPapan)})`}>
+                    <button className="ibtn primary" onClick={addPapan} aria-label="Tambah papan" title={`Tambah Papan (${shortcutToString(shortcuts.addPapan)})`}>
                       <PlusIcon />
                     </button>
                   </div>
