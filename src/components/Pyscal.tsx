@@ -1799,6 +1799,24 @@ function SettingsPanel({
       </div>
 
       <div className="sp-section">
+        <div className="sp-title">Backup Lengkap</div>
+        <div className="sp-empty" style={{ marginBottom: 6 }}>
+          State, preset, history, shortcut, tema dalam 1 file JSON. Untuk pindah device atau jaga-jaga.
+        </div>
+        <div className="sp-import-export">
+          <button className="sp-ie-btn" onClick={exportAll}>↓ Export Semua</button>
+          <button className="sp-ie-btn" onClick={() => fullBackupInputRef.current?.click()}>↑ Restore</button>
+          <input ref={fullBackupInputRef} type="file" accept="application/json,.json"
+            style={{ display: 'none' }}
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) importAll(file);
+              e.target.value = '';
+            }} />
+        </div>
+      </div>
+
+      <div className="sp-section">
         <div className="sp-title"><KeyboardIcon /> Shortcut</div>
         <div className="kbd-list">
           {Object.entries(shortcuts).map(([key, s]) => (
