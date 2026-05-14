@@ -1079,6 +1079,72 @@ export default function PYSCAL() {
     try { localStorage.setItem('pyscal_history', JSON.stringify(next)); } catch {}
   };
 
+  // ==================== FULL BACKUP / RESTORE ====================
+  // Export all data: state + presets + history + shortcuts + theme
+  const exportAll = useCallback(() => {
+    const state = { baseLot, targetTicks, targetProfit, feeBuy, feeSell, bids, balance, mode, existingAvg, existingLot, customLot, customLots };
+    const payload = {
+      app: 'pyscal',
+      schema: 1,
+      exported_at: new Date().toISOString(),
+      state,
+      presets,
+      history,
+      shortcuts,
+      theme,
+    };
+    const json = JSON.stringify(payload, null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const d = new Date();
+    const stamp = `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}-${String(d.getHours()).padStart(2,'0')}${String(d.getMinutes()).padStart(2,'0')}`;
+    a.href = url;
+    a.download = `pyscal-backup-${stamp}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast('Backup lengkap di-export');
+  }, [baseLot, targetTicks, targetProfit, feeBuy, feeSell, bids, balance, mode, existingAvg, existingLot, customLot, customLots, presets, history, shortcuts, theme, showToast]);
+
+  const importAll = useCallback((file) => {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const payload = JSON.parse(e.target.result);
+        if (payload.app !== 'pyscal' || !payload.state) {
+          showToast('Bukan file backup PYSCAL', 'error');
+          return;
+        }
+        if (!confirm('Restore akan MENGGANTI semua data saat ini (state, preset, history, shortcut). Lanjutkan?')) return;
+        const s = payload.state || {};
+        const merged = { ...DEFAULT_STATE, ...s };
+        setBaseLot(merged.baseLot);
+        setTargetTicks(merged.targetTicks);
+        setTargetProfit(merged.targetProfit);
+        setFeeBuy(merged.feeBuy);
+        setFeeSell(merged.feeSell);
+        setBids(Array.isArray(merged.bids) && merged.bids.length ? merged.bids : [100]);
+        setBalance(merged.balance || 0);
+        setMode(merged.mode || 'entry');
+        setExistingAvg(merged.existingAvg || 0);
+        setExistingLot(merged.existingLot || 0);
+        setCustomLot(!!merged.customLot);
+        setCustomLots(Array.isArray(merged.customLots) ? merged.customLots : []);
+        if (Array.isArray(payload.presets)) persistPresets(payload.presets);
+        if (Array.isArray(payload.history)) persistHistory(payload.history);
+        if (payload.shortcuts && typeof payload.shortcuts === 'object') persistShortcuts({ ...DEFAULT_SHORTCUTS, ...payload.shortcuts });
+        if (payload.theme === 'dark' || payload.theme === 'light') setTheme(payload.theme);
+        showToast('Backup berhasil di-restore');
+      } catch {
+        showToast('File tidak bisa dibaca (bukan JSON valid)', 'error');
+      }
+    };
+    reader.readAsText(file);
+  }, [showToast]);
+
   // ==================== UNDO / REDO ====================
   // Snapshot captures the undo-able state shape
   const makeSnapshot = useCallback(() => ({
