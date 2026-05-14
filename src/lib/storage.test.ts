@@ -7,6 +7,12 @@ import {
   migrateLegacyKeys,
   shortcutToString,
   eventMatchesShortcut,
+  loadStateVersioned,
+  saveState,
+  loadHistory,
+  saveHistory,
+  loadShortcutsVersioned,
+  SCHEMA_VERSION,
 } from "./storage";
 
 // Minimal localStorage shim untuk env "node".
@@ -98,5 +104,61 @@ describe("shortcut helpers", () => {
         sc,
       ),
     ).toBe(false);
+  });
+});
+
+describe("schema versioning", () => {
+  it("loadStateVersioned baca legacy raw (v1) lalu re-wrap ke v2 di storage", () => {
+    localStorage.setItem("pyscal_state", JSON.stringify({ baseLot: 250, bids: [123] }));
+    const s = loadStateVersioned();
+    expect(s.baseLot).toBe(250);
+    expect(s.bids).toEqual([123]);
+    // setelah load, storage harus sudah dalam format wrapped
+    const reread = JSON.parse(localStorage.getItem("pyscal_state") as string);
+    expect(reread.version).toBe(SCHEMA_VERSION.state);
+    expect(reread.data.baseLot).toBe(250);
+  });
+
+  it("saveState menulis dalam format { version, data }", () => {
+    saveState({ ...DEFAULT_STATE, balance: 5_000_000 });
+    const raw = JSON.parse(localStorage.getItem("pyscal_state") as string);
+    expect(raw.version).toBe(SCHEMA_VERSION.state);
+    expect(raw.data.balance).toBe(5_000_000);
+  });
+
+  it("loadStateVersioned mengembalikan default ketika storage corrupt", () => {
+    localStorage.setItem("pyscal_state", "{not json");
+    expect(loadStateVersioned()).toEqual(DEFAULT_STATE);
+  });
+
+  it("loadHistory legacy v1 (array raw) → v2 menambah field pinned & note default", () => {
+    localStorage.setItem(
+      "pyscal_history",
+      JSON.stringify([{ id: "tr_1", timestamp: 1, planned: { avgFinal: 100 } }]),
+    );
+    const h = loadHistory<{ id: string; pinned: boolean; note: string }>();
+    expect(h).toHaveLength(1);
+    expect(h[0].pinned).toBe(false);
+    expect(h[0].note).toBe("");
+    // dan ter-rewrap
+    const raw = JSON.parse(localStorage.getItem("pyscal_history") as string);
+    expect(raw.version).toBe(SCHEMA_VERSION.history);
+  });
+
+  it("loadHistory mempertahankan pinned/note yang sudah ada di v2", () => {
+    saveHistory([{ id: "tr_2", timestamp: 2, planned: { avgFinal: 200 }, pinned: true, note: "BBRI" }]);
+    const h = loadHistory<{ pinned: boolean; note: string }>();
+    expect(h[0].pinned).toBe(true);
+    expect(h[0].note).toBe("BBRI");
+  });
+
+  it("loadShortcutsVersioned memertahankan custom + isi default untuk key baru", () => {
+    localStorage.setItem(
+      "pyscal_shortcuts",
+      JSON.stringify({ addPapan: { key: "p", mod: true, label: "Tambah Papan" } }),
+    );
+    const s = loadShortcutsVersioned();
+    expect(s.addPapan.key).toBe("p");
+    expect(s.undo).toEqual(DEFAULT_SHORTCUTS.undo);
   });
 });
