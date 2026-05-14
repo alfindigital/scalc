@@ -1,5 +1,6 @@
 // @ts-nocheck
 import { useState, useMemo, useCallback, useEffect, useRef } from "react";
+import logoUrl from "@/assets/logo-pyscal.png";
 
 /* ==================== COMPUTE LOGIC ==================== */
 const getTickSize = (p) => p < 200 ? 1 : p < 500 ? 2 : p < 2000 ? 5 : p < 5000 ? 10 : 25;
@@ -1078,6 +1079,72 @@ export default function PYSCAL() {
     try { localStorage.setItem('pyscal_history', JSON.stringify(next)); } catch {}
   };
 
+  // ==================== FULL BACKUP / RESTORE ====================
+  // Export all data: state + presets + history + shortcuts + theme
+  const exportAll = useCallback(() => {
+    const state = { baseLot, targetTicks, targetProfit, feeBuy, feeSell, bids, balance, mode, existingAvg, existingLot, customLot, customLots };
+    const payload = {
+      app: 'pyscal',
+      schema: 1,
+      exported_at: new Date().toISOString(),
+      state,
+      presets,
+      history,
+      shortcuts,
+      theme,
+    };
+    const json = JSON.stringify(payload, null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const d = new Date();
+    const stamp = `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}-${String(d.getHours()).padStart(2,'0')}${String(d.getMinutes()).padStart(2,'0')}`;
+    a.href = url;
+    a.download = `pyscal-backup-${stamp}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast('Backup lengkap di-export');
+  }, [baseLot, targetTicks, targetProfit, feeBuy, feeSell, bids, balance, mode, existingAvg, existingLot, customLot, customLots, presets, history, shortcuts, theme, showToast]);
+
+  const importAll = useCallback((file) => {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const payload = JSON.parse(e.target.result);
+        if (payload.app !== 'pyscal' || !payload.state) {
+          showToast('Bukan file backup PYSCAL', 'error');
+          return;
+        }
+        if (!confirm('Restore akan MENGGANTI semua data saat ini (state, preset, history, shortcut). Lanjutkan?')) return;
+        const s = payload.state || {};
+        const merged = { ...DEFAULT_STATE, ...s };
+        setBaseLot(merged.baseLot);
+        setTargetTicks(merged.targetTicks);
+        setTargetProfit(merged.targetProfit);
+        setFeeBuy(merged.feeBuy);
+        setFeeSell(merged.feeSell);
+        setBids(Array.isArray(merged.bids) && merged.bids.length ? merged.bids : [100]);
+        setBalance(merged.balance || 0);
+        setMode(merged.mode || 'entry');
+        setExistingAvg(merged.existingAvg || 0);
+        setExistingLot(merged.existingLot || 0);
+        setCustomLot(!!merged.customLot);
+        setCustomLots(Array.isArray(merged.customLots) ? merged.customLots : []);
+        if (Array.isArray(payload.presets)) persistPresets(payload.presets);
+        if (Array.isArray(payload.history)) persistHistory(payload.history);
+        if (payload.shortcuts && typeof payload.shortcuts === 'object') persistShortcuts({ ...DEFAULT_SHORTCUTS, ...payload.shortcuts });
+        if (payload.theme === 'dark' || payload.theme === 'light') setTheme(payload.theme);
+        showToast('Backup berhasil di-restore');
+      } catch {
+        showToast('File tidak bisa dibaca (bukan JSON valid)', 'error');
+      }
+    };
+    reader.readAsText(file);
+  }, [showToast]);
+
   // ==================== UNDO / REDO ====================
   // Snapshot captures the undo-able state shape
   const makeSnapshot = useCallback(() => ({
@@ -1455,17 +1522,22 @@ export default function PYSCAL() {
 
             {/* Header */}
             <div className="hdr">
-              <div className="logo"><BoltIcon /></div>
+              <div className="logo" aria-hidden="true">
+                <img src={logoUrl} alt="" width={28} height={28}
+                  style={{ display: 'block', width: '70%', height: '70%', objectFit: 'contain', filter: theme === 'dark' ? 'invert(1)' : 'none' }} />
+              </div>
               <div className="brand">
                 <h1>PYSCAL</h1>
                 <span>Pyramid Bid Calculator</span>
               </div>
               <div className="hdr-r" ref={settingsRef}>
-                <button className="gear-btn" onClick={() => setShowHistory(true)} title={`History (${shortcutToString(shortcuts.showHistory)})`}>
+                <button className="gear-btn" onClick={() => setShowHistory(true)} aria-label="Buka History" title={`History (${shortcutToString(shortcuts.showHistory)})`}>
                   <HistoryIcon />
                 </button>
                 <button className={`gear-btn ${showSettings ? 'active' : ''}`}
                   onClick={() => setShowSettings(v => !v)}
+                  aria-label="Buka Settings"
+                  aria-expanded={showSettings}
                   title={`Settings (${shortcutToString(shortcuts.toggleSettings)})`}>
                   <GearIcon />
                 </button>
@@ -1475,6 +1547,7 @@ export default function PYSCAL() {
                     feeBuy, setFeeBuy, feeSell, setFeeSell,
                     presets, presetName, setPresetName, savePreset, deletePreset, loadPreset,
                     exportPresets, importPresets,
+                    exportAll, importAll,
                     shortcuts, setShortcuts: persistShortcuts,
                     recordingShortcut, setRecordingShortcut,
                   }} />
@@ -1591,22 +1664,24 @@ export default function PYSCAL() {
                   <div className="papan-actions">
                     <button className={`ibtn ${customLot ? 'ibtn-active-amber' : ''}`}
                       onClick={toggleCustomLot}
+                      aria-label={customLot ? 'Matikan Custom Lot' : 'Aktifkan Custom Lot'}
+                      aria-pressed={customLot}
                       title={customLot ? 'Matikan Custom Lot' : 'Aktifkan Custom Lot (edit lot manual)'}>
                       {customLot ? <UnlockIcon /> : <LockIcon />}
                     </button>
-                    <button className="ibtn" onClick={saveTrade} title={`Simpan ke History (${shortcutToString(shortcuts.saveTrade)})`}>
+                    <button className="ibtn" onClick={saveTrade} aria-label="Simpan ke History" title={`Simpan ke History (${shortcutToString(shortcuts.saveTrade)})`}>
                       <BookmarkIcon />
                     </button>
                     <button className={`ibtn ${copyState === 'copied' ? 'success' : ''}`}
-                      onClick={copyResults} title={`Copy (${shortcutToString(shortcuts.copyResults)})`}>
+                      onClick={copyResults} aria-label="Copy hasil" title={`Copy (${shortcutToString(shortcuts.copyResults)})`}>
                       {copyState === 'copied' ? <CheckIcon /> : <CopyIcon />}
                     </button>
                     {bids.length > 1 && (
-                      <button className="ibtn danger" onClick={resetPapan} title={`Reset (${shortcutToString(shortcuts.resetPapan)})`}>
+                      <button className="ibtn danger" onClick={resetPapan} aria-label="Reset semua papan" title={`Reset (${shortcutToString(shortcuts.resetPapan)})`}>
                         <RefreshIcon />
                       </button>
                     )}
-                    <button className="ibtn primary" onClick={addPapan} title={`Tambah Papan (${shortcutToString(shortcuts.addPapan)})`}>
+                    <button className="ibtn primary" onClick={addPapan} aria-label="Tambah papan" title={`Tambah Papan (${shortcutToString(shortcuts.addPapan)})`}>
                       <PlusIcon />
                     </button>
                   </div>
@@ -1652,9 +1727,11 @@ function SettingsPanel({
   theme, setTheme, balance, setBalance, feeBuy, setFeeBuy, feeSell, setFeeSell,
   presets, presetName, setPresetName, savePreset, deletePreset, loadPreset,
   exportPresets, importPresets,
+  exportAll, importAll,
   shortcuts, setShortcuts, recordingShortcut, setRecordingShortcut,
 }) {
   const fileInputRef = useRef(null);
+  const fullBackupInputRef = useRef(null);
   return (
     <div className="settings-panel">
       <div className="sp-section">
@@ -1723,6 +1800,24 @@ function SettingsPanel({
             onChange={(e) => {
               const file = e.target.files?.[0];
               if (file) importPresets(file);
+              e.target.value = '';
+            }} />
+        </div>
+      </div>
+
+      <div className="sp-section">
+        <div className="sp-title">Backup Lengkap</div>
+        <div className="sp-empty" style={{ marginBottom: 6 }}>
+          State, preset, history, shortcut, tema dalam 1 file JSON. Untuk pindah device atau jaga-jaga.
+        </div>
+        <div className="sp-import-export">
+          <button className="sp-ie-btn" onClick={exportAll}>↓ Export Semua</button>
+          <button className="sp-ie-btn" onClick={() => fullBackupInputRef.current?.click()}>↑ Restore</button>
+          <input ref={fullBackupInputRef} type="file" accept="application/json,.json"
+            style={{ display: 'none' }}
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) importAll(file);
               e.target.value = '';
             }} />
         </div>
