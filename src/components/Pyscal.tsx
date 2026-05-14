@@ -1422,6 +1422,57 @@ export default function PYSCAL() {
               </button>
             </div>
 
+            {/* First-run hint */}
+            {showHint && (
+              <div className="onboarding" role="region" aria-label="Petunjuk singkat">
+                <button
+                  className="onboarding-close"
+                  onClick={dismissHint}
+                  aria-label="Tutup petunjuk"
+                  title="Tutup"
+                ><XIcon /></button>
+                <div className="onboarding-title">Selamat datang di PYSCAL</div>
+                <div className="onboarding-sub">
+                  Kalkulator pyramid bid untuk avg-down terukur. 4 hal yang perlu kamu tahu:
+                </div>
+                <ol className="onboarding-steps">
+                  <li>
+                    <span className="ob-num">1</span>
+                    <div>
+                      <strong>Isi Bid Awal &amp; Lot</strong> di kartu di bawah, lalu atur target
+                      tick &amp; min profit. Hasil hitung otomatis muncul.
+                    </div>
+                  </li>
+                  <li>
+                    <span className="ob-num">2</span>
+                    <div>
+                      <strong>Tambah papan</strong> untuk simulasi avg-down per layer.
+                      <span className="ob-kbd">{shortcutToString(shortcuts.addPapan)}</span>
+                    </div>
+                  </li>
+                  <li>
+                    <span className="ob-num">3</span>
+                    <div>
+                      <strong>Simpan ke History</strong> kalau plan sudah pas — bisa di-rename &amp; di-pin nanti.
+                      <span className="ob-kbd">{shortcutToString(shortcuts.saveTrade)}</span>
+                    </div>
+                  </li>
+                  <li>
+                    <span className="ob-num">4</span>
+                    <div>
+                      <strong>Settings</strong> untuk fee broker, balance, preset, theme &amp; backup JSON.
+                      <span className="ob-kbd">{shortcutToString(shortcuts.toggleSettings)}</span>
+                    </div>
+                  </li>
+                </ol>
+                <div className="onboarding-actions">
+                  <button className="btn-primary-pyscal" onClick={dismissHint}>
+                    Mengerti, mulai pakai
+                  </button>
+                </div>
+              </div>
+            )}
+
             {/* Preset chips */}
             {presets.length > 0 && (
               <div className="preset-bar">
