@@ -1,5 +1,6 @@
 // @ts-nocheck
 import { useState, useMemo, useCallback, useEffect, useRef } from "react";
+import logoUrl from "@/assets/logo-pyscal.png";
 
 /* ==================== COMPUTE LOGIC ==================== */
 const getTickSize = (p) => p < 200 ? 1 : p < 500 ? 2 : p < 2000 ? 5 : p < 5000 ? 10 : 25;
