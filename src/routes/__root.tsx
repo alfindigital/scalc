@@ -79,6 +79,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:description", content: "Pyramid Bid Calculator untuk IDX." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "PYSCAL" },
+      { name: "twitter:description", content: "Pyramid Bid Calculator untuk IDX." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/7b4fb587-c80b-4037-b8b5-8e6b4462d0f9/id-preview-d158645f--f5757e02-acee-4620-9e57-0f4aeb12bc48.lovable.app-1778723881610.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/7b4fb587-c80b-4037-b8b5-8e6b4462d0f9/id-preview-d158645f--f5757e02-acee-4620-9e57-0f4aeb12bc48.lovable.app-1778723881610.png" },
     ],
     links: [
       {
