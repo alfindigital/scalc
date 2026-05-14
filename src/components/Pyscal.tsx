@@ -6,8 +6,14 @@ import { n, nDec, nShort, terbilang, fmtPct, fmtPL, fmtTime } from "@/lib/format
 import {
   DEFAULT_SHORTCUTS,
   DEFAULT_STATE,
-  loadShortcuts,
-  loadState,
+  loadShortcutsVersioned,
+  loadStateVersioned,
+  loadHistory,
+  loadPresets,
+  saveState,
+  saveShortcuts,
+  saveHistory,
+  savePresets,
   shortcutToString,
   eventMatchesShortcut,
 } from "@/lib/storage";
@@ -730,7 +736,7 @@ export default function PYSCAL() {
   const [theme, setTheme] = useState(() =>
     (typeof window !== 'undefined' && localStorage.getItem('pyscal_theme')) || 'light'
   );
-  const initial = loadState();
+  const initial = loadStateVersioned();
 
   const [baseLot, setBaseLot] = useState(initial.baseLot);
   const [targetTicks, setTargetTicks] = useState(initial.targetTicks);
@@ -778,7 +784,7 @@ export default function PYSCAL() {
   // Auto-save
   useEffect(() => {
     const state = { baseLot, targetTicks, targetProfit, feeBuy, feeSell, bids, balance, mode, existingAvg, existingLot, customLot, customLots };
-    try { localStorage.setItem('pyscal_state', JSON.stringify(state)); } catch {}
+    saveState(state);
   }, [baseLot, targetTicks, targetProfit, feeBuy, feeSell, bids, balance, mode, existingAvg, existingLot, customLot, customLots]);
 
   useEffect(() => {
@@ -797,15 +803,14 @@ export default function PYSCAL() {
 
   // Presets
   const [presets, setPresets] = useState(() => {
-    if (typeof window === 'undefined') return [];
-    try { return JSON.parse(localStorage.getItem('pyscal_presets') || '[]'); } catch { return []; }
+    return loadPresets();
   });
   const [presetName, setPresetName] = useState("");
   const [activePreset, setActivePreset] = useState(null);
 
   const persistPresets = (next) => {
     setPresets(next);
-    try { localStorage.setItem('pyscal_presets', JSON.stringify(next)); } catch {}
+    savePresets(next);
   };
 
   const savePreset = () => {
@@ -898,21 +903,20 @@ export default function PYSCAL() {
   }, [presets, showToast]);
 
   // Shortcuts state
-  const [shortcuts, setShortcuts] = useState(loadShortcuts);
+  const [shortcuts, setShortcuts] = useState(loadShortcutsVersioned);
   const persistShortcuts = (next) => {
     setShortcuts(next);
-    try { localStorage.setItem('pyscal_shortcuts', JSON.stringify(next)); } catch {}
+    saveShortcuts(next);
   };
   const [recordingShortcut, setRecordingShortcut] = useState(null);
 
   // History
   const [history, setHistory] = useState(() => {
-    if (typeof window === 'undefined') return [];
-    try { return JSON.parse(localStorage.getItem('pyscal_history') || '[]'); } catch { return []; }
+    return loadHistory();
   });
   const persistHistory = (next) => {
     setHistory(next);
-    try { localStorage.setItem('pyscal_history', JSON.stringify(next)); } catch {}
+    saveHistory(next);
   };
 
   // ==================== FULL BACKUP / RESTORE ====================
