@@ -17,6 +17,17 @@ function Index() {
   // and the original component was never SSR-tested. Render after mount.
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
-  if (!mounted) return <div style={{ minHeight: "100vh", background: "#0B1220" }} />;
-  return <Pyscal />;
+  if (!mounted) {
+    return (
+      <main style={{ minHeight: "100vh", background: "#0B1220", color: "#E5E7EB", padding: "24px" }}>
+        <h1 style={{ fontSize: "28px", fontWeight: 700, margin: 0 }}>PYSCAL</h1>
+        <p style={{ marginTop: 8, opacity: 0.8 }}>Pyramid Bid Calculator untuk trader IDX.</p>
+      </main>
+    );
+  }
+  return (
+    <main>
+      <Pyscal />
+    </main>
+  );
 }
