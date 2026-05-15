@@ -6,8 +6,12 @@ export const Route = createFileRoute("/")({
   component: Index,
   head: () => ({
     meta: [
-      { title: "PYSCAL · Pyramid Bid Calculator" },
-      { name: "description", content: "Kalkulator pyramid averaging-down untuk trader IDX. Local-only, no signup." },
+      { title: "PYSCAL — Pyramid Bid Calculator untuk Trader IDX" },
+      { name: "description", content: "Kalkulator pyramid averaging-down untuk trader saham IDX. Hitung bid berlapis, simpan history, dan jalankan offline tanpa daftar." },
+      { property: "og:url", content: "https://pyscal.lovable.app/" },
+    ],
+    links: [
+      { rel: "canonical", href: "https://pyscal.lovable.app/" },
     ],
   }),
 });
