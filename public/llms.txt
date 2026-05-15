@@ -1,0 +1,9 @@
+# PYSCAL
+
+> Kalkulator pyramid averaging-down untuk trader saham IDX. Local-only, tanpa signup, jalan offline.
+
+PYSCAL membantu trader merencanakan bid berlapis (pyramid / averaging-down) dengan menghitung harga rata-rata, alokasi modal, dan lot per layer. Semua data disimpan di localStorage browser pengguna.
+
+## Pages
+
+- [Home](/): Kalkulator pyramid bid utama, history, dan settings.
