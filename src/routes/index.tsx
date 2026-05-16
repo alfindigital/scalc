@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import Pyscal from "@/components/Pyscal";
+import { setupPWA, bindInstallPrompt } from "@/lib/pwa";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -20,7 +21,12 @@ function Index() {
   // Client-only mount: Pyscal touches localStorage/navigator extensively
   // and the original component was never SSR-tested. Render after mount.
   const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
+  useEffect(() => {
+    setMounted(true);
+    setupPWA();
+    const unbind = bindInstallPrompt();
+    return unbind;
+  }, []);
   if (!mounted) {
     return (
       <main style={{ minHeight: "100vh", background: "#0B1220", color: "#E5E7EB", padding: "24px" }}>
