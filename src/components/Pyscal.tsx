@@ -616,6 +616,30 @@ tbody td:last-child{padding:14px 8px;width:1%}
 
 /* ==================== TOAST COMPONENT ==================== */
 /* ==================== FIELD HINT + HELP TIP ==================== */
+function InstallAppRow() {
+  const [available, setAvailable] = useState(isInstallAvailable());
+  const [standalone] = useState(isStandalone());
+  useEffect(() => subscribeInstallPrompt(() => setAvailable(isInstallAvailable())), []);
+  if (standalone) {
+    return <div className="sp-empty">App sudah ter-install ✓</div>;
+  }
+  if (!available) {
+    return (
+      <div className="sp-empty">
+        Buka di browser (bukan editor preview) lalu klik tombol Install di address bar.
+        Di iOS Safari: Share → Add to Home Screen.
+      </div>
+    );
+  }
+  return (
+    <div className="sp-import-export">
+      <button className="sp-ie-btn" onClick={() => triggerInstall()}>
+        ↓ Install ke Home Screen
+      </button>
+    </div>
+  );
+}
+
 function FieldHint({ status }) {
   if (!status || (!status.error && !status.warning)) return null;
   const isErr = !!status.error;
