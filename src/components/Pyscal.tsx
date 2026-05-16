@@ -1567,37 +1567,67 @@ export default function PYSCAL() {
               {mode === 'position' && (
                 <div className="ig-2">
                   <div>
-                    <div className="il">Avg Existing (inc fee)</div>
+                    <div className="il il-wrap">Avg Existing (inc fee)
+                      <HelpTip text="Average price posisi yang sudah kamu pegang, sudah include fee buy. Dipakai sebagai baseline avg-down." />
+                    </div>
                     <input className="if" type="number" value={existingAvg || ''} min={0} step={0.01}
+                      inputMode="decimal" enterKeyHint="next"
+                      aria-invalid={!!validateExistingAvg(existingAvg, mode).error}
                       onChange={e => setExistingAvg(+e.target.value || 0)} />
+                    <FieldHint status={validateExistingAvg(existingAvg, mode)} />
                   </div>
                   <div>
-                    <div className="il">Lot Existing</div>
+                    <div className="il il-wrap">Lot Existing
+                      <HelpTip text="Berapa lot posisi existing yang kamu pegang." />
+                    </div>
                     <input className="if" type="number" value={existingLot || ''} min={0}
+                      inputMode="numeric" enterKeyHint="next"
+                      aria-invalid={!!validateExistingLot(existingLot, mode).error}
                       onChange={e => setExistingLot(+e.target.value || 0)} />
+                    <FieldHint status={validateExistingLot(existingLot, mode)} />
                   </div>
                 </div>
               )}
               <div className="ig">
                 <div>
-                  <div className="il">{mode === 'position' ? 'Bid Awal (beli baru)' : 'Bid Awal'}</div>
+                  <div className="il il-wrap">{mode === 'position' ? 'Bid Awal (beli baru)' : 'Bid Awal'}
+                    <HelpTip text="Harga limit order pertama. Sistem akan menurunkan untuk averaging-down di papan berikut." />
+                  </div>
                   <input ref={bidAwalRef} className="if" type="number" value={bids[0] || ''} min={1}
+                    inputMode="decimal" enterKeyHint="next"
+                    aria-invalid={!!validateBid(bids[0]).error}
                     onChange={e => setBidAt(0, +e.target.value)} />
+                  <FieldHint status={validateBid(bids[0])} />
                 </div>
                 <div>
-                  <div className="il">Lot</div>
+                  <div className="il il-wrap">Lot
+                    <HelpTip text="Lot dasar per papan. Tiap layer berikutnya bisa di-multiply manual via Custom Lot." />
+                  </div>
                   <input className="if" type="number" value={baseLot} min={1}
+                    inputMode="numeric" enterKeyHint="next"
+                    aria-invalid={!!validateLot(baseLot).error}
                     onChange={e => setBaseLot(+e.target.value)} />
+                  <FieldHint status={validateLot(baseLot)} />
                 </div>
                 <div>
-                  <div className="il">Target Tick</div>
-                  <input className="if" type="number" value={targetTicks} min={1} max={10}
+                  <div className="il il-wrap">Target Tick
+                    <HelpTip text="Berapa tick di atas average price untuk target jual. 1 tick = 1 step harga IDX." />
+                  </div>
+                  <input className="if" type="number" value={targetTicks} min={1} max={20}
+                    inputMode="numeric" enterKeyHint="next"
+                    aria-invalid={!!validateTargetTicks(targetTicks).error}
                     onChange={e => setTargetTicks(+e.target.value)} />
+                  <FieldHint status={validateTargetTicks(targetTicks)} />
                 </div>
                 <div>
-                  <div className="il">Min Profit %</div>
+                  <div className="il il-wrap">Min Profit %
+                    <HelpTip text="Minimal profit per pyramid. Kalau di bawah ini, papan akan flag warning." />
+                  </div>
                   <input className="if" type="number" value={targetProfit} min={0} step={0.1}
+                    inputMode="decimal" enterKeyHint="done"
+                    aria-invalid={!!validateTargetProfit(targetProfit).error}
                     onChange={e => setTargetProfit(+e.target.value)} />
+                  <FieldHint status={validateTargetProfit(targetProfit)} />
                 </div>
               </div>
             </div>
