@@ -675,6 +675,8 @@ function BidStepInput({ value, onChange, onFocus, disabled, className = '', vari
       <input
         ref={inputRef}
         type="number"
+        inputMode="decimal"
+        enterKeyHint="done"
         className={className}
         value={value}
         min={1}
@@ -1713,6 +1715,7 @@ function SettingsPanel({
         <div className="sp-title">Trading Balance</div>
         <input className="sp-input" type="number" value={balance || ''} min={0}
           placeholder="Kosongkan jika tidak dibutuhkan"
+          inputMode="numeric" enterKeyHint="done"
           onChange={e => setBalance(+e.target.value || 0)} />
         {balance > 0 && (
           <div className="terbilang"><strong>{terbilang(balance)}</strong> rupiah</div>
@@ -1725,11 +1728,13 @@ function SettingsPanel({
           <div>
             <div className="sp-label">Buy Fee %</div>
             <input className="sp-input" type="number" value={feeBuy} step={0.01}
+              inputMode="decimal" enterKeyHint="next"
               onChange={e => setFeeBuy(+e.target.value)} />
           </div>
           <div>
             <div className="sp-label">Sell Fee %</div>
             <input className="sp-input" type="number" value={feeSell} step={0.01}
+              inputMode="decimal" enterKeyHint="done"
               onChange={e => setFeeSell(+e.target.value)} />
           </div>
         </div>
@@ -1847,6 +1852,7 @@ function ResultsTable({ results, bidRiseWarnings, targetProfit, totalLot, totalC
                     {customLot && !r.isExisting ? (
                       <input type="number" className="lot-edit"
                         value={r.lot} min={1} step={100}
+                        inputMode="numeric" enterKeyHint="done"
                         onChange={e => setLotAt(li, +e.target.value)}
                         onFocus={e => e.target.select()} />
                     ) : n(r.lot)}
@@ -1916,6 +1922,7 @@ function ResultsTable({ results, bidRiseWarnings, targetProfit, totalLot, totalC
                     <label>Lot</label>
                     {customLot && !r.isExisting ? (
                       <input type="number" className="mhi-inp lot-edit-m" value={r.lot} min={1} step={100}
+                        inputMode="numeric" enterKeyHint="done"
                         onChange={e => setLotAt(li, +e.target.value)}
                         onFocus={e => e.target.select()} />
                     ) : <span>{n(r.lot)}</span>}
