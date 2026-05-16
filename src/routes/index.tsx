@@ -30,7 +30,7 @@ function Index() {
     );
   }
   return (
-    <main>
+    <main id="main">
       <Pyscal />
     </main>
   );

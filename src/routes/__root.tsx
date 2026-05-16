@@ -110,6 +110,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body>
+        <a href="#main" className="pyscal-sr-only">Skip to content</a>
         {children}
         <Scripts />
       </body>
