@@ -1869,6 +1869,11 @@ function SettingsPanel({
       </div>
 
       <div className="sp-section">
+        <div className="sp-title">Install App</div>
+        <InstallAppRow />
+      </div>
+
+      <div className="sp-section">
         <div className="sp-title"><KeyboardIcon /> Shortcut</div>
         <div className="kbd-list">
           {Object.entries(shortcuts).map(([key, s]) => (
