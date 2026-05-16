@@ -1750,6 +1750,7 @@ export default function PYSCAL() {
             onDelete={deleteTrade}
             onRename={renameTrade}
             onTogglePin={togglePinTrade}
+            onRecall={recallTrade}
           />
         )}
 
@@ -2039,7 +2040,7 @@ function ResultsTable({ results, bidRiseWarnings, targetProfit, totalLot, totalC
 }
 
 /* ==================== HISTORY MODAL ==================== */
-function HistoryModal({ history, viewingId, setViewingId, onClose, onDelete, onRename, onTogglePin }) {
+function HistoryModal({ history, viewingId, setViewingId, onClose, onDelete, onRename, onTogglePin, onRecall }) {
   const trade = viewingId ? history.find(t => t.id === viewingId) : null;
   const [query, setQuery] = useState('');
   const [renamingId, setRenamingId] = useState(null);
@@ -2074,9 +2075,10 @@ function HistoryModal({ history, viewingId, setViewingId, onClose, onDelete, onR
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal" onClick={e => e.stopPropagation()}>
+      <div className="modal" onClick={e => e.stopPropagation()}
+        role="dialog" aria-modal="true" aria-labelledby="history-modal-title">
         <div className="modal-header">
-          <div className="modal-title">
+          <div className="modal-title" id="history-modal-title">
             {trade ? (
               <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <button className="modal-close" onClick={() => setViewingId(null)} style={{ padding: '4px' }} aria-label="Kembali ke daftar">←</button>
@@ -2089,7 +2091,7 @@ function HistoryModal({ history, viewingId, setViewingId, onClose, onDelete, onR
         </div>
         <div className="modal-body">
           {trade ? (
-            <TradeDetail trade={trade} onDelete={() => { onDelete(trade.id); }} />
+            <TradeDetail trade={trade} onDelete={() => { onDelete(trade.id); }} onRecall={() => onRecall && onRecall(trade)} />
           ) : history.length === 0 ? (
             <div className="history-empty">
               <div style={{ fontSize: 32, marginBottom: 8, fontStyle: 'normal' }}>📒</div>
@@ -2158,6 +2160,12 @@ function HistoryModal({ history, viewingId, setViewingId, onClose, onDelete, onR
                         <div className="history-actions" onClick={(e) => e.stopPropagation()}>
                           <button
                             className="history-act"
+                            onClick={() => onRecall && onRecall(t)}
+                            aria-label="Recall trade"
+                            title="Recall (muat ke kalkulator)"
+                          >↻</button>
+                          <button
+                            className="history-act"
                             onClick={() => onTogglePin(t.id)}
                             aria-pressed={!!t.pinned}
                             aria-label={t.pinned ? 'Lepas pin' : 'Pin trade'}
@@ -2187,7 +2195,7 @@ function HistoryModal({ history, viewingId, setViewingId, onClose, onDelete, onR
 }
 
 /* ==================== TRADE DETAIL ==================== */
-function TradeDetail({ trade, onDelete }) {
+function TradeDetail({ trade, onDelete, onRecall }) {
   return (
     <div className="history-detail">
       <div className="hd-section">
@@ -2216,7 +2224,11 @@ function TradeDetail({ trade, onDelete }) {
         </div>
       </div>
 
-      <div className="hd-section" style={{ display: 'flex', justifyContent: 'flex-end' }}>
+      <div className="hd-section" style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
+        <button className="btn-primary-pyscal" onClick={() => onRecall && onRecall()}
+          style={{ padding: '8px 14px' }}>
+          ↻ Recall ke Kalkulator
+        </button>
         <button className="btn-secondary" onClick={() => { if (confirm(`Hapus trade ini?`)) onDelete(); }}
           style={{ borderColor: 'var(--red)', color: 'var(--red)' }}>
           Hapus Trade
