@@ -1351,6 +1351,7 @@ export default function PYSCAL() {
       mode,
       baseLot, targetTicks, targetProfit, feeBuy, feeSell, balance,
       bids: [...bids], existingAvg, existingLot,
+      customLot, customLots: [...customLots],
       planned: {
         totalLot: totalBuyLot,
         totalCost: totalBuyCost,
@@ -1362,7 +1363,28 @@ export default function PYSCAL() {
     const next = [trade, ...history].slice(0, 500);
     persistHistory(next);
     showToast(`Avg <strong>${trade.planned.avgFinal.toFixed(2)}</strong> tersimpan di History`);
-  }, [data, bids, baseLot, targetTicks, targetProfit, feeBuy, feeSell, balance, mode, existingAvg, existingLot, totalBuyLot, totalBuyCost, history, showToast]);
+  }, [data, bids, baseLot, targetTicks, targetProfit, feeBuy, feeSell, balance, mode, existingAvg, existingLot, customLot, customLots, totalBuyLot, totalBuyCost, history, showToast]);
+
+  // Recall a saved trade back into the calculator state (undo-able).
+  const recallTrade = useCallback((t) => {
+    if (!t) return;
+    if (!confirm('Muat papan ini ke kalkulator? State saat ini akan ter-replace (bisa di-undo).')) return;
+    const snap = {
+      baseLot: t.baseLot ?? baseLot,
+      targetTicks: t.targetTicks ?? targetTicks,
+      targetProfit: t.targetProfit ?? targetProfit,
+      bids: Array.isArray(t.bids) && t.bids.length ? [...t.bids] : [...bids],
+      mode: t.mode || 'entry',
+      existingAvg: t.existingAvg ?? 0,
+      existingLot: t.existingLot ?? 0,
+      customLot: !!t.customLot,
+      customLots: Array.isArray(t.customLots) ? [...t.customLots] : [],
+    };
+    applySnapshot(snap);
+    setShowHistory(false);
+    setViewingTradeId(null);
+    showToast(`Recalled: <strong>${t.note ? t.note : 'Avg ' + t.planned.avgFinal.toFixed(2)}</strong>`);
+  }, [bids, baseLot, targetTicks, targetProfit, applySnapshot, showToast]);
 
   const deleteTrade = (id) => {
     const t = history.find(x => x.id === id);
