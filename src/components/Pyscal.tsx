@@ -610,9 +610,10 @@ tbody td:last-child{padding:14px 8px;width:1%}
 /* ==================== TOAST COMPONENT ==================== */
 function ToastContainer({ toasts, onRemove }) {
   return (
-    <div className="toast-container">
+    <div className="toast-container" role="region" aria-label="Notifikasi" aria-live="polite">
       {toasts.map(t => (
         <div key={t.id} className={`toast ${t.type ? 'toast-' + t.type : ''} ${t.leaving ? 'toast-out' : ''}`}
+          role={t.type === 'error' ? 'alert' : 'status'}
           onAnimationEnd={() => { if (t.leaving) onRemove(t.id); }}>
           <span className="toast-icon">
             {t.type === 'success' && <CheckIcon />}
