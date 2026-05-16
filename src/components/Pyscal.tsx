@@ -4,6 +4,13 @@ import logoUrl from "@/assets/logo-pyscal.png";
 import { getTickSize, ceilTick, computeRows } from "@/lib/compute";
 import { n, nDec, nShort, terbilang, fmtPct, fmtPL, fmtTime } from "@/lib/format";
 import {
+  validateBid, validateLot, validateTargetTicks, validateTargetProfit,
+  validateExistingAvg, validateExistingLot,
+} from "@/lib/validation";
+import {
+  isInstallAvailable, isStandalone, subscribeInstallPrompt, triggerInstall,
+} from "@/lib/pwa";
+import {
   DEFAULT_SHORTCUTS,
   DEFAULT_STATE,
   loadShortcutsVersioned,
@@ -38,6 +45,23 @@ const UnlockIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="n
 const CSS = `
 @import url('https://fonts.googleapis.com/css2?family=Funnel+Display:wght@500;600;700;800&family=Funnel+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+/* a11y: visible focus ring on keyboard nav */
+.pyscal :focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+.pyscal button:focus-visible,.pyscal input:focus-visible,.pyscal a:focus-visible,.pyscal [tabindex]:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+/* sr-only, becomes visible when focused (for skip link) */
+.pyscal-sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.pyscal-sr-only:focus,.pyscal-sr-only:focus-visible{position:fixed;top:8px;left:8px;width:auto;height:auto;clip:auto;clip-path:none;padding:8px 14px;background:var(--brand);color:var(--brand-text);font-weight:700;z-index:9999}
+/* validation field state */
+.if[aria-invalid="true"]{border-color:var(--red)!important;outline-color:var(--red)}
+.field-hint{font-size:11px;margin-top:4px;line-height:1.35;font-family:'Funnel Sans',sans-serif}
+.field-hint.error{color:var(--red)}
+.field-hint.warning{color:var(--brand);opacity:.85}
+/* (?) help icon next to label */
+.il-wrap{display:flex;align-items:center;gap:6px}
+.il-help{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border:1px solid var(--border);background:transparent;color:var(--text-m);font-size:10px;font-weight:700;cursor:help;border-radius:50%;line-height:1;padding:0}
+.il-help:hover,.il-help:focus-visible{color:var(--brand);border-color:var(--brand)}
+.il-help-tip{position:absolute;background:var(--surface);color:var(--text);border:1px solid var(--border-strong);padding:8px 10px;font-size:11px;line-height:1.4;max-width:240px;z-index:50;box-shadow:0 4px 12px rgba(0,0,0,0.15);border-radius:4px;font-weight:400}
 
 .pyscal[data-theme="dark"]{
   --bg:#0A0A0A;--surface:#141414;--surface-hover:#1C1C1C;--border:#262626;--border-strong:#404040;
@@ -591,11 +615,53 @@ tbody td:last-child{padding:14px 8px;width:1%}
 `;
 
 /* ==================== TOAST COMPONENT ==================== */
+/* ==================== FIELD HINT + HELP TIP ==================== */
+function InstallAppRow() {
+  const [available, setAvailable] = useState(isInstallAvailable());
+  const [standalone] = useState(isStandalone());
+  useEffect(() => subscribeInstallPrompt(() => setAvailable(isInstallAvailable())), []);
+  if (standalone) {
+    return <div className="sp-empty">App sudah ter-install ✓</div>;
+  }
+  if (!available) {
+    return (
+      <div className="sp-empty">
+        Buka di browser (bukan editor preview) lalu klik tombol Install di address bar.
+        Di iOS Safari: Share → Add to Home Screen.
+      </div>
+    );
+  }
+  return (
+    <div className="sp-import-export">
+      <button className="sp-ie-btn" onClick={() => triggerInstall()}>
+        ↓ Install ke Home Screen
+      </button>
+    </div>
+  );
+}
+
+function FieldHint({ status }) {
+  if (!status || (!status.error && !status.warning)) return null;
+  const isErr = !!status.error;
+  return (
+    <div className={`field-hint ${isErr ? 'error' : 'warning'}`} role={isErr ? 'alert' : 'status'}>
+      {isErr ? '✕ ' : '⚠ '}{status.error || status.warning}
+    </div>
+  );
+}
+function HelpTip({ text }) {
+  return (
+    <button type="button" className="il-help" tabIndex={0}
+      aria-label={`Penjelasan: ${text}`} title={text}>?</button>
+  );
+}
+
 function ToastContainer({ toasts, onRemove }) {
   return (
-    <div className="toast-container">
+    <div className="toast-container" role="region" aria-label="Notifikasi" aria-live="polite">
       {toasts.map(t => (
         <div key={t.id} className={`toast ${t.type ? 'toast-' + t.type : ''} ${t.leaving ? 'toast-out' : ''}`}
+          role={t.type === 'error' ? 'alert' : 'status'}
           onAnimationEnd={() => { if (t.leaving) onRemove(t.id); }}>
           <span className="toast-icon">
             {t.type === 'success' && <CheckIcon />}
@@ -657,6 +723,8 @@ function BidStepInput({ value, onChange, onFocus, disabled, className = '', vari
       <input
         ref={inputRef}
         type="number"
+        inputMode="decimal"
+        enterKeyHint="done"
         className={className}
         value={value}
         min={1}
@@ -1310,6 +1378,7 @@ export default function PYSCAL() {
       mode,
       baseLot, targetTicks, targetProfit, feeBuy, feeSell, balance,
       bids: [...bids], existingAvg, existingLot,
+      customLot, customLots: [...customLots],
       planned: {
         totalLot: totalBuyLot,
         totalCost: totalBuyCost,
@@ -1321,7 +1390,28 @@ export default function PYSCAL() {
     const next = [trade, ...history].slice(0, 500);
     persistHistory(next);
     showToast(`Avg <strong>${trade.planned.avgFinal.toFixed(2)}</strong> tersimpan di History`);
-  }, [data, bids, baseLot, targetTicks, targetProfit, feeBuy, feeSell, balance, mode, existingAvg, existingLot, totalBuyLot, totalBuyCost, history, showToast]);
+  }, [data, bids, baseLot, targetTicks, targetProfit, feeBuy, feeSell, balance, mode, existingAvg, existingLot, customLot, customLots, totalBuyLot, totalBuyCost, history, showToast]);
+
+  // Recall a saved trade back into the calculator state (undo-able).
+  const recallTrade = useCallback((t) => {
+    if (!t) return;
+    if (!confirm('Muat papan ini ke kalkulator? State saat ini akan ter-replace (bisa di-undo).')) return;
+    const snap = {
+      baseLot: t.baseLot ?? baseLot,
+      targetTicks: t.targetTicks ?? targetTicks,
+      targetProfit: t.targetProfit ?? targetProfit,
+      bids: Array.isArray(t.bids) && t.bids.length ? [...t.bids] : [...bids],
+      mode: t.mode || 'entry',
+      existingAvg: t.existingAvg ?? 0,
+      existingLot: t.existingLot ?? 0,
+      customLot: !!t.customLot,
+      customLots: Array.isArray(t.customLots) ? [...t.customLots] : [],
+    };
+    applySnapshot(snap);
+    setShowHistory(false);
+    setViewingTradeId(null);
+    showToast(`Recalled: <strong>${t.note ? t.note : 'Avg ' + t.planned.avgFinal.toFixed(2)}</strong>`);
+  }, [bids, baseLot, targetTicks, targetProfit, applySnapshot, showToast]);
 
   const deleteTrade = (id) => {
     const t = history.find(x => x.id === id);
@@ -1526,37 +1616,67 @@ export default function PYSCAL() {
               {mode === 'position' && (
                 <div className="ig-2">
                   <div>
-                    <div className="il">Avg Existing (inc fee)</div>
+                    <div className="il il-wrap">Avg Existing (inc fee)
+                      <HelpTip text="Average price posisi yang sudah kamu pegang, sudah include fee buy. Dipakai sebagai baseline avg-down." />
+                    </div>
                     <input className="if" type="number" value={existingAvg || ''} min={0} step={0.01}
+                      inputMode="decimal" enterKeyHint="next"
+                      aria-invalid={!!validateExistingAvg(existingAvg, mode).error}
                       onChange={e => setExistingAvg(+e.target.value || 0)} />
+                    <FieldHint status={validateExistingAvg(existingAvg, mode)} />
                   </div>
                   <div>
-                    <div className="il">Lot Existing</div>
+                    <div className="il il-wrap">Lot Existing
+                      <HelpTip text="Berapa lot posisi existing yang kamu pegang." />
+                    </div>
                     <input className="if" type="number" value={existingLot || ''} min={0}
+                      inputMode="numeric" enterKeyHint="next"
+                      aria-invalid={!!validateExistingLot(existingLot, mode).error}
                       onChange={e => setExistingLot(+e.target.value || 0)} />
+                    <FieldHint status={validateExistingLot(existingLot, mode)} />
                   </div>
                 </div>
               )}
               <div className="ig">
                 <div>
-                  <div className="il">{mode === 'position' ? 'Bid Awal (beli baru)' : 'Bid Awal'}</div>
+                  <div className="il il-wrap">{mode === 'position' ? 'Bid Awal (beli baru)' : 'Bid Awal'}
+                    <HelpTip text="Harga limit order pertama. Sistem akan menurunkan untuk averaging-down di papan berikut." />
+                  </div>
                   <input ref={bidAwalRef} className="if" type="number" value={bids[0] || ''} min={1}
+                    inputMode="decimal" enterKeyHint="next"
+                    aria-invalid={!!validateBid(bids[0]).error}
                     onChange={e => setBidAt(0, +e.target.value)} />
+                  <FieldHint status={validateBid(bids[0])} />
                 </div>
                 <div>
-                  <div className="il">Lot</div>
+                  <div className="il il-wrap">Lot
+                    <HelpTip text="Lot dasar per papan. Tiap layer berikutnya bisa di-multiply manual via Custom Lot." />
+                  </div>
                   <input className="if" type="number" value={baseLot} min={1}
+                    inputMode="numeric" enterKeyHint="next"
+                    aria-invalid={!!validateLot(baseLot).error}
                     onChange={e => setBaseLot(+e.target.value)} />
+                  <FieldHint status={validateLot(baseLot)} />
                 </div>
                 <div>
-                  <div className="il">Target Tick</div>
-                  <input className="if" type="number" value={targetTicks} min={1} max={10}
+                  <div className="il il-wrap">Target Tick
+                    <HelpTip text="Berapa tick di atas average price untuk target jual. 1 tick = 1 step harga IDX." />
+                  </div>
+                  <input className="if" type="number" value={targetTicks} min={1} max={20}
+                    inputMode="numeric" enterKeyHint="next"
+                    aria-invalid={!!validateTargetTicks(targetTicks).error}
                     onChange={e => setTargetTicks(+e.target.value)} />
+                  <FieldHint status={validateTargetTicks(targetTicks)} />
                 </div>
                 <div>
-                  <div className="il">Min Profit %</div>
+                  <div className="il il-wrap">Min Profit %
+                    <HelpTip text="Minimal profit per pyramid. Kalau di bawah ini, papan akan flag warning." />
+                  </div>
                   <input className="if" type="number" value={targetProfit} min={0} step={0.1}
+                    inputMode="decimal" enterKeyHint="done"
+                    aria-invalid={!!validateTargetProfit(targetProfit).error}
                     onChange={e => setTargetProfit(+e.target.value)} />
+                  <FieldHint status={validateTargetProfit(targetProfit)} />
                 </div>
               </div>
             </div>
@@ -1657,6 +1777,7 @@ export default function PYSCAL() {
             onDelete={deleteTrade}
             onRename={renameTrade}
             onTogglePin={togglePinTrade}
+            onRecall={recallTrade}
           />
         )}
 
@@ -1695,6 +1816,7 @@ function SettingsPanel({
         <div className="sp-title">Trading Balance</div>
         <input className="sp-input" type="number" value={balance || ''} min={0}
           placeholder="Kosongkan jika tidak dibutuhkan"
+          inputMode="numeric" enterKeyHint="done"
           onChange={e => setBalance(+e.target.value || 0)} />
         {balance > 0 && (
           <div className="terbilang"><strong>{terbilang(balance)}</strong> rupiah</div>
@@ -1707,11 +1829,13 @@ function SettingsPanel({
           <div>
             <div className="sp-label">Buy Fee %</div>
             <input className="sp-input" type="number" value={feeBuy} step={0.01}
+              inputMode="decimal" enterKeyHint="next"
               onChange={e => setFeeBuy(+e.target.value)} />
           </div>
           <div>
             <div className="sp-label">Sell Fee %</div>
             <input className="sp-input" type="number" value={feeSell} step={0.01}
+              inputMode="decimal" enterKeyHint="done"
               onChange={e => setFeeSell(+e.target.value)} />
           </div>
         </div>
@@ -1766,6 +1890,11 @@ function SettingsPanel({
               e.target.value = '';
             }} />
         </div>
+      </div>
+
+      <div className="sp-section">
+        <div className="sp-title">Install App</div>
+        <InstallAppRow />
       </div>
 
       <div className="sp-section">
@@ -1829,6 +1958,7 @@ function ResultsTable({ results, bidRiseWarnings, targetProfit, totalLot, totalC
                     {customLot && !r.isExisting ? (
                       <input type="number" className="lot-edit"
                         value={r.lot} min={1} step={100}
+                        inputMode="numeric" enterKeyHint="done"
                         onChange={e => setLotAt(li, +e.target.value)}
                         onFocus={e => e.target.select()} />
                     ) : n(r.lot)}
@@ -1898,6 +2028,7 @@ function ResultsTable({ results, bidRiseWarnings, targetProfit, totalLot, totalC
                     <label>Lot</label>
                     {customLot && !r.isExisting ? (
                       <input type="number" className="mhi-inp lot-edit-m" value={r.lot} min={1} step={100}
+                        inputMode="numeric" enterKeyHint="done"
                         onChange={e => setLotAt(li, +e.target.value)}
                         onFocus={e => e.target.select()} />
                     ) : <span>{n(r.lot)}</span>}
@@ -1941,7 +2072,7 @@ function ResultsTable({ results, bidRiseWarnings, targetProfit, totalLot, totalC
 }
 
 /* ==================== HISTORY MODAL ==================== */
-function HistoryModal({ history, viewingId, setViewingId, onClose, onDelete, onRename, onTogglePin }) {
+function HistoryModal({ history, viewingId, setViewingId, onClose, onDelete, onRename, onTogglePin, onRecall }) {
   const trade = viewingId ? history.find(t => t.id === viewingId) : null;
   const [query, setQuery] = useState('');
   const [renamingId, setRenamingId] = useState(null);
@@ -1976,9 +2107,10 @@ function HistoryModal({ history, viewingId, setViewingId, onClose, onDelete, onR
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal" onClick={e => e.stopPropagation()}>
+      <div className="modal" onClick={e => e.stopPropagation()}
+        role="dialog" aria-modal="true" aria-labelledby="history-modal-title">
         <div className="modal-header">
-          <div className="modal-title">
+          <div className="modal-title" id="history-modal-title">
             {trade ? (
               <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <button className="modal-close" onClick={() => setViewingId(null)} style={{ padding: '4px' }} aria-label="Kembali ke daftar">←</button>
@@ -1991,7 +2123,7 @@ function HistoryModal({ history, viewingId, setViewingId, onClose, onDelete, onR
         </div>
         <div className="modal-body">
           {trade ? (
-            <TradeDetail trade={trade} onDelete={() => { onDelete(trade.id); }} />
+            <TradeDetail trade={trade} onDelete={() => { onDelete(trade.id); }} onRecall={() => onRecall && onRecall(trade)} />
           ) : history.length === 0 ? (
             <div className="history-empty">
               <div style={{ fontSize: 32, marginBottom: 8, fontStyle: 'normal' }}>📒</div>
@@ -2060,6 +2192,12 @@ function HistoryModal({ history, viewingId, setViewingId, onClose, onDelete, onR
                         <div className="history-actions" onClick={(e) => e.stopPropagation()}>
                           <button
                             className="history-act"
+                            onClick={() => onRecall && onRecall(t)}
+                            aria-label="Recall trade"
+                            title="Recall (muat ke kalkulator)"
+                          >↻</button>
+                          <button
+                            className="history-act"
                             onClick={() => onTogglePin(t.id)}
                             aria-pressed={!!t.pinned}
                             aria-label={t.pinned ? 'Lepas pin' : 'Pin trade'}
@@ -2089,7 +2227,7 @@ function HistoryModal({ history, viewingId, setViewingId, onClose, onDelete, onR
 }
 
 /* ==================== TRADE DETAIL ==================== */
-function TradeDetail({ trade, onDelete }) {
+function TradeDetail({ trade, onDelete, onRecall }) {
   return (
     <div className="history-detail">
       <div className="hd-section">
@@ -2118,7 +2256,11 @@ function TradeDetail({ trade, onDelete }) {
         </div>
       </div>
 
-      <div className="hd-section" style={{ display: 'flex', justifyContent: 'flex-end' }}>
+      <div className="hd-section" style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
+        <button className="btn-primary-pyscal" onClick={() => onRecall && onRecall()}
+          style={{ padding: '8px 14px' }}>
+          ↻ Recall ke Kalkulator
+        </button>
         <button className="btn-secondary" onClick={() => { if (confirm(`Hapus trade ini?`)) onDelete(); }}
           style={{ borderColor: 'var(--red)', color: 'var(--red)' }}>
           Hapus Trade
