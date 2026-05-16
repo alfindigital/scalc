@@ -4,6 +4,10 @@ import logoUrl from "@/assets/logo-pyscal.png";
 import { getTickSize, ceilTick, computeRows } from "@/lib/compute";
 import { n, nDec, nShort, terbilang, fmtPct, fmtPL, fmtTime } from "@/lib/format";
 import {
+  validateBid, validateLot, validateTargetTicks, validateTargetProfit,
+  validateExistingAvg, validateExistingLot,
+} from "@/lib/validation";
+import {
   DEFAULT_SHORTCUTS,
   DEFAULT_STATE,
   loadShortcutsVersioned,
@@ -608,6 +612,23 @@ tbody td:last-child{padding:14px 8px;width:1%}
 `;
 
 /* ==================== TOAST COMPONENT ==================== */
+/* ==================== FIELD HINT + HELP TIP ==================== */
+function FieldHint({ status }) {
+  if (!status || (!status.error && !status.warning)) return null;
+  const isErr = !!status.error;
+  return (
+    <div className={`field-hint ${isErr ? 'error' : 'warning'}`} role={isErr ? 'alert' : 'status'}>
+      {isErr ? '✕ ' : '⚠ '}{status.error || status.warning}
+    </div>
+  );
+}
+function HelpTip({ text }) {
+  return (
+    <button type="button" className="il-help" tabIndex={0}
+      aria-label={`Penjelasan: ${text}`} title={text}>?</button>
+  );
+}
+
 function ToastContainer({ toasts, onRemove }) {
   return (
     <div className="toast-container" role="region" aria-label="Notifikasi" aria-live="polite">
