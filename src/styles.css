@@ -142,3 +142,32 @@
     color: var(--color-foreground);
   }
 }
+
+/* Visually-hidden skip link (defined globally so it works before app mounts). */
+.pyscal-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.pyscal-sr-only:focus,
+.pyscal-sr-only:focus-visible {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  width: auto;
+  height: auto;
+  clip: auto;
+  clip-path: none;
+  padding: 8px 14px;
+  background: #3B82F6;
+  color: #fff;
+  font-weight: 700;
+  z-index: 9999;
+  border-radius: 4px;
+}
