@@ -199,6 +199,14 @@ const CSS = `
   transition:all .15s;letter-spacing:0.3px}
 .sp-ie-btn:hover{border-color:var(--brand);color:var(--brand)}
 
+.sp-ios-install{margin-top:6px;padding:10px 12px;border:1px solid var(--border);border-radius:6px;background:var(--surface-2,rgba(255,255,255,0.02))}
+.sp-ios-title{font-size:12px;font-weight:700;color:var(--text);margin-bottom:8px;letter-spacing:0.3px;text-transform:uppercase}
+.sp-ios-steps{margin:0;padding-left:18px;font-size:12px;color:var(--text-m);line-height:1.65}
+.sp-ios-steps li{margin-bottom:4px}
+.sp-ios-steps b{color:var(--text);font-weight:600}
+.sp-ios-ico{display:inline-block;padding:0 4px;border:1px solid var(--border);border-radius:3px;font-size:11px;line-height:1.4;margin:0 1px}
+.sp-ios-warn{margin-top:8px;font-size:11px;color:var(--text-d);font-style:italic;line-height:1.5}
+
 /* shortcut list in settings */
 .kbd-list{display:flex;flex-direction:column;gap:6px}
 .kbd-row{display:flex;align-items:center;justify-content:space-between;gap:10px;
