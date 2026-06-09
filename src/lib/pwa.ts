@@ -96,3 +96,38 @@ export function isStandalone(): boolean {
     (window.navigator as any).standalone === true
   );
 }
+
+// ---- Platform detection ----
+export type Platform = "ios" | "android" | "desktop" | "unknown";
+
+export interface PlatformInfo {
+  platform: Platform;
+  isSafari: boolean;
+  isChrome: boolean;
+  /** In-app browsers (IG, FB, Line, TikTok, etc.) — install/A2HS biasanya tidak tersedia. */
+  isInAppBrowser: boolean;
+}
+
+export function detectPlatform(): PlatformInfo {
+  if (typeof navigator === "undefined") {
+    return { platform: "unknown", isSafari: false, isChrome: false, isInAppBrowser: false };
+  }
+  const ua = navigator.userAgent || "";
+  const isIPad =
+    /iPad/.test(ua) ||
+    // iPadOS 13+ reports as Mac; detect via touch points.
+    (navigator.platform === "MacIntel" && (navigator as any).maxTouchPoints > 1);
+  const isIOS = /iPhone|iPod/.test(ua) || isIPad;
+  const isAndroid = /Android/i.test(ua);
+  const isSafari = /^((?!chrome|android|crios|fxios|edgios).)*safari/i.test(ua);
+  const isChrome = /Chrome|CriOS/i.test(ua) && !/Edg|OPR|SamsungBrowser/i.test(ua);
+  const isInAppBrowser =
+    /(FBAN|FBAV|Instagram|Line|TikTok|MicroMessenger|Twitter|LinkedInApp)/i.test(ua);
+
+  let platform: Platform = "unknown";
+  if (isIOS) platform = "ios";
+  else if (isAndroid) platform = "android";
+  else if (/Mac|Win|Linux|CrOS/i.test(ua)) platform = "desktop";
+
+  return { platform, isSafari, isChrome, isInAppBrowser };
+}

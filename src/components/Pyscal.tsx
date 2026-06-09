@@ -8,7 +8,7 @@ import {
   validateExistingAvg, validateExistingLot,
 } from "@/lib/validation";
 import {
-  isInstallAvailable, isStandalone, subscribeInstallPrompt, triggerInstall,
+  isInstallAvailable, isStandalone, subscribeInstallPrompt, triggerInstall, detectPlatform,
 } from "@/lib/pwa";
 import {
   DEFAULT_SHORTCUTS,
@@ -198,6 +198,14 @@ const CSS = `
   font-family:'Funnel Sans',sans-serif;font-size:11px;font-weight:600;padding:8px 10px;cursor:pointer;
   transition:all .15s;letter-spacing:0.3px}
 .sp-ie-btn:hover{border-color:var(--brand);color:var(--brand)}
+
+.sp-ios-install{margin-top:6px;padding:10px 12px;border:1px solid var(--border);border-radius:6px;background:var(--surface-2,rgba(255,255,255,0.02))}
+.sp-ios-title{font-size:12px;font-weight:700;color:var(--text);margin-bottom:8px;letter-spacing:0.3px;text-transform:uppercase}
+.sp-ios-steps{margin:0;padding-left:18px;font-size:12px;color:var(--text-m);line-height:1.65}
+.sp-ios-steps li{margin-bottom:4px}
+.sp-ios-steps b{color:var(--text);font-weight:600}
+.sp-ios-ico{display:inline-block;padding:0 4px;border:1px solid var(--border);border-radius:3px;font-size:11px;line-height:1.4;margin:0 1px}
+.sp-ios-warn{margin-top:8px;font-size:11px;color:var(--text-d);font-style:italic;line-height:1.5}
 
 /* shortcut list in settings */
 .kbd-list{display:flex;flex-direction:column;gap:6px}
@@ -619,22 +627,75 @@ tbody td:last-child{padding:14px 8px;width:1%}
 function InstallAppRow() {
   const [available, setAvailable] = useState(isInstallAvailable());
   const [standalone] = useState(isStandalone());
+  const [info] = useState(() => detectPlatform());
   useEffect(() => subscribeInstallPrompt(() => setAvailable(isInstallAvailable())), []);
+
   if (standalone) {
     return <div className="sp-empty">App sudah ter-install ✓</div>;
   }
-  if (!available) {
+
+  // In-app browser (IG/FB/Line/TikTok): A2HS jarang jalan.
+  if (info.isInAppBrowser) {
     return (
       <div className="sp-empty">
-        Buka di browser (bukan editor preview) lalu klik tombol Install di address bar.
-        Di iOS Safari: Share → Add to Home Screen.
+        Kamu sedang di in-app browser. Tap menu ⋯ → "Open in {info.platform === "ios" ? "Safari" : "Chrome"}",
+        lalu install dari sana.
       </div>
     );
   }
+
+  // iOS: tidak ada beforeinstallprompt. Wajib manual A2HS via Safari.
+  if (info.platform === "ios") {
+    return (
+      <div className="sp-ios-install">
+        <div className="sp-ios-title">Install di iOS (Safari)</div>
+        <ol className="sp-ios-steps">
+          <li>Pastikan kamu buka di <b>Safari</b> (bukan Chrome/in-app).</li>
+          <li>Tap ikon <b>Share</b> <span className="sp-ios-ico">⬆︎</span> di bawah.</li>
+          <li>Scroll, pilih <b>Add to Home Screen</b> <span className="sp-ios-ico">＋</span>.</li>
+          <li>Tap <b>Add</b>. Icon PYSCAL muncul di home screen.</li>
+        </ol>
+        {!info.isSafari && (
+          <div className="sp-ios-warn">
+            ⚠ Browser saat ini bukan Safari. Add to Home Screen hanya bekerja penuh di Safari iOS.
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // Android tanpa event (Chrome belum siap atau browser non-Chromium): instruksi manual.
+  if (info.platform === "android" && !available) {
+    return (
+      <div className="sp-ios-install">
+        <div className="sp-ios-title">Install di Android</div>
+        <ol className="sp-ios-steps">
+          <li>Pastikan buka di <b>Chrome</b> (bukan in-app browser).</li>
+          <li>Tap menu <b>⋮</b> di pojok kanan atas.</li>
+          <li>Pilih <b>Install app</b> atau <b>Add to Home screen</b>.</li>
+        </ol>
+        <div className="sp-ios-warn">
+          Tip: prompt otomatis kadang muncul setelah beberapa detik di halaman — coba scroll/interaksi sebentar.
+        </div>
+      </div>
+    );
+  }
+
+  // Desktop tanpa event: arahkan ke icon address bar.
+  if (info.platform === "desktop" && !available) {
+    return (
+      <div className="sp-empty">
+        Buka di Chrome/Edge/Brave, lalu klik ikon <b>Install</b> di pojok kanan address bar
+        (atau menu ⋮ → Install PYSCAL).
+      </div>
+    );
+  }
+
+  // beforeinstallprompt tersedia → tombol langsung.
   return (
     <div className="sp-import-export">
       <button className="sp-ie-btn" onClick={() => triggerInstall()}>
-        ↓ Install ke Home Screen
+        ↓ Install PYSCAL {info.platform === "android" ? "(Android)" : "(Desktop)"}
       </button>
     </div>
   );
