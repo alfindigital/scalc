@@ -8,7 +8,7 @@ import {
   validateExistingAvg, validateExistingLot,
 } from "@/lib/validation";
 import {
-  isInstallAvailable, isStandalone, subscribeInstallPrompt, triggerInstall,
+  isInstallAvailable, isStandalone, subscribeInstallPrompt, triggerInstall, detectPlatform,
 } from "@/lib/pwa";
 import {
   DEFAULT_SHORTCUTS,
