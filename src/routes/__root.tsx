@@ -85,6 +85,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:description", content: "Kalkulator pyramid averaging-down untuk trader IDX. Hitung bid berlapis, simpan history, jalankan offline." },
       { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/7b4fb587-c80b-4037-b8b5-8e6b4462d0f9/id-preview-d158645f--f5757e02-acee-4620-9e57-0f4aeb12bc48.lovable.app-1778723881610.png" },
       { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/7b4fb587-c80b-4037-b8b5-8e6b4462d0f9/id-preview-d158645f--f5757e02-acee-4620-9e57-0f4aeb12bc48.lovable.app-1778723881610.png" },
+      { name: "google-site-verification", content: "J-Czc4w4Dto_XXTUZfW8lAMoT45CpTWqZ72Nt91yFbw" },
     ],
     links: [
       {
