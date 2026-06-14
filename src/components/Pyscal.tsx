@@ -994,7 +994,7 @@ export default function PYSCAL() {
     persistPresets([...presets.filter(p => p.name !== name), preset]);
     setPresetName("");
     setActivePreset(name);
-    showToast(`Preset <strong>${name}</strong> ${isUpdate ? 'diupdate' : 'tersimpan'}`);
+    showToast(`Preset <strong>${escHtml(name)}</strong> ${isUpdate ? 'diupdate' : 'tersimpan'}`);
   };
 
   const loadPreset = (p) => {
@@ -1015,7 +1015,7 @@ export default function PYSCAL() {
   const deletePreset = (name) => {
     persistPresets(presets.filter(p => p.name !== name));
     if (activePreset === name) setActivePreset(null);
-    showToast(`Preset <strong>${name}</strong> dihapus`);
+    showToast(`Preset <strong>${escHtml(name)}</strong> dihapus`);
   };
 
   const exportPresets = useCallback(() => {
@@ -1451,7 +1451,7 @@ export default function PYSCAL() {
     };
     const next = [trade, ...history].slice(0, 500);
     persistHistory(next);
-    showToast(`Avg <strong>${trade.planned.avgFinal.toFixed(2)}</strong> tersimpan di History`);
+    showToast(`Avg <strong>${escHtml(trade.planned.avgFinal.toFixed(2))}</strong> tersimpan di History`);
   }, [data, bids, baseLot, targetTicks, targetProfit, feeBuy, feeSell, balance, mode, existingAvg, existingLot, customLot, customLots, totalBuyLot, totalBuyCost, history, showToast]);
 
   // Recall a saved trade back into the calculator state (undo-able).
@@ -1472,7 +1472,7 @@ export default function PYSCAL() {
     applySnapshot(snap);
     setShowHistory(false);
     setViewingTradeId(null);
-    showToast(`Recalled: <strong>${t.note ? t.note : 'Avg ' + t.planned.avgFinal.toFixed(2)}</strong>`);
+    showToast(`Recalled: <strong>${escHtml(t.note ? t.note : 'Avg ' + t.planned.avgFinal.toFixed(2))}</strong>`);
   }, [bids, baseLot, targetTicks, targetProfit, applySnapshot, showToast]);
 
   const deleteTrade = (id) => {
