@@ -1,4 +1,5 @@
 // @ts-nocheck
+const escHtml = (s) => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import logoUrl from "@/assets/logo-pyscal.png";
 import { getTickSize, ceilTick, computeRows } from "@/lib/compute";
