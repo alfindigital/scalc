@@ -470,6 +470,23 @@ tbody td:last-child{padding:14px 8px;width:1%}
 .modal-close:hover{color:var(--red)}
 .modal-body{padding:20px}
 
+/* INFO MODAL */
+.info-body{display:flex;flex-direction:column;gap:14px}
+.info-sec{background:var(--surface-2,var(--surface));border:1px solid var(--border);
+  border-radius:10px;padding:14px 16px}
+.info-h{font-family:'Funnel Sans',sans-serif;margin:0 0 8px;font-size:11px;font-weight:700;
+  color:var(--text-m);text-transform:uppercase;letter-spacing:0.8px}
+.info-p{margin:0;font-size:14px;line-height:1.6;color:var(--text)}
+.info-ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px;
+  color:var(--text);font-size:14px;line-height:1.55}
+.info-kbd{margin-left:6px}
+.info-links{display:flex;flex-direction:column;gap:6px}
+.info-link{display:flex;flex-direction:column;gap:2px;padding:10px 12px;border:1px solid var(--border);
+  border-radius:8px;text-decoration:none;transition:border-color .15s,background .15s}
+.info-link:hover{border-color:var(--brand);background:color-mix(in oklab,var(--brand) 6%,transparent)}
+.info-link-t{font-family:'Funnel Sans',sans-serif;font-size:14px;font-weight:600;color:var(--brand)}
+.info-link-d{font-size:12.5px;color:var(--text-m);line-height:1.4}
+
 .btn-secondary{background:transparent;border:1px solid var(--border);color:var(--text);
   font-family:'Funnel Sans',sans-serif;font-size:13px;font-weight:600;padding:10px 18px;cursor:pointer;transition:all .15s}
 .btn-secondary:hover{border-color:var(--brand);color:var(--brand)}
