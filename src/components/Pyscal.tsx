@@ -2368,33 +2368,13 @@ function InfoModal({ onClose, shortcuts }) {
       <div className="modal" onClick={e => e.stopPropagation()}
         role="dialog" aria-modal="true" aria-labelledby="info-modal-title">
         <div className="modal-header">
-          <div className="modal-title" id="info-modal-title">Cara pakai PYSCAL</div>
+          <div className="modal-title" id="info-modal-title">Tentang PYSCAL</div>
           <button className="modal-close" onClick={onClose} aria-label="Tutup"><XIcon /></button>
         </div>
-        <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-          <section>
-            <h3 style={{ margin: '0 0 6px', fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>Langkah pakai</h3>
-          <ol style={{ margin: 0, paddingLeft: 20, display: 'flex', flexDirection: 'column', gap: 10, color: 'var(--text)', fontSize: 14, lineHeight: 1.55 }}>
-            <li>
-              Masukkan <strong>bid awal</strong>, target profit / tick, dan fee beli–jual broker Anda.
-            </li>
-            <li>
-              Tambah <strong>papan bid</strong> berikutnya — harga turun berlapis untuk averaging-down.
-              <span className="ob-kbd" style={{ marginLeft: 6 }}>{shortcutToString(shortcuts.addPapan)}</span>
-            </li>
-            <li>
-              PYSCAL menghitung <strong>average price</strong>, total lot, modal terpakai, dan target jual otomatis.
-            </li>
-            <li>
-              Simpan hasil ke <strong>History</strong>, atau simpan skema ke <strong>Preset</strong> per ticker lewat Settings.
-              <span className="ob-kbd" style={{ marginLeft: 6 }}>{shortcutToString(shortcuts.saveTrade)}</span>
-            </li>
-          </ol>
-          </section>
-
-          <section>
-            <h3 style={{ margin: '0 0 6px', fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>Apa itu PYSCAL?</h3>
-            <p style={{ margin: 0, fontSize: 14, lineHeight: 1.55, color: 'var(--text-m)' }}>
+        <div className="modal-body info-body">
+          <section className="info-sec">
+            <h3 className="info-h">Apa itu PYSCAL?</h3>
+            <p className="info-p">
               Kalkulator <strong>pyramid bid</strong> (averaging-down berlapis) untuk trader saham{' '}
               <strong>IDX / BEI</strong>. Rencanakan bid berjenjang, hitung <em>average price</em>,
               alokasi modal, dan lot per layer sesuai <em>tick size</em> dan fee broker Indonesia.
@@ -2402,9 +2382,9 @@ function InfoModal({ onClose, shortcuts }) {
             </p>
           </section>
 
-          <section>
-            <h3 style={{ margin: '0 0 6px', fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>Untuk siapa?</h3>
-            <p style={{ margin: 0, fontSize: 14, lineHeight: 1.55, color: 'var(--text-m)' }}>
+          <section className="info-sec">
+            <h3 className="info-h">Untuk siapa?</h3>
+            <p className="info-p">
               Trader IDX yang pakai strategi <em>staggered buy</em>, <em>pyramid averaging</em>,
               atau siap-siap DCA di area support. PYSCAL memastikan tiap layer sesuai{' '}
               <strong>fraksi harga (tick size) BEI</strong> dan menghitung <em>break-even</em>{' '}
@@ -2412,13 +2392,42 @@ function InfoModal({ onClose, shortcuts }) {
             </p>
           </section>
 
-          <section>
-            <h3 style={{ margin: '0 0 6px', fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>Pelajari lebih lanjut</h3>
-            <ul style={{ margin: 0, paddingLeft: 20, display: 'flex', flexDirection: 'column', gap: 6, fontSize: 14, lineHeight: 1.55, color: 'var(--text-m)' }}>
-              <li><a href="/panduan-averaging-down" style={{ color: 'var(--accent, #3b82f6)' }}>Panduan averaging-down saham</a> — kapan pakai, kapan hindari.</li>
-              <li><a href="/rumus-fee-broker-idx" style={{ color: 'var(--accent, #3b82f6)' }}>Rumus fee broker IDX</a> — cara hitung biaya beli &amp; jual saham.</li>
-              <li><a href="/tick-size-idx" style={{ color: 'var(--accent, #3b82f6)' }}>Tick size / fraksi harga BEI</a> — tabel lengkap per rentang harga.</li>
-            </ul>
+          <section className="info-sec">
+            <h3 className="info-h">Cara pakai</h3>
+            <ol className="info-ol">
+              <li>
+                Masukkan <strong>bid awal</strong>, target profit / tick, dan fee beli–jual broker Anda.
+              </li>
+              <li>
+                Tambah <strong>papan bid</strong> berikutnya — harga turun berlapis untuk averaging-down.
+                <span className="ob-kbd info-kbd">{shortcutToString(shortcuts.addPapan)}</span>
+              </li>
+              <li>
+                PYSCAL menghitung <strong>average price</strong>, total lot, modal terpakai, dan target jual otomatis.
+              </li>
+              <li>
+                Simpan hasil ke <strong>History</strong>, atau simpan skema ke <strong>Preset</strong> per ticker lewat Settings.
+                <span className="ob-kbd info-kbd">{shortcutToString(shortcuts.saveTrade)}</span>
+              </li>
+            </ol>
+          </section>
+
+          <section className="info-sec">
+            <h3 className="info-h">Pelajari lebih lanjut</h3>
+            <div className="info-links">
+              <a className="info-link" href="/panduan-averaging-down">
+                <span className="info-link-t">Panduan averaging-down saham</span>
+                <span className="info-link-d">Kapan pakai, kapan hindari.</span>
+              </a>
+              <a className="info-link" href="/rumus-fee-broker-idx">
+                <span className="info-link-t">Rumus fee broker IDX</span>
+                <span className="info-link-d">Cara hitung biaya beli &amp; jual saham.</span>
+              </a>
+              <a className="info-link" href="/tick-size-idx">
+                <span className="info-link-t">Tick size / fraksi harga BEI</span>
+                <span className="info-link-d">Tabel lengkap per rentang harga.</span>
+              </a>
+            </div>
           </section>
         </div>
       </div>
