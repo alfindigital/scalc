@@ -712,13 +712,6 @@ function FieldHint({ status }) {
     </div>
   );
 }
-function HelpTip({ text }) {
-  return (
-    <button type="button" className="il-help" tabIndex={0}
-      aria-label={`Penjelasan: ${text}`}>?</button>
-  );
-}
-
 function ToastContainer({ toasts, onRemove }) {
   return (
     <div className="toast-container" role="region" aria-label="Notifikasi" aria-live="polite">
