@@ -177,7 +177,7 @@
 .pyscal-article {
   background: var(--background, #0B1220);
   color: var(--foreground, #E5E7EB);
-  padding: 32px 20px 96px;
+  padding: clamp(20px, 4vw, 40px) clamp(16px, 4vw, 24px) clamp(64px, 10vw, 96px);
   border-top: 1px solid rgba(148, 163, 184, 0.12);
 }
 .pyscal-seo__inner,
@@ -185,19 +185,19 @@
   max-width: 680px;
   margin: 0 auto;
   line-height: 1.7;
-  font-size: 16px;
-  color: #cbd5e1;
+  font-size: clamp(15px, 1.6vw, 16px);
+  color: #d1d9e6;
 }
 .pyscal-seo h1,
 .pyscal-article h1 {
-  font-size: 32px; line-height: 1.2;
-  margin: 8px 0 20px; font-weight: 700;
+  font-size: clamp(24px, 5.5vw, 32px); line-height: 1.2;
+  margin: 8px 0 16px; font-weight: 700;
   color: #f1f5f9; letter-spacing: -0.01em;
   text-wrap: balance;
 }
 .pyscal-seo h2,
 .pyscal-article h2 {
-  font-size: 20px; margin: 40px 0 12px; font-weight: 600;
+  font-size: clamp(18px, 2.6vw, 20px); margin: clamp(28px, 5vw, 40px) 0 12px; font-weight: 600;
   color: #f1f5f9; letter-spacing: -0.005em;
   padding-top: 20px; border-top: 1px solid rgba(148,163,184,0.10);
   text-wrap: balance;
@@ -213,8 +213,14 @@
 .pyscal-seo li,
 .pyscal-article li { margin: 6px 0; padding-left: 4px; }
 .pyscal-seo a,
-.pyscal-article a { color: #60a5fa; text-decoration: none; border-bottom: 1px solid rgba(96,165,250,0.35); }
+.pyscal-article a { color: #93c5fd; text-decoration: none; border-bottom: 1px solid rgba(147,197,253,0.4); }
 .pyscal-article a:hover { border-bottom-color: #60a5fa; }
+.pyscal-seo a:focus-visible,
+.pyscal-article a:focus-visible {
+  outline: 2px solid #60a5fa;
+  outline-offset: 3px;
+  border-radius: 3px;
+}
 .pyscal-article strong { color: #f1f5f9; font-weight: 600; }
 .pyscal-article code {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
@@ -231,12 +237,13 @@
 }
 .pyscal-article__nav {
   display: flex; gap: 8px; flex-wrap: wrap; align-items: center;
-  padding-bottom: 20px; margin-bottom: 8px;
+  padding-bottom: clamp(16px, 3vw, 24px); margin-bottom: 8px;
   font-size: 13px;
 }
 .pyscal-article__nav a {
   display: inline-flex; align-items: center; gap: 6px;
-  padding: 6px 14px; border-radius: 999px;
+  padding: 8px 14px; border-radius: 999px;
+  min-height: 36px;
   border: 1px solid rgba(148, 163, 184, 0.25);
   color: var(--foreground, #E5E7EB);
   text-decoration: none;
@@ -246,7 +253,10 @@
   border-color: #60a5fa; color: #60a5fa;
   background: rgba(96, 165, 250, 0.08);
 }
-.pyscal-article__nav a { border-bottom: 1px solid rgba(148,163,184,0.25); }
+.pyscal-article__nav a:focus-visible {
+  outline: 2px solid #60a5fa;
+  outline-offset: 2px;
+}
 .pyscal-article__nav a[data-nav="back"] {
   margin-right: auto;
   border-color: transparent;
@@ -256,21 +266,39 @@
 .pyscal-article__nav a[data-nav="back"]:hover {
   background: transparent; color: #60a5fa;
 }
+@media (max-width: 520px) {
+  .pyscal-article__nav { gap: 6px; }
+  .pyscal-article__nav a[data-nav="back"] {
+    flex-basis: 100%; margin-right: 0; margin-bottom: 4px;
+  }
+}
 .pyscal-article table {
   width: 100%; border-collapse: separate; border-spacing: 0;
   margin: 16px 0 20px;
   font-variant-numeric: tabular-nums;
-  font-size: 14px;
+  font-size: clamp(13px, 1.5vw, 14px);
   border: 1px solid rgba(148,163,184,0.20);
   border-radius: 10px;
   overflow: hidden;
+  display: block;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  white-space: nowrap;
+}
+@media (min-width: 640px) {
+  .pyscal-article table {
+    display: table;
+    white-space: normal;
+  }
 }
 .pyscal-article th, .pyscal-article td {
   border-bottom: 1px solid rgba(148,163,184,0.15);
-  padding: 8px 12px; text-align: left;
+  padding: 10px 12px; text-align: left;
+  vertical-align: top;
 }
 .pyscal-article tr:last-child td { border-bottom: 0; }
 .pyscal-article th {
   background: rgba(148, 163, 184, 0.08);
   font-weight: 600; color: #f1f5f9; font-size: 13px;
+  white-space: nowrap;
 }
