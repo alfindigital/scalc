@@ -2244,7 +2244,6 @@ function HistoryModal({ history, viewingId, setViewingId, onClose, onDelete, onR
             <TradeDetail trade={trade} onDelete={() => { onDelete(trade.id); }} onRecall={() => onRecall && onRecall(trade)} />
           ) : history.length === 0 ? (
             <div className="history-empty">
-              <div style={{ fontSize: 32, marginBottom: 8, fontStyle: 'normal' }}>📒</div>
               <div style={{ fontStyle: 'normal', color: 'var(--text)', fontWeight: 600, marginBottom: 4 }}>
                 Belum ada trade tersimpan
               </div>
