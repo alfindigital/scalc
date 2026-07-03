@@ -39,7 +39,7 @@ function FeePage() {
     <article className="pyscal-article">
       <div className="pyscal-article__inner">
         <nav className="pyscal-article__nav" aria-label="Navigasi">
-          <Link to="/">← Kembali ke kalkulator</Link>
+          <Link to="/" data-nav="back">← Kalkulator</Link>
           <Link to="/panduan-averaging-down">Panduan averaging-down</Link>
           <Link to="/tick-size-idx">Tick size BEI</Link>
         </nav>
