@@ -919,9 +919,21 @@ function SwipeableCard({ children, canSwipe, onDelete, className = '', style = {
 
 /* ==================== MAIN COMPONENT ==================== */
 export default function PYSCAL() {
-  const [theme, setTheme] = useState(() =>
-    (typeof window !== 'undefined' && localStorage.getItem('pyscal_theme')) || 'light'
-  );
+  const [theme, setTheme] = useState(() => {
+    if (typeof window === 'undefined') return 'light';
+    // Prefer the value the pre-hydration script already applied to <html>,
+    // then fall back to localStorage, then to system preference.
+    try {
+      const attr = document.documentElement.dataset.pyscalTheme;
+      if (attr === 'dark' || attr === 'light') return attr;
+      const saved = localStorage.getItem('pyscal_theme');
+      if (saved === 'dark' || saved === 'light') return saved;
+    } catch {}
+    try {
+      if (window.matchMedia?.('(prefers-color-scheme: dark)').matches) return 'dark';
+    } catch {}
+    return 'light';
+  });
   const initial = loadStateVersioned();
 
   const [baseLot, setBaseLot] = useState(initial.baseLot);
