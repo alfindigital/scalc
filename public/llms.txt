@@ -7,3 +7,6 @@ PYSCAL membantu trader merencanakan bid berlapis (pyramid / averaging-down) deng
 ## Pages
 
 - [Home](/): Kalkulator pyramid bid utama, history, dan settings.
+- [Panduan averaging-down saham IDX](/panduan-averaging-down): Rumus average price, kapan pakai dan hindari averaging down, contoh skema 3 layer.
+- [Rumus fee broker saham IDX](/rumus-fee-broker-idx): Komponen fee beli & jual (komisi, levy, PPN, PPh), tabel fee broker populer, contoh perhitungan, rumus break-even.
+- [Tick size / fraksi harga BEI](/tick-size-idx): Tabel tick size resmi BEI per rentang harga, contoh, dan penerapannya di pyramid bid.

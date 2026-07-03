@@ -72,7 +72,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { name: "theme-color", content: "#0B1220" },
+      { name: "theme-color", media: "(prefers-color-scheme: light)", content: "#F8FAFC" },
+      { name: "theme-color", media: "(prefers-color-scheme: dark)", content: "#0B1220" },
+      { name: "apple-mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
+      { name: "apple-mobile-web-app-title", content: "PYSCAL" },
       { title: "PYSCAL — Pyramid Bid Calculator untuk Trader IDX" },
       { name: "description", content: "PYSCAL adalah kalkulator pyramid averaging-down untuk trader saham IDX. Hitung bid berlapis, simpan history, dan jalankan offline — gratis dan tanpa daftar." },
       { property: "og:title", content: "PYSCAL — Pyramid Bid Calculator untuk Trader IDX" },
@@ -80,11 +84,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:url", content: "https://pyscal.lovable.app/" },
       { property: "og:site_name", content: "PYSCAL" },
       { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
+      { property: "og:locale", content: "id_ID" },
       { name: "twitter:title", content: "PYSCAL — Pyramid Bid Calculator untuk Trader IDX" },
       { name: "twitter:description", content: "Kalkulator pyramid averaging-down untuk trader IDX. Hitung bid berlapis, simpan history, jalankan offline." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/7b4fb587-c80b-4037-b8b5-8e6b4462d0f9/id-preview-d158645f--f5757e02-acee-4620-9e57-0f4aeb12bc48.lovable.app-1778723881610.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/7b4fb587-c80b-4037-b8b5-8e6b4462d0f9/id-preview-d158645f--f5757e02-acee-4620-9e57-0f4aeb12bc48.lovable.app-1778723881610.png" },
+      { property: "og:image", content: "https://pyscal.lovable.app/og-image.jpg" },
+      { property: "og:image:width", content: "1216" },
+      { property: "og:image:height", content: "640" },
+      { property: "og:image:alt", content: "PYSCAL — Pyramid Bid Calculator untuk trader saham IDX" },
+      { name: "twitter:image", content: "https://pyscal.lovable.app/og-image.jpg" },
+      { name: "twitter:card", content: "summary_large_image" },
       { name: "google-site-verification", content: "J-Czc4w4Dto_XXTUZfW8lAMoT45CpTWqZ72Nt91yFbw" },
     ],
     links: [
@@ -97,6 +105,23 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "icon", type: "image/png", sizes: "32x32", href: "/favicon-32.png" },
       { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
     ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "SoftwareApplication",
+          name: "PYSCAL",
+          description:
+            "Kalkulator pyramid averaging-down untuk trader saham IDX. Hitung bid berlapis, simpan history, jalankan offline.",
+          applicationCategory: "FinanceApplication",
+          operatingSystem: "Web",
+          url: "https://pyscal.lovable.app/",
+          inLanguage: "id-ID",
+          offers: { "@type": "Offer", price: "0", priceCurrency: "IDR" },
+        }),
+      },
+    ],
   }),
   shellComponent: RootShell,
   component: RootComponent,
@@ -106,8 +131,16 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="id" suppressHydrationWarning>
       <head>
+        <script
+          // Pre-hydration theme: prevent FOUC by applying saved theme
+          // (or system preference) to <html> before React mounts.
+          dangerouslySetInnerHTML={{
+            __html:
+              "(function(){try{var t=localStorage.getItem('pyscal_theme');if(t!=='dark'&&t!=='light'){t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.dataset.pyscalTheme=t;document.documentElement.style.colorScheme=t;}catch(e){}})();",
+          }}
+        />
         <HeadContent />
       </head>
       <body>
