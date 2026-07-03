@@ -61,13 +61,6 @@ function SeoContent() {
           <em> tick size</em> dan fee broker Indonesia. Semua data disimpan lokal
           di browser—tanpa signup, tanpa server, aman dipakai offline.
         </p>
-        <h2>Cara pakai singkat</h2>
-        <ol>
-          <li>Masukkan <strong>bid awal</strong>, target profit / tick, dan fee beli–jual broker Anda.</li>
-          <li>Tambah <strong>papan bid</strong> berikutnya—harga turun berlapis untuk averaging-down.</li>
-          <li>PYSCAL menghitung <strong>average price</strong>, total lot, modal terpakai, dan target jual.</li>
-          <li>Simpan hasil ke <strong>History</strong>, atau simpan skema ke <strong>Preset</strong> per ticker.</li>
-        </ol>
         <h2>Untuk siapa?</h2>
         <p>
           Cocok untuk trader IDX yang pakai strategi <em>staggered buy</em>,
