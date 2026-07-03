@@ -952,6 +952,7 @@ export default function PYSCAL() {
 
   const [showSettings, setShowSettings] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
+  const [showInfo, setShowInfo] = useState(false);
   const [viewingTradeId, setViewingTradeId] = useState(null);
   const [showHint, setShowHint] = useState(() => {
     if (typeof window === 'undefined') return false;
