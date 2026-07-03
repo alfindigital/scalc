@@ -368,7 +368,7 @@ tbody td:last-child{padding:14px 8px;width:1%}
 
 .total-row td{border-top:1px solid var(--border-strong)!important;border-bottom:none!important;
   font-weight:700!important;color:var(--text)!important;padding-top:16px!important;font-size:14px!important;
-  background:transparent!important}
+  background:color-mix(in oklab, var(--brand) 8%, transparent)!important}
 .total-label{font-family:'Funnel Sans',sans-serif!important;font-size:11px!important;
   text-transform:uppercase;letter-spacing:0.6px;color:var(--text-m)!important;font-weight:600!important}
 /* TOAST */
@@ -448,7 +448,7 @@ tbody td:last-child{padding:14px 8px;width:1%}
 .mgi-profit span{color:var(--text)!important;font-weight:700}
 .mgi-pct span{font-weight:700}
 
-.mt{background:transparent;border-top:1px solid var(--border-strong);padding:14px 16px;
+.mt{background:color-mix(in oklab, var(--brand) 8%, transparent);border-top:1px solid var(--border-strong);padding:14px 16px;
   display:flex;align-items:center;justify-content:space-between}
 .mt-label{font-family:'Funnel Sans',sans-serif;font-size:10px;font-weight:600;color:var(--text-m);
   text-transform:uppercase;letter-spacing:0.6px}
