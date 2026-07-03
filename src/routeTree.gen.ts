@@ -10,12 +10,18 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as RumusFeeBrokerIdxRouteImport } from './routes/rumus-fee-broker-idx'
 import { Route as PanduanAveragingDownRouteImport } from './routes/panduan-averaging-down'
 import { Route as IndexRouteImport } from './routes/index'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RumusFeeBrokerIdxRoute = RumusFeeBrokerIdxRouteImport.update({
+  id: '/rumus-fee-broker-idx',
+  path: '/rumus-fee-broker-idx',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PanduanAveragingDownRoute = PanduanAveragingDownRouteImport.update({
@@ -32,30 +38,43 @@ const IndexRoute = IndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/panduan-averaging-down': typeof PanduanAveragingDownRoute
+  '/rumus-fee-broker-idx': typeof RumusFeeBrokerIdxRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/panduan-averaging-down': typeof PanduanAveragingDownRoute
+  '/rumus-fee-broker-idx': typeof RumusFeeBrokerIdxRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/panduan-averaging-down': typeof PanduanAveragingDownRoute
+  '/rumus-fee-broker-idx': typeof RumusFeeBrokerIdxRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/panduan-averaging-down' | '/sitemap.xml'
+  fullPaths:
+    | '/'
+    | '/panduan-averaging-down'
+    | '/rumus-fee-broker-idx'
+    | '/sitemap.xml'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/panduan-averaging-down' | '/sitemap.xml'
-  id: '__root__' | '/' | '/panduan-averaging-down' | '/sitemap.xml'
+  to: '/' | '/panduan-averaging-down' | '/rumus-fee-broker-idx' | '/sitemap.xml'
+  id:
+    | '__root__'
+    | '/'
+    | '/panduan-averaging-down'
+    | '/rumus-fee-broker-idx'
+    | '/sitemap.xml'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   PanduanAveragingDownRoute: typeof PanduanAveragingDownRoute
+  RumusFeeBrokerIdxRoute: typeof RumusFeeBrokerIdxRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
 }
 
@@ -66,6 +85,13 @@ declare module '@tanstack/react-router' {
       path: '/sitemap.xml'
       fullPath: '/sitemap.xml'
       preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/rumus-fee-broker-idx': {
+      id: '/rumus-fee-broker-idx'
+      path: '/rumus-fee-broker-idx'
+      fullPath: '/rumus-fee-broker-idx'
+      preLoaderRoute: typeof RumusFeeBrokerIdxRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/panduan-averaging-down': {
@@ -88,6 +114,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   PanduanAveragingDownRoute: PanduanAveragingDownRoute,
+  RumusFeeBrokerIdxRoute: RumusFeeBrokerIdxRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
 }
 export const routeTree = rootRouteImport
