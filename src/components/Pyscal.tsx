@@ -38,6 +38,7 @@ const SunIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none
 const MoonIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>;
 const BookmarkIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>;
 const HistoryIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/><polyline points="12 7 12 12 16 14"/></svg>;
+const InfoIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>;
 const KeyboardIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><line x1="6" y1="10" x2="6" y2="10"/><line x1="10" y1="10" x2="10" y2="10"/><line x1="14" y1="10" x2="14" y2="10"/><line x1="18" y1="10" x2="18" y2="10"/><line x1="6" y1="14" x2="18" y2="14"/></svg>;
 const LockIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>;
 const UnlockIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>;
@@ -951,6 +952,7 @@ export default function PYSCAL() {
 
   const [showSettings, setShowSettings] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
+  const [showInfo, setShowInfo] = useState(false);
   const [viewingTradeId, setViewingTradeId] = useState(null);
   const [showHint, setShowHint] = useState(() => {
     if (typeof window === 'undefined') return false;
@@ -1543,6 +1545,7 @@ export default function PYSCAL() {
     const onKeyDown = (e) => {
       // Esc handling
       if (e.key === 'Escape') {
+        if (showInfo) { setShowInfo(false); return; }
         if (viewingTradeId) { setViewingTradeId(null); return; }
         if (showHistory) { setShowHistory(false); return; }
         if (showSettings) { setShowSettings(false); return; }
@@ -1622,6 +1625,9 @@ export default function PYSCAL() {
                 <span>Pyramid Bid Calculator</span>
               </div>
               <div className="hdr-r" ref={settingsRef}>
+                <button className="gear-btn" onClick={() => setShowInfo(true)} aria-label="Cara pakai" title="Cara pakai">
+                  <InfoIcon />
+                </button>
                 <button className="gear-btn" onClick={() => setShowHistory(true)} aria-label="Buka History" title={`History (${shortcutToString(shortcuts.showHistory)})`}>
                   <HistoryIcon />
                 </button>
@@ -1889,6 +1895,9 @@ export default function PYSCAL() {
             onRecall={recallTrade}
           />
         )}
+
+        {/* Info Modal */}
+        {showInfo && <InfoModal onClose={() => setShowInfo(false)} shortcuts={shortcuts} />}
 
         {/* Toast */}
         <ToastContainer toasts={toasts} onRemove={removeToast} />
@@ -2235,7 +2244,6 @@ function HistoryModal({ history, viewingId, setViewingId, onClose, onDelete, onR
             <TradeDetail trade={trade} onDelete={() => { onDelete(trade.id); }} onRecall={() => onRecall && onRecall(trade)} />
           ) : history.length === 0 ? (
             <div className="history-empty">
-              <div style={{ fontSize: 32, marginBottom: 8, fontStyle: 'normal' }}>📒</div>
               <div style={{ fontStyle: 'normal', color: 'var(--text)', fontWeight: 600, marginBottom: 4 }}>
                 Belum ada trade tersimpan
               </div>
@@ -2374,6 +2382,42 @@ function TradeDetail({ trade, onDelete, onRecall }) {
           style={{ borderColor: 'var(--red)', color: 'var(--red)' }}>
           Hapus Trade
         </button>
+      </div>
+    </div>
+  );
+}
+
+/* ==================== INFO MODAL ==================== */
+function InfoModal({ onClose, shortcuts }) {
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal" onClick={e => e.stopPropagation()}
+        role="dialog" aria-modal="true" aria-labelledby="info-modal-title">
+        <div className="modal-header">
+          <div className="modal-title" id="info-modal-title">Cara pakai PYSCAL</div>
+          <button className="modal-close" onClick={onClose} aria-label="Tutup"><XIcon /></button>
+        </div>
+        <div className="modal-body">
+          <ol style={{ margin: 0, paddingLeft: 20, display: 'flex', flexDirection: 'column', gap: 10, color: 'var(--text)', fontSize: 14, lineHeight: 1.55 }}>
+            <li>
+              Masukkan <strong>bid awal</strong>, target profit / tick, dan fee beli–jual broker Anda.
+            </li>
+            <li>
+              Tambah <strong>papan bid</strong> berikutnya — harga turun berlapis untuk averaging-down.
+              <span className="ob-kbd" style={{ marginLeft: 6 }}>{shortcutToString(shortcuts.addPapan)}</span>
+            </li>
+            <li>
+              PYSCAL menghitung <strong>average price</strong>, total lot, modal terpakai, dan target jual otomatis.
+            </li>
+            <li>
+              Simpan hasil ke <strong>History</strong>, atau simpan skema ke <strong>Preset</strong> per ticker lewat Settings.
+              <span className="ob-kbd" style={{ marginLeft: 6 }}>{shortcutToString(shortcuts.saveTrade)}</span>
+            </li>
+          </ol>
+          <div style={{ marginTop: 16, padding: 12, background: 'var(--inp-bg)', border: '1px solid var(--border)', borderRadius: 8, fontSize: 13, color: 'var(--text-m)', lineHeight: 1.5 }}>
+            Tip: semua data disimpan lokal di browser — tanpa signup, tanpa server, aman dipakai offline.
+          </div>
+        </div>
       </div>
     </div>
   );
