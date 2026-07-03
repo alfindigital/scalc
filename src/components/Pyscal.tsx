@@ -984,6 +984,20 @@ export default function PYSCAL() {
     setToasts(prev => prev.filter(t => t.id !== id));
   }, []);
 
+  // Surface storage errors dispatched from lib/storage.ts (quota / privacy mode).
+  useEffect(() => {
+    const onStorageErr = (e) => {
+      const kind = e?.detail?.kind;
+      if (kind === 'quota') {
+        showToast('Storage browser penuh. Hapus history lama atau export backup.', 'error', { timeout: 5000 });
+      } else {
+        showToast('Data tidak bisa disimpan (mode private / storage diblokir).', 'error', { timeout: 5000 });
+      }
+    };
+    window.addEventListener('pyscal:storage-error', onStorageErr);
+    return () => window.removeEventListener('pyscal:storage-error', onStorageErr);
+  }, [showToast]);
+
   // Flashing preset (load feedback)
   const [flashingPreset, setFlashingPreset] = useState(null);
 

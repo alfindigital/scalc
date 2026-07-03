@@ -174,8 +174,21 @@ function safeWrite(key: string, value: unknown): void {
   if (typeof window === "undefined") return;
   try {
     localStorage.setItem(key, JSON.stringify(value));
-  } catch {
-    /* quota / privacy mode — fail silently */
+  } catch (err) {
+    // Signal quota/privacy errors so the UI can surface a toast.
+    try {
+      const name = (err as { name?: string })?.name || "";
+      const isQuota =
+        name === "QuotaExceededError" ||
+        name === "NS_ERROR_DOM_QUOTA_REACHED";
+      window.dispatchEvent(
+        new CustomEvent("pyscal:storage-error", {
+          detail: { key, kind: isQuota ? "quota" : "unavailable" },
+        }),
+      );
+    } catch {
+      /* noop */
+    }
   }
 }
 
