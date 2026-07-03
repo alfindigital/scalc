@@ -72,7 +72,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { name: "theme-color", content: "#0B1220" },
+      { name: "theme-color", media: "(prefers-color-scheme: light)", content: "#F8FAFC" },
+      { name: "theme-color", media: "(prefers-color-scheme: dark)", content: "#0B1220" },
+      { name: "apple-mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
+      { name: "apple-mobile-web-app-title", content: "PYSCAL" },
       { title: "PYSCAL — Pyramid Bid Calculator untuk Trader IDX" },
       { name: "description", content: "PYSCAL adalah kalkulator pyramid averaging-down untuk trader saham IDX. Hitung bid berlapis, simpan history, dan jalankan offline — gratis dan tanpa daftar." },
       { property: "og:title", content: "PYSCAL — Pyramid Bid Calculator untuk Trader IDX" },
@@ -80,6 +84,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:url", content: "https://pyscal.lovable.app/" },
       { property: "og:site_name", content: "PYSCAL" },
       { property: "og:type", content: "website" },
+      { property: "og:locale", content: "id_ID" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:title", content: "PYSCAL — Pyramid Bid Calculator untuk Trader IDX" },
       { name: "twitter:description", content: "Kalkulator pyramid averaging-down untuk trader IDX. Hitung bid berlapis, simpan history, jalankan offline." },
@@ -97,6 +102,23 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "icon", type: "image/png", sizes: "32x32", href: "/favicon-32.png" },
       { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
     ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "SoftwareApplication",
+          name: "PYSCAL",
+          description:
+            "Kalkulator pyramid averaging-down untuk trader saham IDX. Hitung bid berlapis, simpan history, jalankan offline.",
+          applicationCategory: "FinanceApplication",
+          operatingSystem: "Web",
+          url: "https://pyscal.lovable.app/",
+          inLanguage: "id-ID",
+          offers: { "@type": "Offer", price: "0", priceCurrency: "IDR" },
+        }),
+      },
+    ],
   }),
   shellComponent: RootShell,
   component: RootComponent,
@@ -106,8 +128,16 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="id" suppressHydrationWarning>
       <head>
+        <script
+          // Pre-hydration theme: prevent FOUC by applying saved theme
+          // (or system preference) to <html> before React mounts.
+          dangerouslySetInnerHTML={{
+            __html:
+              "(function(){try{var t=localStorage.getItem('pyscal_theme');if(t!=='dark'&&t!=='light'){t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.dataset.pyscalTheme=t;document.documentElement.style.colorScheme=t;}catch(e){}})();",
+          }}
+        />
         <HeadContent />
       </head>
       <body>
