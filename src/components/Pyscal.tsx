@@ -579,7 +579,7 @@ tbody td:last-child{padding:14px 8px;width:1%}
   /* Mobile result cards */
   .mk{padding:16px 14px}
   .mb{width:26px;height:26px;font-size:11px;top:12px;right:12px}
-  .m-remove{top:13px;right:46px}
+  .m-remove{top:0;right:0}
   .mh{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px;padding-bottom:12px;align-items:end}
   .mhi{min-width:0}
   .mhi label{font-size:9px;letter-spacing:0.5px;margin-bottom:4px}
