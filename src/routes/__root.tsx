@@ -85,7 +85,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:site_name", content: "PYSCAL" },
       { property: "og:type", content: "website" },
       { property: "og:locale", content: "id_ID" },
-      { name: "twitter:card", content: "summary" },
       { name: "twitter:title", content: "PYSCAL — Pyramid Bid Calculator untuk Trader IDX" },
       { name: "twitter:description", content: "Kalkulator pyramid averaging-down untuk trader IDX. Hitung bid berlapis, simpan history, jalankan offline." },
       { property: "og:image", content: "https://pyscal.lovable.app/og-image.jpg" },
