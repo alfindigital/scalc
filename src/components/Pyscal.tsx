@@ -421,7 +421,7 @@ tbody td:last-child{padding:14px 8px;width:1%}
   font-family:'Funnel Sans',sans-serif;font-size:9px;font-weight:700;color:var(--text-m);
   letter-spacing:0.8px;font-style:italic}
 .mk-existing{padding-top:28px}
-.m-remove{position:absolute;top:10px;right:10px;background:transparent;border:none;color:var(--text-d);
+.m-remove{position:absolute;top:0;right:0;background:transparent;border:none;color:var(--text-d);
   cursor:pointer;padding:6px;display:flex;align-items:center;transition:color .15s;z-index:2}
 .m-remove:hover{color:var(--red)}
 
