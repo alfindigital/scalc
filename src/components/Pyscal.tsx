@@ -1830,19 +1830,19 @@ export default function PYSCAL() {
 >
                       {customLot ? <UnlockIcon /> : <LockIcon />}
                     </button>
-                    <button className="ibtn" onClick={saveTrade} aria-label="Simpan ke History")`}>
+                    <button className="ibtn" onClick={saveTrade} aria-label="Simpan ke History">
                       <BookmarkIcon />
                     </button>
                     <button className={`ibtn ${copyState === 'copied' ? 'success' : ''}`}
-                      onClick={copyResults} aria-label="Copy hasil")`}>
+                      onClick={copyResults} aria-label="Copy hasil">
                       {copyState === 'copied' ? <CheckIcon /> : <CopyIcon />}
                     </button>
                     {bids.length > 1 && (
-                      <button className="ibtn danger" onClick={resetPapan} aria-label="Reset semua papan")`}>
+                      <button className="ibtn danger" onClick={resetPapan} aria-label="Reset semua papan">
                         <RefreshIcon />
                       </button>
                     )}
-                    <button className="ibtn primary" onClick={addPapan} aria-label="Tambah papan")`}>
+                    <button className="ibtn primary" onClick={addPapan} aria-label="Tambah papan">
                       <PlusIcon />
                     </button>
                   </div>
