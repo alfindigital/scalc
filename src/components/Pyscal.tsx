@@ -712,13 +712,6 @@ function FieldHint({ status }) {
     </div>
   );
 }
-function HelpTip({ text }) {
-  return (
-    <button type="button" className="il-help" tabIndex={0}
-      aria-label={`Penjelasan: ${text}`} title={text}>?</button>
-  );
-}
-
 function ToastContainer({ toasts, onRemove }) {
   return (
     <div className="toast-container" role="region" aria-label="Notifikasi" aria-live="polite">
@@ -1621,17 +1614,17 @@ export default function PYSCAL() {
                 <span>Pyramid Bid Calculator</span>
               </div>
               <div className="hdr-r" ref={settingsRef}>
-                <button className="gear-btn" onClick={() => setShowInfo(true)} aria-label="Cara pakai" title="Cara pakai">
+                <button className="gear-btn" onClick={() => setShowInfo(true)} aria-label="Cara pakai">
                   <InfoIcon />
                 </button>
-                <button className="gear-btn" onClick={() => setShowHistory(true)} aria-label="Buka History" title={`History (${shortcutToString(shortcuts.showHistory)})`}>
+                <button className="gear-btn" onClick={() => setShowHistory(true)} aria-label="Buka History">
                   <HistoryIcon />
                 </button>
                 <button className={`gear-btn ${showSettings ? 'active' : ''}`}
                   onClick={() => setShowSettings(v => !v)}
                   aria-label="Buka Settings"
                   aria-expanded={showSettings}
-                  title={`Settings (${shortcutToString(shortcuts.toggleSettings)})`}>
+                >
                   <GearIcon />
                 </button>
                 {showSettings && (
@@ -1665,7 +1658,7 @@ export default function PYSCAL() {
                   className="onboarding-close"
                   onClick={dismissHint}
                   aria-label="Tutup petunjuk"
-                  title="Tutup"
+
                 ><XIcon /></button>
                 <div className="onboarding-title">Selamat datang di PYSCAL</div>
                 <div className="onboarding-sub">
@@ -1728,7 +1721,6 @@ export default function PYSCAL() {
                 <div className="ig-2">
                   <div>
                     <div className="il il-wrap">Avg Existing (inc fee)
-                      <HelpTip text="Average price posisi yang sudah kamu pegang, sudah include fee buy. Dipakai sebagai baseline avg-down." />
                     </div>
                     <input className="if" type="number" value={existingAvg || ''} min={0} step={0.01}
                       inputMode="decimal" enterKeyHint="next"
@@ -1738,7 +1730,6 @@ export default function PYSCAL() {
                   </div>
                   <div>
                     <div className="il il-wrap">Lot Existing
-                      <HelpTip text="Berapa lot posisi existing yang kamu pegang." />
                     </div>
                     <input className="if" type="number" value={existingLot || ''} min={0}
                       inputMode="numeric" enterKeyHint="next"
@@ -1751,7 +1742,6 @@ export default function PYSCAL() {
               <div className="ig">
                 <div>
                   <div className="il il-wrap">{mode === 'position' ? 'Bid Awal (beli baru)' : 'Bid Awal'}
-                    <HelpTip text="Harga limit order pertama. Sistem akan menurunkan untuk averaging-down di papan berikut." />
                   </div>
                   <input ref={bidAwalRef} className="if" type="number" value={bids[0] || ''} min={1}
                     inputMode="decimal" enterKeyHint="next"
@@ -1761,7 +1751,6 @@ export default function PYSCAL() {
                 </div>
                 <div>
                   <div className="il il-wrap">Lot
-                    <HelpTip text="Lot dasar per papan. Tiap layer berikutnya bisa di-multiply manual via Custom Lot." />
                   </div>
                   <input className="if" type="number" value={baseLot} min={1}
                     inputMode="numeric" enterKeyHint="next"
@@ -1771,7 +1760,6 @@ export default function PYSCAL() {
                 </div>
                 <div>
                   <div className="il il-wrap">Target Tick
-                    <HelpTip text="Berapa tick di atas average price untuk target jual. 1 tick = 1 step harga IDX." />
                   </div>
                   <input className="if" type="number" value={targetTicks} min={1} max={20}
                     inputMode="numeric" enterKeyHint="next"
@@ -1781,7 +1769,6 @@ export default function PYSCAL() {
                 </div>
                 <div>
                   <div className="il il-wrap">Min Profit %
-                    <HelpTip text="Minimal profit per pyramid. Kalau di bawah ini, papan akan flag warning." />
                   </div>
                   <input className="if" type="number" value={targetProfit} min={0} step={0.1}
                     inputMode="decimal" enterKeyHint="done"
@@ -1840,22 +1827,22 @@ export default function PYSCAL() {
                       onClick={toggleCustomLot}
                       aria-label={customLot ? 'Matikan Custom Lot' : 'Aktifkan Custom Lot'}
                       aria-pressed={customLot}
-                      title={customLot ? 'Matikan Custom Lot' : 'Aktifkan Custom Lot (edit lot manual)'}>
+>
                       {customLot ? <UnlockIcon /> : <LockIcon />}
                     </button>
-                    <button className="ibtn" onClick={saveTrade} aria-label="Simpan ke History" title={`Simpan ke History (${shortcutToString(shortcuts.saveTrade)})`}>
+                    <button className="ibtn" onClick={saveTrade} aria-label="Simpan ke History">
                       <BookmarkIcon />
                     </button>
                     <button className={`ibtn ${copyState === 'copied' ? 'success' : ''}`}
-                      onClick={copyResults} aria-label="Copy hasil" title={`Copy (${shortcutToString(shortcuts.copyResults)})`}>
+                      onClick={copyResults} aria-label="Copy hasil">
                       {copyState === 'copied' ? <CheckIcon /> : <CopyIcon />}
                     </button>
                     {bids.length > 1 && (
-                      <button className="ibtn danger" onClick={resetPapan} aria-label="Reset semua papan" title={`Reset (${shortcutToString(shortcuts.resetPapan)})`}>
+                      <button className="ibtn danger" onClick={resetPapan} aria-label="Reset semua papan">
                         <RefreshIcon />
                       </button>
                     )}
-                    <button className="ibtn primary" onClick={addPapan} aria-label="Tambah papan" title={`Tambah Papan (${shortcutToString(shortcuts.addPapan)})`}>
+                    <button className="ibtn primary" onClick={addPapan} aria-label="Tambah papan">
                       <PlusIcon />
                     </button>
                   </div>
@@ -2098,7 +2085,7 @@ function ResultsTable({ results, bidRiseWarnings, targetProfit, totalLot, totalC
             <tr className="total-row">
               <td className="total-label">Total Beli</td><td></td>
               <td className="c-lot">{n(totalLot)}</td><td></td><td></td>
-              <td style={{ fontFamily: "'JetBrains Mono', monospace" }} title={n(totalCost)}>
+              <td style={{ fontFamily: "'JetBrains Mono', monospace" }}>
                 {nShort(totalCost)}
                 {balance > 0 && <span className="util"> ({Math.round(totalCost / balance * 100)}%)</span>}
               </td>
@@ -2169,7 +2156,7 @@ function ResultsTable({ results, bidRiseWarnings, targetProfit, totalLot, totalC
           <div className="mt">
             <div>
               <div className="mt-label">Total Cost Beli</div>
-              <div className="mt-val" title={n(totalCost)}>
+              <div className="mt-val">
                 {nShort(totalCost)}
                 {balance > 0 && <span className="util-m"> {Math.round(totalCost / balance * 100)}%</span>}
               </div>
@@ -2275,7 +2262,7 @@ function HistoryModal({ history, viewingId, setViewingId, onClose, onDelete, onR
                       >
                         <div className="history-info">
                           <div className="history-avg" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                            {t.pinned && <span aria-label="Ter-pin" title="Ter-pin" style={{ color: 'var(--brand)' }}>📌</span>}
+                            {t.pinned && <span aria-label="Ter-pin" style={{ color: 'var(--brand)' }}>📌</span>}
                             {isRenaming ? (
                               <input
                                 autoFocus
@@ -2307,22 +2294,22 @@ function HistoryModal({ history, viewingId, setViewingId, onClose, onDelete, onR
                             className="history-act"
                             onClick={() => onRecall && onRecall(t)}
                             aria-label="Recall trade"
-                            title="Recall (muat ke kalkulator)"
+
                           >↻</button>
                           <button
                             className="history-act"
                             onClick={() => onTogglePin(t.id)}
                             aria-pressed={!!t.pinned}
                             aria-label={t.pinned ? 'Lepas pin' : 'Pin trade'}
-                            title={t.pinned ? 'Lepas pin' : 'Pin'}
+
                           >📌</button>
                           <button
                             className="history-act"
                             onClick={() => isRenaming ? commitRename() : startRename(t)}
                             aria-label={isRenaming ? 'Simpan nama' : 'Rename trade'}
-                            title={isRenaming ? 'Simpan' : 'Rename'}
+
                           >{isRenaming ? '✓' : '✎'}</button>
-                          <button className="history-del" onClick={() => onDelete(t.id)} aria-label="Hapus trade" title="Hapus">
+                          <button className="history-del" onClick={() => onDelete(t.id)} aria-label="Hapus trade">
                             <XIcon />
                           </button>
                         </div>
