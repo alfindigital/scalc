@@ -1616,10 +1616,6 @@ export default function PYSCAL() {
 
             {/* Header */}
             <div className="hdr">
-              <div className="logo" aria-hidden="true">
-                <img src={logoUrl} alt="" width={28} height={28}
-                  style={{ display: 'block', width: '70%', height: '70%', objectFit: 'contain', filter: theme === 'dark' ? 'invert(1)' : 'none' }} />
-              </div>
               <div className="brand">
                 <h1>PYSCAL</h1>
                 <span>Pyramid Bid Calculator</span>
