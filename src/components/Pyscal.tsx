@@ -811,15 +811,6 @@ function BidStepInput({ value, onChange, onFocus, disabled, className = '', vari
         onBlur={() => setFocused(false)}
         onKeyDown={handleKeyDown}
       />
-      <div className="bid-step-btns">
-        <button type="button" className="bid-step-btn" tabIndex={-1}
-          onMouseDown={e => { e.preventDefault(); stepUp(false); }}
-          onTouchStart={e => { e.preventDefault(); stepUp(true); }}>▲</button>
-        <button type="button" className={`bid-step-btn ${downDisabled ? 'is-disabled' : ''}`} tabIndex={-1}
-          disabled={downDisabled}
-          onMouseDown={e => { e.preventDefault(); if (!downDisabled) stepDown(false); }}
-          onTouchStart={e => { e.preventDefault(); if (!downDisabled) stepDown(true); }}>▼</button>
-      </div>
     </div>
   );
 }
