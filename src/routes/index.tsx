@@ -1,5 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import Pyscal from "@/components/Pyscal";
 import { setupPWA, bindInstallPrompt } from "@/lib/pwa";
@@ -39,10 +38,10 @@ function Index() {
             <p style={{ marginTop: 8, opacity: 0.8 }}>
               Pyramid Bid Calculator untuk trader saham IDX.
             </p>
+            <SeoContent />
           </div>
         )}
       </main>
-      <SeoContent />
     </>
   );
 }
@@ -71,15 +70,15 @@ function SeoContent() {
         <h2>Pelajari lebih lanjut</h2>
         <ul>
           <li>
-            <Link to="/panduan-averaging-down">Panduan averaging-down saham</Link> —
+            <a href="/panduan-averaging-down">Panduan averaging-down saham</a> —
             kapan pakai, kapan hindari.
           </li>
           <li>
-            <Link to="/rumus-fee-broker-idx">Rumus fee broker IDX</Link> —
+            <a href="/rumus-fee-broker-idx">Rumus fee broker IDX</a> —
             cara hitung biaya beli & jual saham.
           </li>
           <li>
-            <Link to="/tick-size-idx">Tick size / fraksi harga BEI</Link> —
+            <a href="/tick-size-idx">Tick size / fraksi harga BEI</a> —
             tabel lengkap per rentang harga.
           </li>
         </ul>
