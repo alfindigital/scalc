@@ -1895,6 +1895,9 @@ export default function PYSCAL() {
           />
         )}
 
+        {/* Info Modal */}
+        {showInfo && <InfoModal onClose={() => setShowInfo(false)} shortcuts={shortcuts} />}
+
         {/* Toast */}
         <ToastContainer toasts={toasts} onRemove={removeToast} />
       </div>
