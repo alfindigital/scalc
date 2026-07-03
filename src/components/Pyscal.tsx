@@ -730,7 +730,7 @@ function ToastContainer({ toasts, onRemove }) {
             {t.type === 'error' && '⚠'}
             {!t.type && '•'}
           </span>
-          <span className="toast-text" dangerouslySetInnerHTML={{ __html: t.text }} />
+          <span className="toast-text">{renderToastText(t.text)}</span>
           {t.action && (
             <button className="toast-action" onClick={() => { t.action.handler(); onRemove(t.id); }}>
               {t.action.label}
@@ -740,6 +740,27 @@ function ToastContainer({ toasts, onRemove }) {
       ))}
     </div>
   );
+}
+
+// Safely render toast text: only <strong>…</strong> is honored as JSX;
+// everything else is text. Entities from escHtml() are decoded so user
+// content displays correctly.
+function renderToastText(text) {
+  if (text == null) return null;
+  const str = String(text);
+  const decode = (s) =>
+    s.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+     .replace(/&quot;/g, '"').replace(/&#39;/g, "'");
+  const parts = [];
+  const re = /<strong>([\s\S]*?)<\/strong>/g;
+  let last = 0, m, i = 0;
+  while ((m = re.exec(str)) !== null) {
+    if (m.index > last) parts.push(decode(str.slice(last, m.index)));
+    parts.push(<strong key={i++}>{decode(m[1])}</strong>);
+    last = re.lastIndex;
+  }
+  if (last < str.length) parts.push(decode(str.slice(last)));
+  return parts;
 }
 
 /* ==================== BID STEP INPUT ==================== */
