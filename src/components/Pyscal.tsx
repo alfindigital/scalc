@@ -1545,6 +1545,7 @@ export default function PYSCAL() {
     const onKeyDown = (e) => {
       // Esc handling
       if (e.key === 'Escape') {
+        if (showInfo) { setShowInfo(false); return; }
         if (viewingTradeId) { setViewingTradeId(null); return; }
         if (showHistory) { setShowHistory(false); return; }
         if (showSettings) { setShowSettings(false); return; }
