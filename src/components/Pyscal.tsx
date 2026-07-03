@@ -421,7 +421,7 @@ tbody td:last-child{padding:14px 8px;width:1%}
   font-family:'Funnel Sans',sans-serif;font-size:9px;font-weight:700;color:var(--text-m);
   letter-spacing:0.8px;font-style:italic}
 .mk-existing{padding-top:28px}
-.m-remove{position:absolute;top:10px;right:10px;background:transparent;border:none;color:var(--text-d);
+.m-remove{position:absolute;top:0;right:0;background:transparent;border:none;color:var(--text-d);
   cursor:pointer;padding:6px;display:flex;align-items:center;transition:color .15s;z-index:2}
 .m-remove:hover{color:var(--red)}
 
@@ -579,7 +579,7 @@ tbody td:last-child{padding:14px 8px;width:1%}
   /* Mobile result cards */
   .mk{padding:16px 14px}
   .mb{width:26px;height:26px;font-size:11px;top:12px;right:12px}
-  .m-remove{top:13px;right:46px}
+  .m-remove{top:0;right:0}
   .mh{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px;padding-bottom:12px;align-items:end}
   .mhi{min-width:0}
   .mhi label{font-size:9px;letter-spacing:0.5px;margin-bottom:4px}
