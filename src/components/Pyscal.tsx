@@ -585,7 +585,7 @@ tbody td:last-child{padding:14px 8px;width:1%}
   .mhi label{font-size:9px;letter-spacing:0.5px;margin-bottom:4px}
   .mhi span{font-size:16px;letter-spacing:-0.4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .mhi-inp{font-size:16px;width:100%;max-width:72px;padding:3px 6px}
-  .mg{grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px}
+  .mg{grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
   .mgi label{font-size:9px;letter-spacing:0.4px}
   .mgi span{font-size:13px}
   .mt{padding:14px 16px}
