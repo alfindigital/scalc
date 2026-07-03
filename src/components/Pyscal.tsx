@@ -2386,3 +2386,39 @@ function TradeDetail({ trade, onDelete, onRecall }) {
     </div>
   );
 }
+
+/* ==================== INFO MODAL ==================== */
+function InfoModal({ onClose, shortcuts }) {
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal" onClick={e => e.stopPropagation()}
+        role="dialog" aria-modal="true" aria-labelledby="info-modal-title">
+        <div className="modal-header">
+          <div className="modal-title" id="info-modal-title">Cara pakai PYSCAL</div>
+          <button className="modal-close" onClick={onClose} aria-label="Tutup"><XIcon /></button>
+        </div>
+        <div className="modal-body">
+          <ol style={{ margin: 0, paddingLeft: 20, display: 'flex', flexDirection: 'column', gap: 10, color: 'var(--text)', fontSize: 14, lineHeight: 1.55 }}>
+            <li>
+              Masukkan <strong>bid awal</strong>, target profit / tick, dan fee beli–jual broker Anda.
+            </li>
+            <li>
+              Tambah <strong>papan bid</strong> berikutnya — harga turun berlapis untuk averaging-down.
+              <span className="ob-kbd" style={{ marginLeft: 6 }}>{shortcutToString(shortcuts.addPapan)}</span>
+            </li>
+            <li>
+              PYSCAL menghitung <strong>average price</strong>, total lot, modal terpakai, dan target jual otomatis.
+            </li>
+            <li>
+              Simpan hasil ke <strong>History</strong>, atau simpan skema ke <strong>Preset</strong> per ticker lewat Settings.
+              <span className="ob-kbd" style={{ marginLeft: 6 }}>{shortcutToString(shortcuts.saveTrade)}</span>
+            </li>
+          </ol>
+          <div style={{ marginTop: 16, padding: 12, background: 'var(--inp-bg)', border: '1px solid var(--border)', borderRadius: 8, fontSize: 13, color: 'var(--text-m)', lineHeight: 1.5 }}>
+            Tip: semua data disimpan lokal di browser — tanpa signup, tanpa server, aman dipakai offline.
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
