@@ -9,11 +9,17 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TickSizeIdxRouteImport } from './routes/tick-size-idx'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as RumusFeeBrokerIdxRouteImport } from './routes/rumus-fee-broker-idx'
 import { Route as PanduanAveragingDownRouteImport } from './routes/panduan-averaging-down'
 import { Route as IndexRouteImport } from './routes/index'
 
+const TickSizeIdxRoute = TickSizeIdxRouteImport.update({
+  id: '/tick-size-idx',
+  path: '/tick-size-idx',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
@@ -40,12 +46,14 @@ export interface FileRoutesByFullPath {
   '/panduan-averaging-down': typeof PanduanAveragingDownRoute
   '/rumus-fee-broker-idx': typeof RumusFeeBrokerIdxRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/tick-size-idx': typeof TickSizeIdxRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/panduan-averaging-down': typeof PanduanAveragingDownRoute
   '/rumus-fee-broker-idx': typeof RumusFeeBrokerIdxRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/tick-size-idx': typeof TickSizeIdxRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -53,6 +61,7 @@ export interface FileRoutesById {
   '/panduan-averaging-down': typeof PanduanAveragingDownRoute
   '/rumus-fee-broker-idx': typeof RumusFeeBrokerIdxRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/tick-size-idx': typeof TickSizeIdxRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -61,14 +70,21 @@ export interface FileRouteTypes {
     | '/panduan-averaging-down'
     | '/rumus-fee-broker-idx'
     | '/sitemap.xml'
+    | '/tick-size-idx'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/panduan-averaging-down' | '/rumus-fee-broker-idx' | '/sitemap.xml'
+  to:
+    | '/'
+    | '/panduan-averaging-down'
+    | '/rumus-fee-broker-idx'
+    | '/sitemap.xml'
+    | '/tick-size-idx'
   id:
     | '__root__'
     | '/'
     | '/panduan-averaging-down'
     | '/rumus-fee-broker-idx'
     | '/sitemap.xml'
+    | '/tick-size-idx'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -76,10 +92,18 @@ export interface RootRouteChildren {
   PanduanAveragingDownRoute: typeof PanduanAveragingDownRoute
   RumusFeeBrokerIdxRoute: typeof RumusFeeBrokerIdxRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  TickSizeIdxRoute: typeof TickSizeIdxRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/tick-size-idx': {
+      id: '/tick-size-idx'
+      path: '/tick-size-idx'
+      fullPath: '/tick-size-idx'
+      preLoaderRoute: typeof TickSizeIdxRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/sitemap.xml': {
       id: '/sitemap.xml'
       path: '/sitemap.xml'
@@ -116,6 +140,7 @@ const rootRouteChildren: RootRouteChildren = {
   PanduanAveragingDownRoute: PanduanAveragingDownRoute,
   RumusFeeBrokerIdxRoute: RumusFeeBrokerIdxRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  TickSizeIdxRoute: TickSizeIdxRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
