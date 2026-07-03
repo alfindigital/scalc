@@ -1624,6 +1624,9 @@ export default function PYSCAL() {
                 <span>Pyramid Bid Calculator</span>
               </div>
               <div className="hdr-r" ref={settingsRef}>
+                <button className="gear-btn" onClick={() => setShowInfo(true)} aria-label="Cara pakai" title="Cara pakai">
+                  <InfoIcon />
+                </button>
                 <button className="gear-btn" onClick={() => setShowHistory(true)} aria-label="Buka History" title={`History (${shortcutToString(shortcuts.showHistory)})`}>
                   <HistoryIcon />
                 </button>
