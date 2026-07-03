@@ -2397,7 +2397,9 @@ function InfoModal({ onClose, shortcuts }) {
           <div className="modal-title" id="info-modal-title">Cara pakai PYSCAL</div>
           <button className="modal-close" onClick={onClose} aria-label="Tutup"><XIcon /></button>
         </div>
-        <div className="modal-body">
+        <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+          <section>
+            <h3 style={{ margin: '0 0 6px', fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>Langkah pakai</h3>
           <ol style={{ margin: 0, paddingLeft: 20, display: 'flex', flexDirection: 'column', gap: 10, color: 'var(--text)', fontSize: 14, lineHeight: 1.55 }}>
             <li>
               Masukkan <strong>bid awal</strong>, target profit / tick, dan fee beli–jual broker Anda.
@@ -2414,9 +2416,36 @@ function InfoModal({ onClose, shortcuts }) {
               <span className="ob-kbd" style={{ marginLeft: 6 }}>{shortcutToString(shortcuts.saveTrade)}</span>
             </li>
           </ol>
-          <div style={{ marginTop: 16, padding: 12, background: 'var(--inp-bg)', border: '1px solid var(--border)', borderRadius: 8, fontSize: 13, color: 'var(--text-m)', lineHeight: 1.5 }}>
-            Tip: semua data disimpan lokal di browser — tanpa signup, tanpa server, aman dipakai offline.
-          </div>
+          </section>
+
+          <section>
+            <h3 style={{ margin: '0 0 6px', fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>Apa itu PYSCAL?</h3>
+            <p style={{ margin: 0, fontSize: 14, lineHeight: 1.55, color: 'var(--text-m)' }}>
+              Kalkulator <strong>pyramid bid</strong> (averaging-down berlapis) untuk trader saham{' '}
+              <strong>IDX / BEI</strong>. Rencanakan bid berjenjang, hitung <em>average price</em>,
+              alokasi modal, dan lot per layer sesuai <em>tick size</em> dan fee broker Indonesia.
+              Semua data disimpan lokal di browser — tanpa signup, tanpa server, aman dipakai offline.
+            </p>
+          </section>
+
+          <section>
+            <h3 style={{ margin: '0 0 6px', fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>Untuk siapa?</h3>
+            <p style={{ margin: 0, fontSize: 14, lineHeight: 1.55, color: 'var(--text-m)' }}>
+              Trader IDX yang pakai strategi <em>staggered buy</em>, <em>pyramid averaging</em>,
+              atau siap-siap DCA di area support. PYSCAL memastikan tiap layer sesuai{' '}
+              <strong>fraksi harga (tick size) BEI</strong> dan menghitung <em>break-even</em>{' '}
+              setelah fee jual-beli otomatis.
+            </p>
+          </section>
+
+          <section>
+            <h3 style={{ margin: '0 0 6px', fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>Pelajari lebih lanjut</h3>
+            <ul style={{ margin: 0, paddingLeft: 20, display: 'flex', flexDirection: 'column', gap: 6, fontSize: 14, lineHeight: 1.55, color: 'var(--text-m)' }}>
+              <li><a href="/panduan-averaging-down" style={{ color: 'var(--accent, #3b82f6)' }}>Panduan averaging-down saham</a> — kapan pakai, kapan hindari.</li>
+              <li><a href="/rumus-fee-broker-idx" style={{ color: 'var(--accent, #3b82f6)' }}>Rumus fee broker IDX</a> — cara hitung biaya beli &amp; jual saham.</li>
+              <li><a href="/tick-size-idx" style={{ color: 'var(--accent, #3b82f6)' }}>Tick size / fraksi harga BEI</a> — tabel lengkap per rentang harga.</li>
+            </ul>
+          </section>
         </div>
       </div>
     </div>
