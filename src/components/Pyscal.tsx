@@ -1617,14 +1617,14 @@ export default function PYSCAL() {
                 <button className="gear-btn" onClick={() => setShowInfo(true)} aria-label="Cara pakai">
                   <InfoIcon />
                 </button>
-                <button className="gear-btn" onClick={() => setShowHistory(true)} aria-label="Buka History")`}>
+                <button className="gear-btn" onClick={() => setShowHistory(true)} aria-label="Buka History">
                   <HistoryIcon />
                 </button>
                 <button className={`gear-btn ${showSettings ? 'active' : ''}`}
                   onClick={() => setShowSettings(v => !v)}
                   aria-label="Buka Settings"
                   aria-expanded={showSettings}
-)`}>
+                >
                   <GearIcon />
                 </button>
                 {showSettings && (
