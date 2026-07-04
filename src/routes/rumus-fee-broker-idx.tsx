@@ -42,8 +42,19 @@ function FeePage() {
           <Link to="/" data-nav="back">← Kalkulator</Link>
           <Link to="/panduan-averaging-down">Panduan averaging-down</Link>
           <Link to="/tick-size-idx">Tick size BEI</Link>
+          <span className="pyscal-article__nav-label">PYSCAL / EDU</span>
         </nav>
-        <h1>Rumus Fee Broker Saham IDX</h1>
+        <header className="pyscal-article__header">
+          <div className="pyscal-article__tags">
+            <span className="pyscal-article__tag">Fees</span>
+            <span className="pyscal-article__tag" data-variant="muted">Dasar</span>
+          </div>
+          <h1>Rumus Fee Broker Saham IDX</h1>
+          <p className="pyscal-article__lede">
+            Komponen fee beli &amp; jual di BEI (levy, PPN, PPh) plus rumus
+            <strong> break-even</strong> setelah fee — dengan contoh Ajaib, Mirae, Stockbit, IPOT.
+          </p>
+        </header>
         <p>
           Tiap transaksi saham di Bursa Efek Indonesia (BEI) dikenakan{" "}
           <strong>fee broker</strong>. Fee beli dan fee jual berbeda—fee jual
