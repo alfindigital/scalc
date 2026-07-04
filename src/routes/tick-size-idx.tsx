@@ -42,8 +42,19 @@ function TickPage() {
           <Link to="/" data-nav="back">← Kalkulator</Link>
           <Link to="/panduan-averaging-down">Panduan averaging-down</Link>
           <Link to="/rumus-fee-broker-idx">Rumus fee broker</Link>
+          <span className="pyscal-article__nav-label">PYSCAL / EDU</span>
         </nav>
-        <h1>Tick Size / Fraksi Harga Saham BEI</h1>
+        <header className="pyscal-article__header">
+          <div className="pyscal-article__tags">
+            <span className="pyscal-article__tag">Market Rules</span>
+            <span className="pyscal-article__tag" data-variant="muted">Referensi</span>
+          </div>
+          <h1>Tick Size / Fraksi Harga Saham BEI</h1>
+          <p className="pyscal-article__lede">
+            Tabel fraksi harga resmi Bursa Efek Indonesia — minimum kenaikan / penurunan
+            harga per rentang. Bid di luar fraksi ditolak sistem JATS.
+          </p>
+        </header>
         <p>
           <strong>Tick size</strong> (fraksi harga) adalah minimum kenaikan / penurunan
           harga saham yang diperbolehkan di Bursa Efek Indonesia. Bid dan offer di luar
