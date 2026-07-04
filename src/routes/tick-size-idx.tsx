@@ -92,12 +92,16 @@ function TickPage() {
           <h2 className="pyscal-article__more-h">Pelajari lebih lanjut</h2>
           <div className="pyscal-article__cards">
             <Link to="/panduan-averaging-down" className="pyscal-article__card">
-              <span className="pyscal-article__card-t">Panduan averaging-down saham</span>
-              <span className="pyscal-article__card-d">Kapan pakai, kapan hindari pyramid bid.</span>
+              <div className="pyscal-article__card-inner">
+                <span className="pyscal-article__card-t">Panduan averaging-down saham</span>
+                <span className="pyscal-article__card-d">Kapan pakai, kapan hindari pyramid bid.</span>
+              </div>
             </Link>
             <Link to="/rumus-fee-broker-idx" className="pyscal-article__card">
-              <span className="pyscal-article__card-t">Rumus fee broker IDX</span>
-              <span className="pyscal-article__card-d">Cara hitung biaya beli &amp; jual saham per sekuritas.</span>
+              <div className="pyscal-article__card-inner">
+                <span className="pyscal-article__card-t">Rumus fee broker IDX</span>
+                <span className="pyscal-article__card-d">Cara hitung biaya beli &amp; jual saham per sekuritas.</span>
+              </div>
             </Link>
           </div>
         </aside>

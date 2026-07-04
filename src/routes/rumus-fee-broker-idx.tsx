@@ -112,12 +112,16 @@ function FeePage() {
           <h2 className="pyscal-article__more-h">Pelajari lebih lanjut</h2>
           <div className="pyscal-article__cards">
             <Link to="/panduan-averaging-down" className="pyscal-article__card">
-              <span className="pyscal-article__card-t">Panduan averaging-down saham</span>
-              <span className="pyscal-article__card-d">Kapan pakai, kapan hindari pyramid bid.</span>
+              <div className="pyscal-article__card-inner">
+                <span className="pyscal-article__card-t">Panduan averaging-down saham</span>
+                <span className="pyscal-article__card-d">Kapan pakai, kapan hindari pyramid bid.</span>
+              </div>
             </Link>
             <Link to="/tick-size-idx" className="pyscal-article__card">
-              <span className="pyscal-article__card-t">Tick size / fraksi harga BEI</span>
-              <span className="pyscal-article__card-d">Tabel lengkap fraksi harga per rentang.</span>
+              <div className="pyscal-article__card-inner">
+                <span className="pyscal-article__card-t">Tick size / fraksi harga BEI</span>
+                <span className="pyscal-article__card-d">Tabel lengkap fraksi harga per rentang.</span>
+              </div>
             </Link>
           </div>
         </aside>

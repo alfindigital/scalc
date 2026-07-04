@@ -111,12 +111,16 @@ function PanduanPage() {
           <h2 className="pyscal-article__more-h">Pelajari lebih lanjut</h2>
           <div className="pyscal-article__cards">
             <Link to="/rumus-fee-broker-idx" className="pyscal-article__card">
-              <span className="pyscal-article__card-t">Rumus fee broker IDX</span>
-              <span className="pyscal-article__card-d">Cara hitung biaya beli &amp; jual saham per sekuritas.</span>
+              <div className="pyscal-article__card-inner">
+                <span className="pyscal-article__card-t">Rumus fee broker IDX</span>
+                <span className="pyscal-article__card-d">Cara hitung biaya beli &amp; jual saham per sekuritas.</span>
+              </div>
             </Link>
             <Link to="/tick-size-idx" className="pyscal-article__card">
-              <span className="pyscal-article__card-t">Tick size / fraksi harga BEI</span>
-              <span className="pyscal-article__card-d">Tabel lengkap fraksi harga per rentang.</span>
+              <div className="pyscal-article__card-inner">
+                <span className="pyscal-article__card-t">Tick size / fraksi harga BEI</span>
+                <span className="pyscal-article__card-d">Tabel lengkap fraksi harga per rentang.</span>
+              </div>
             </Link>
           </div>
         </aside>
