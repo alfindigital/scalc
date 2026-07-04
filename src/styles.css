@@ -172,162 +172,272 @@
   border-radius: 4px;
 }
 
-/* ---- SEO / static content pages ---- */
-/*
- * Theme-aware tokens for article/SEO pages.
- * The app toggles theme via <html data-pyscal-theme="light|dark"> (see __root.tsx).
- * We define local tokens here so article pages stay readable in BOTH themes
- * and match the aesthetic of the in-app info modal.
- */
+/* =====================================================================
+   Article / SEO pages — "Terminal-doc" aesthetic
+   Dark-first technical reference. Theme-aware via <html data-pyscal-theme>.
+   ===================================================================== */
 :root {
   --art-bg: #ffffff;
-  --art-surface: #ffffff;
-  --art-surface-2: #fafafa;
-  --art-border: #e5e5e5;
-  --art-border-strong: #d4d4d4;
-  --art-text: #0a0a0a;
-  --art-text-2: #262626;
-  --art-text-m: #525252;
-  --art-brand: #CA8A04;
-  --art-brand-h: #A16207;
+  --art-surface: #fafafa;
+  --art-surface-2: #f4f4f5;
+  --art-surface-3: #ffffff;
+  --art-border: #e4e4e7;
+  --art-border-strong: #d4d4d8;
+  --art-text: #09090b;
+  --art-text-2: #27272a;
+  --art-text-m: #71717a;
+  --art-text-d: #a1a1aa;
+  --art-brand: #A16207;
+  --art-brand-h: #854D0E;
   --art-brand-soft: rgba(202, 138, 4, 0.10);
-  --art-shadow: 0 1px 2px rgba(0,0,0,0.04);
+  --art-brand-glow: 0 0 0 rgba(0,0,0,0);
 }
 html[data-pyscal-theme="dark"] {
-  --art-bg: #0A0A0A;
-  --art-surface: #141414;
-  --art-surface-2: #181818;
-  --art-border: #262626;
-  --art-border-strong: #404040;
-  --art-text: #FAFAFA;
-  --art-text-2: #D4D4D4;
-  --art-text-m: #A3A3A3;
+  --art-bg: #09090b;
+  --art-surface: #18181b;
+  --art-surface-2: #0f0f11;
+  --art-surface-3: #000000;
+  --art-border: #27272a;
+  --art-border-strong: #3f3f46;
+  --art-text: #fafafa;
+  --art-text-2: #e4e4e7;
+  --art-text-m: #a1a1aa;
+  --art-text-d: #71717a;
   --art-brand: #EAB308;
   --art-brand-h: #FACC15;
-  --art-brand-soft: rgba(234, 179, 8, 0.12);
-  --art-shadow: 0 1px 2px rgba(0,0,0,0.4);
+  --art-brand-soft: rgba(234, 179, 8, 0.10);
+  --art-brand-glow: 0 0 12px rgba(234, 179, 8, 0.35);
 }
 
-.pyscal-seo,
-.pyscal-article {
+/* ---- Shell ---- */
+.pyscal-article,
+.pyscal-seo {
   background: var(--art-bg);
   color: var(--art-text-2);
-  padding: clamp(20px, 4vw, 40px) clamp(16px, 4vw, 24px) clamp(64px, 10vw, 96px);
   min-height: 100vh;
   font-family: 'Funnel Sans', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  padding-bottom: clamp(64px, 10vw, 96px);
 }
-.pyscal-seo__inner,
-.pyscal-article__inner {
+.pyscal-article__inner,
+.pyscal-seo__inner {
   max-width: 720px;
   margin: 0 auto;
-  line-height: 1.7;
-  font-size: clamp(15px, 1.6vw, 16px);
+  padding: 0 clamp(16px, 4.5vw, 28px);
+  font-size: clamp(14px, 1.55vw, 15px);
+  line-height: 1.65;
   color: var(--art-text-2);
 }
-.pyscal-seo h1,
-.pyscal-article h1 {
-  font-size: clamp(26px, 5.5vw, 34px); line-height: 1.15;
-  margin: 4px 0 20px; font-weight: 700;
-  color: var(--art-text); letter-spacing: -0.015em;
-  text-wrap: balance;
-}
-.pyscal-seo h2,
-.pyscal-article h2 {
-  font-size: clamp(18px, 2.6vw, 21px); margin: clamp(32px, 5vw, 44px) 0 12px; font-weight: 700;
-  color: var(--art-text); letter-spacing: -0.01em;
-  padding-top: 24px; border-top: 1px solid var(--art-border);
-  text-wrap: balance;
-}
-.pyscal-seo h2:first-of-type,
-.pyscal-article h2:first-of-type { border-top: 0; padding-top: 0; margin-top: 28px; }
-.pyscal-seo h3,
-.pyscal-article h3 { font-size: 17px; margin: 24px 0 6px; font-weight: 700; color: var(--art-text); }
-.pyscal-seo p,
-.pyscal-article p { margin: 0 0 14px; color: var(--art-text-2); }
-.pyscal-seo ul, .pyscal-seo ol,
-.pyscal-article ul, .pyscal-article ol { padding-left: 22px; margin: 8px 0 16px; color: var(--art-text-2); }
-.pyscal-seo li,
-.pyscal-article li { margin: 8px 0; padding-left: 4px; }
-.pyscal-seo a,
-.pyscal-article a { color: var(--art-brand); text-decoration: none;
-  border-bottom: 1px solid color-mix(in oklab, var(--art-brand) 40%, transparent);
-  transition: border-color .15s, color .15s;
-}
-.pyscal-article a:hover { color: var(--art-brand-h); border-bottom-color: var(--art-brand-h); }
-.pyscal-seo a:focus-visible,
-.pyscal-article a:focus-visible {
-  outline: 2px solid var(--art-brand);
-  outline-offset: 3px;
-  border-radius: 4px;
-}
-.pyscal-article strong { color: var(--art-text); font-weight: 700; }
-.pyscal-article em { color: var(--art-text); font-style: italic; }
-.pyscal-article code {
-  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 13px;
-  background: var(--art-surface-2);
-  border: 1px solid var(--art-border);
-  border-radius: 6px;
-  padding: 2px 6px;
-  color: var(--art-text);
-  word-break: break-word;
-}
-.pyscal-article p > code {
-  display: inline-block;
-}
 
-/* ---- Top nav (chip pills) ---- */
+/* ---- Sticky terminal topbar (nav) ---- */
 .pyscal-article__nav {
-  display: flex; gap: 8px; flex-wrap: wrap; align-items: center;
-  padding-bottom: clamp(20px, 3vw, 28px); margin-bottom: 8px;
+  position: sticky; top: 0; z-index: 20;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 12px;
+  margin: 0 calc(-1 * clamp(16px, 4.5vw, 28px)) clamp(20px, 4vw, 28px);
+  padding: 10px clamp(16px, 4.5vw, 28px);
+  background: color-mix(in oklab, var(--art-bg) 82%, transparent);
+  backdrop-filter: saturate(140%) blur(10px);
+  -webkit-backdrop-filter: saturate(140%) blur(10px);
   border-bottom: 1px solid var(--art-border);
   font-size: 13px;
 }
-.pyscal-article__nav a {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 8px 14px; border-radius: 999px;
-  min-height: 36px;
-  border: 1px solid var(--art-border);
-  background: var(--art-surface);
-  color: var(--art-text-2);
-  font-weight: 500;
-  text-decoration: none;
-  transition: border-color .15s, background .15s, color .15s;
-}
-.pyscal-article__nav a:hover {
-  border-color: var(--art-brand); color: var(--art-brand);
-  background: var(--art-brand-soft);
-}
-.pyscal-article__nav a:focus-visible {
-  outline: 2px solid var(--art-brand);
-  outline-offset: 2px;
+.pyscal-article__nav::after {
+  content: "";
+  position: absolute; left: 0; right: 0; bottom: -1px;
+  height: 2px;
+  background: linear-gradient(90deg, var(--art-brand) 0%, var(--art-brand) 33%, transparent 33%);
+  pointer-events: none;
+  opacity: 0.9;
+  box-shadow: var(--art-brand-glow);
 }
 .pyscal-article__nav a[data-nav="back"] {
-  margin-right: auto;
-  border-color: transparent;
-  background: transparent;
-  padding-left: 0;
+  display: inline-flex; align-items: center; gap: 6px;
+  min-height: 40px; padding: 0 4px 0 0;
   color: var(--art-text-m);
   font-weight: 600;
+  border-bottom: 0 !important;
+  text-decoration: none;
+  border-radius: 6px;
+  transition: color .15s;
 }
-.pyscal-article__nav a[data-nav="back"]:hover {
-  background: transparent; color: var(--art-brand); border-color: transparent;
+.pyscal-article__nav a[data-nav="back"]:hover { color: var(--art-brand); }
+.pyscal-article__nav a[data-nav="back"]:focus-visible { outline: 2px solid var(--art-brand); outline-offset: 3px; }
+.pyscal-article__nav-label {
+  grid-column: 3;
+  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--art-text-d);
 }
-@media (max-width: 520px) {
-  .pyscal-article__nav { gap: 6px; }
-  .pyscal-article__nav a[data-nav="back"] {
-    flex-basis: 100%; margin-right: 0; margin-bottom: 4px;
-  }
+/* Hide any sibling links in nav — sibling articles live in the footer module */
+.pyscal-article__nav a:not([data-nav="back"]) { display: none; }
+
+/* ---- Header block ---- */
+.pyscal-article__header {
+  padding: clamp(8px, 2vw, 16px) 0 clamp(20px, 4vw, 28px);
+  border-bottom: 1px solid var(--art-border);
+  margin-bottom: clamp(24px, 4vw, 32px);
+}
+.pyscal-article__tags {
+  display: flex; flex-wrap: wrap; gap: 6px;
+  margin-bottom: 14px;
+}
+.pyscal-article__tag {
+  display: inline-flex; align-items: center;
+  padding: 4px 8px;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 10px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.08em;
+  color: var(--art-brand);
+  background: var(--art-brand-soft);
+  border: 1px solid color-mix(in oklab, var(--art-brand) 30%, transparent);
+  border-radius: 3px;
+}
+.pyscal-article__tag[data-variant="muted"] {
+  color: var(--art-text-m);
+  background: var(--art-surface);
+  border-color: var(--art-border);
 }
 
-/* ---- Tables ---- */
-.pyscal-article table {
-  width: 100%; border-collapse: separate; border-spacing: 0;
-  margin: 16px 0 20px;
-  font-variant-numeric: tabular-nums;
-  font-size: clamp(13px, 1.5vw, 14px);
+.pyscal-article h1,
+.pyscal-seo h1 {
+  font-size: clamp(26px, 6.2vw, 34px); line-height: 1.1;
+  margin: 0 0 12px; font-weight: 700;
+  color: var(--art-text); letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+.pyscal-article__lede {
+  font-size: clamp(14px, 1.7vw, 15px);
+  color: var(--art-text-m);
+  line-height: 1.55;
+  margin: 0;
+}
+
+/* ---- Section headings with brand accent bar ---- */
+.pyscal-article h2,
+.pyscal-seo h2 {
+  position: relative;
+  font-size: clamp(17px, 2.5vw, 20px);
+  margin: clamp(36px, 6vw, 44px) 0 14px;
+  padding-left: 12px;
+  font-weight: 700;
+  color: var(--art-text); letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+.pyscal-article h2::before,
+.pyscal-seo h2::before {
+  content: "";
+  position: absolute; left: 0; top: 6px; bottom: 6px;
+  width: 3px;
+  background: var(--art-brand);
+  box-shadow: var(--art-brand-glow);
+  border-radius: 2px;
+}
+.pyscal-article h3,
+.pyscal-seo h3 {
+  font-size: 15px; margin: 22px 0 8px;
+  font-weight: 700; color: var(--art-text);
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  letter-spacing: -0.01em;
+}
+
+/* ---- Prose ---- */
+.pyscal-article p,
+.pyscal-seo p { margin: 0 0 14px; color: var(--art-text-2); }
+.pyscal-article ul, .pyscal-article ol,
+.pyscal-seo ul, .pyscal-seo ol {
+  padding: 0; margin: 8px 0 18px; list-style: none;
+  color: var(--art-text-2);
+}
+.pyscal-article li,
+.pyscal-seo li {
+  position: relative;
+  padding-left: 22px;
+  margin: 8px 0;
+}
+.pyscal-article li::before,
+.pyscal-seo li::before {
+  content: "▸";
+  position: absolute; left: 4px; top: 0;
+  color: var(--art-brand);
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 12px;
+  line-height: 1.65;
+}
+.pyscal-article a,
+.pyscal-seo a {
+  color: var(--art-brand);
+  text-decoration: none;
+  border-bottom: 1px solid color-mix(in oklab, var(--art-brand) 40%, transparent);
+  transition: border-color .15s, color .15s;
+}
+.pyscal-article a:hover,
+.pyscal-seo a:hover { color: var(--art-brand-h); border-bottom-color: var(--art-brand-h); }
+.pyscal-article a:focus-visible,
+.pyscal-seo a:focus-visible {
+  outline: 2px solid var(--art-brand); outline-offset: 3px; border-radius: 3px;
+}
+.pyscal-article strong { color: var(--art-text); font-weight: 700; }
+.pyscal-article em { color: var(--art-text); font-style: italic; }
+
+/* ---- Inline code + formula blocks ---- */
+.pyscal-article code,
+.pyscal-seo code {
+  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12.5px;
+  background: var(--art-surface-2);
   border: 1px solid var(--art-border);
-  border-radius: 10px;
+  border-radius: 4px;
+  padding: 1px 6px;
+  color: var(--art-brand);
+  word-break: break-word;
+}
+/* Standalone paragraph that contains only <code> lines becomes a formula block */
+.pyscal-article p:has(> code:only-child),
+.pyscal-article p:has(> code + br) {
+  background: var(--art-surface);
+  border: 1px solid var(--art-border);
+  border-left: 3px solid var(--art-brand);
+  border-radius: 6px;
+  padding: 14px 16px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.pyscal-article p:has(> code:only-child) > code,
+.pyscal-article p:has(> code + br) > code {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: var(--art-text);
+  font-size: 13px;
+  display: inline-block;
+}
+.pyscal-article p:has(> code + br) > br + code {
+  display: inline-block;
+  margin-top: 4px;
+}
+
+/* ---- Tables (terminal grid) ---- */
+.pyscal-article__table-wrap {
+  margin: 16px 0 20px;
+  border: 1px solid var(--art-border);
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--art-surface);
+}
+.pyscal-article table {
+  width: 100%; border-collapse: collapse;
+  margin: 16px 0 20px;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+  font-size: 12.5px;
+  border: 1px solid var(--art-border);
+  border-radius: 6px;
   overflow: hidden;
   background: var(--art-surface);
   display: block;
@@ -336,82 +446,105 @@ html[data-pyscal-theme="dark"] {
   white-space: nowrap;
 }
 @media (min-width: 640px) {
-  .pyscal-article table {
-    display: table;
-    white-space: normal;
-  }
+  .pyscal-article table { display: table; white-space: normal; }
 }
-.pyscal-article th, .pyscal-article td {
-  border-bottom: 1px solid var(--art-border);
-  padding: 10px 12px; text-align: left;
-  vertical-align: top;
-  color: var(--art-text-2);
-}
-.pyscal-article tr:last-child td { border-bottom: 0; }
+.pyscal-article thead { background: var(--art-surface-2); }
 .pyscal-article th {
-  background: var(--art-surface-2);
-  font-weight: 700; color: var(--art-text); font-size: 12px;
-  text-transform: uppercase; letter-spacing: 0.5px;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--art-text-m);
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--art-border-strong);
   white-space: nowrap;
 }
+.pyscal-article td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--art-border);
+  color: var(--art-text-2);
+  vertical-align: top;
+}
+.pyscal-article tr:last-child td { border-bottom: 0; }
+.pyscal-article tbody tr:hover td { background: color-mix(in oklab, var(--art-brand) 5%, transparent); }
+.pyscal-article td strong { color: var(--art-brand); font-weight: 700; }
 
-/* ---- Editorial "Baca juga" / continue reading module ---- */
+/* ---- "Pelajari lebih lanjut" — footer card module ---- */
 .pyscal-article__more {
   margin-top: clamp(48px, 8vw, 72px);
   padding-top: clamp(20px, 4vw, 28px);
-  border-top: 2px solid var(--art-text);
+  border-top: 1px solid var(--art-border);
 }
 .pyscal-article__more-h {
-  font-family: 'Funnel Sans', sans-serif;
-  font-size: 11px; font-weight: 700; letter-spacing: 1.2px;
-  text-transform: uppercase; color: var(--art-text-m);
-  margin: 0 0 4px;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 10px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.18em;
+  color: var(--art-text-m);
+  margin: 0 0 14px;
 }
 .pyscal-article__cards {
-  display: flex; flex-direction: column;
+  display: flex; flex-direction: column; gap: 10px;
 }
 .pyscal-article__card {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  gap: 14px;
-  padding: 18px 4px;
-  border-bottom: 1px solid var(--art-border);
+  gap: 12px;
+  padding: 14px 16px;
+  background: var(--art-surface) !important;
+  border: 1px solid var(--art-border) !important;
+  border-radius: 6px !important;
   text-decoration: none !important;
   color: var(--art-text) !important;
-  border-radius: 0 !important;
-  background: transparent !important;
-  transition: color .15s, transform .15s, padding .15s;
+  transition: border-color .15s, background .15s, transform .15s;
   position: relative;
-}
-.pyscal-article__card::before {
-  content: counter(more-counter, decimal-leading-zero);
-  counter-increment: more-counter;
-  font-family: 'Funnel Sans', sans-serif;
-  font-size: 12px; font-weight: 700;
-  color: var(--art-text-m);
-  letter-spacing: 0.5px;
-  min-width: 28px;
 }
 .pyscal-article__card::after {
   content: "→";
-  font-size: 20px; font-weight: 400;
-  color: var(--art-text-m);
+  color: var(--art-text-d);
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 16px; line-height: 1;
   transition: transform .2s ease, color .2s ease;
 }
-.pyscal-article__cards { counter-reset: more-counter; }
-.pyscal-article__card:hover { color: var(--art-brand) !important; padding-left: 10px; }
-.pyscal-article__card:hover::after { transform: translateX(4px); color: var(--art-brand); }
-.pyscal-article__card:hover .pyscal-article__card-t { color: var(--art-brand); }
-.pyscal-article__card-inner {
-  display: flex; flex-direction: column; gap: 4px; min-width: 0;
+.pyscal-article__card:hover {
+  border-color: color-mix(in oklab, var(--art-brand) 50%, var(--art-border)) !important;
+  background: color-mix(in oklab, var(--art-brand) 6%, var(--art-surface)) !important;
 }
+.pyscal-article__card:hover::after { color: var(--art-brand); transform: translateX(3px); }
+.pyscal-article__card:hover .pyscal-article__card-t { color: var(--art-brand); }
+.pyscal-article__card:focus-visible {
+  outline: 2px solid var(--art-brand); outline-offset: 2px;
+}
+.pyscal-article__card-inner { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
 .pyscal-article__card-t {
   font-family: 'Funnel Sans', sans-serif;
-  font-size: 16px; font-weight: 700; line-height: 1.3;
+  font-size: 14px; font-weight: 700; line-height: 1.35;
   color: var(--art-text);
   transition: color .15s;
 }
 .pyscal-article__card-d {
-  font-size: 13px; color: var(--art-text-m); line-height: 1.45;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 11px; color: var(--art-text-m); line-height: 1.45;
+  letter-spacing: 0.01em;
+}
+
+/* ---- Callout aside ---- */
+.pyscal-article__note {
+  margin: 20px 0;
+  padding: 12px 14px;
+  background: var(--art-brand-soft);
+  border-left: 3px solid var(--art-brand);
+  border-radius: 0 6px 6px 0;
+  font-size: 13px;
+  color: var(--art-text-2);
+}
+.pyscal-article__note-label {
+  display: inline-block;
+  margin-right: 8px;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 10px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.15em;
+  color: var(--art-brand);
 }
