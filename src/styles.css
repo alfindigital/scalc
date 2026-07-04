@@ -358,38 +358,38 @@ html[data-pyscal-theme="dark"] {
 /* ---- Card link grid (Baca juga / Pelajari lebih lanjut) ---- */
 .pyscal-article__more {
   margin-top: clamp(40px, 6vw, 56px);
-  padding-top: clamp(24px, 4vw, 32px);
-  border-top: 1px solid var(--art-border);
+  padding: 14px 16px;
+  border: 1px solid var(--art-border);
+  border-radius: 10px;
+  background: var(--art-surface-2);
+  box-shadow: var(--art-shadow);
 }
 .pyscal-article__more-h {
   font-size: 11px; font-weight: 700; letter-spacing: 0.8px;
   text-transform: uppercase; color: var(--art-text-m);
-  margin: 0 0 14px;
+  margin: 0 0 10px;
+  font-family: 'Funnel Sans', sans-serif;
 }
 .pyscal-article__cards {
-  display: grid; gap: 10px;
-  grid-template-columns: 1fr;
-}
-@media (min-width: 640px) {
-  .pyscal-article__cards { grid-template-columns: 1fr 1fr; }
+  display: flex; flex-direction: column; gap: 6px;
 }
 .pyscal-article__card {
-  display: flex; flex-direction: column; gap: 4px;
-  padding: 14px 16px;
+  display: flex; flex-direction: column; gap: 2px;
+  padding: 10px 12px;
   border: 1px solid var(--art-border);
-  border-radius: 10px;
+  border-radius: 8px;
   background: var(--art-surface);
   text-decoration: none !important;
-  transition: border-color .15s, background .15s, transform .15s;
-  box-shadow: var(--art-shadow);
+  transition: border-color .15s, background .15s;
 }
 .pyscal-article__card:hover {
   border-color: var(--art-brand);
   background: var(--art-brand-soft);
 }
 .pyscal-article__card-t {
-  font-size: 14.5px; font-weight: 700; color: var(--art-brand); line-height: 1.35;
+  font-family: 'Funnel Sans', sans-serif;
+  font-size: 14px; font-weight: 600; color: var(--art-brand); line-height: 1.35;
 }
 .pyscal-article__card-d {
-  font-size: 12.5px; color: var(--art-text-m); line-height: 1.45;
+  font-size: 12.5px; color: var(--art-text-m); line-height: 1.4;
 }
