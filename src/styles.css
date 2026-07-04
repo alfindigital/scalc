@@ -355,41 +355,63 @@ html[data-pyscal-theme="dark"] {
   white-space: nowrap;
 }
 
-/* ---- Card link grid (Baca juga / Pelajari lebih lanjut) ---- */
+/* ---- Editorial "Baca juga" / continue reading module ---- */
 .pyscal-article__more {
-  margin-top: clamp(40px, 6vw, 56px);
-  padding: 14px 16px;
-  border: 1px solid var(--art-border);
-  border-radius: 10px;
-  background: var(--art-surface-2);
-  box-shadow: var(--art-shadow);
+  margin-top: clamp(48px, 8vw, 72px);
+  padding-top: clamp(20px, 4vw, 28px);
+  border-top: 2px solid var(--art-text);
 }
 .pyscal-article__more-h {
-  font-size: 11px; font-weight: 700; letter-spacing: 0.8px;
-  text-transform: uppercase; color: var(--art-text-m);
-  margin: 0 0 10px;
   font-family: 'Funnel Sans', sans-serif;
+  font-size: 11px; font-weight: 700; letter-spacing: 1.2px;
+  text-transform: uppercase; color: var(--art-text-m);
+  margin: 0 0 4px;
 }
 .pyscal-article__cards {
-  display: flex; flex-direction: column; gap: 6px;
+  display: flex; flex-direction: column;
 }
 .pyscal-article__card {
-  display: flex; flex-direction: column; gap: 2px;
-  padding: 10px 12px;
-  border: 1px solid var(--art-border);
-  border-radius: 8px;
-  background: var(--art-surface);
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 4px;
+  border-bottom: 1px solid var(--art-border);
   text-decoration: none !important;
-  transition: border-color .15s, background .15s;
+  color: var(--art-text) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  transition: color .15s, transform .15s, padding .15s;
+  position: relative;
 }
-.pyscal-article__card:hover {
-  border-color: var(--art-brand);
-  background: var(--art-brand-soft);
+.pyscal-article__card::before {
+  content: counter(more-counter, decimal-leading-zero);
+  counter-increment: more-counter;
+  font-family: 'Funnel Sans', sans-serif;
+  font-size: 12px; font-weight: 700;
+  color: var(--art-text-m);
+  letter-spacing: 0.5px;
+  min-width: 28px;
+}
+.pyscal-article__card::after {
+  content: "→";
+  font-size: 20px; font-weight: 400;
+  color: var(--art-text-m);
+  transition: transform .2s ease, color .2s ease;
+}
+.pyscal-article__cards { counter-reset: more-counter; }
+.pyscal-article__card:hover { color: var(--art-brand) !important; padding-left: 10px; }
+.pyscal-article__card:hover::after { transform: translateX(4px); color: var(--art-brand); }
+.pyscal-article__card:hover .pyscal-article__card-t { color: var(--art-brand); }
+.pyscal-article__card-inner {
+  display: flex; flex-direction: column; gap: 4px; min-width: 0;
 }
 .pyscal-article__card-t {
   font-family: 'Funnel Sans', sans-serif;
-  font-size: 14px; font-weight: 600; color: var(--art-brand); line-height: 1.35;
+  font-size: 16px; font-weight: 700; line-height: 1.3;
+  color: var(--art-text);
+  transition: color .15s;
 }
 .pyscal-article__card-d {
-  font-size: 12.5px; color: var(--art-text-m); line-height: 1.4;
+  font-size: 13px; color: var(--art-text-m); line-height: 1.45;
 }
