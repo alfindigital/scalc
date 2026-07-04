@@ -42,8 +42,19 @@ function PanduanPage() {
           <Link to="/" data-nav="back">← Kalkulator</Link>
           <Link to="/rumus-fee-broker-idx">Rumus fee broker</Link>
           <Link to="/tick-size-idx">Tick size BEI</Link>
+          <span className="pyscal-article__nav-label">PYSCAL / EDU</span>
         </nav>
-        <h1>Panduan Averaging Down Saham IDX</h1>
+        <header className="pyscal-article__header">
+          <div className="pyscal-article__tags">
+            <span className="pyscal-article__tag">Strategi</span>
+            <span className="pyscal-article__tag" data-variant="muted">Menengah</span>
+          </div>
+          <h1>Panduan Averaging Down Saham IDX</h1>
+          <p className="pyscal-article__lede">
+            Cara menurunkan <strong>average price</strong> lewat pyramid bid tanpa jadi
+            <em> catching falling knife</em> — kapan masuk akal, kapan berbahaya.
+          </p>
+        </header>
         <p>
           <em>Averaging down</em> adalah menambah posisi beli saat harga saham turun
           di bawah harga beli awal. Tujuannya menurunkan <strong>average price</strong>{" "}
