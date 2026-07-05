@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { TutorialBookmark } from "@/components/TutorialBookmark";
+import { TagChips } from "@/components/TagChips";
 
 const URL = "https://pyscal.lovable.app/panduan-averaging-down";
 const TITLE = "Panduan Averaging Down Saham IDX — Kapan Pakai, Kapan Hindari";
@@ -45,10 +46,7 @@ function PanduanPage() {
           <TutorialBookmark path="/panduan-averaging-down" title="Panduan Averaging Down Saham IDX" />
         </nav>
         <header className="pyscal-article__header">
-          <div className="pyscal-article__tags">
-            <span className="pyscal-article__tag">Strategi</span>
-            <span className="pyscal-article__tag" data-variant="muted">Menengah</span>
-          </div>
+          <TagChips items={[{ label: "Strategi" }, { label: "Menengah", variant: "muted" }]} />
           <h1>Panduan Averaging Down Saham IDX</h1>
           <p className="pyscal-article__lede">
             Cara menurunkan <strong>average price</strong> lewat pyramid bid tanpa jadi
