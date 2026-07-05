@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { TutorialBookmark } from "@/components/TutorialBookmark";
+import { TagChips } from "@/components/TagChips";
 
 const URL = "https://pyscal.lovable.app/rumus-fee-broker-idx";
 const TITLE = "Rumus Fee Broker Saham IDX — Cara Hitung Biaya Beli & Jual";
@@ -45,10 +46,7 @@ function FeePage() {
           <TutorialBookmark path="/rumus-fee-broker-idx" title="Rumus Fee Broker Saham IDX" />
         </nav>
         <header className="pyscal-article__header">
-          <div className="pyscal-article__tags">
-            <span className="pyscal-article__tag">Fees</span>
-            <span className="pyscal-article__tag" data-variant="muted">Dasar</span>
-          </div>
+          <TagChips items={[{ label: "Fees" }, { label: "Dasar", variant: "muted" }]} />
           <h1>Rumus Fee Broker Saham IDX</h1>
           <p className="pyscal-article__lede">
             Komponen fee beli &amp; jual di BEI (levy, PPN, PPh) plus rumus
