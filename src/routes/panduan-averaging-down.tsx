@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { TutorialBookmark } from "@/components/TutorialBookmark";
 import { TagChips } from "@/components/TagChips";
 
-const URL = "https://pyscal.lovable.app/panduan-averaging-down";
+const URL = "https://scalc.alfindigital.com/panduan-averaging-down";
 const TITLE = "Panduan Averaging Down Saham IDX — Kapan Pakai, Kapan Hindari";
 const DESC =
   "Averaging down saham di BEI: prinsip, cara hitung average price, risiko psikologis, dan skenario kapan pyramid bid layak dipakai untuk trader IDX.";

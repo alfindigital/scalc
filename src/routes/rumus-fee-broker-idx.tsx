@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { TutorialBookmark } from "@/components/TutorialBookmark";
 import { TagChips } from "@/components/TagChips";
 
-const URL = "https://pyscal.lovable.app/rumus-fee-broker-idx";
+const URL = "https://scalc.alfindigital.com/rumus-fee-broker-idx";
 const TITLE = "Rumus Fee Broker Saham IDX — Cara Hitung Biaya Beli & Jual";
 const DESC =
   "Cara hitung fee beli dan jual saham di IDX. Komponen fee broker (levy, PPN, PPh), rumus break-even setelah fee, serta contoh perhitungan untuk Ajaib, Mirae, Stockbit, dan IPOT.";
