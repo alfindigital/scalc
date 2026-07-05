@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { TutorialBookmark } from "@/components/TutorialBookmark";
 import { TagChips } from "@/components/TagChips";
 
-const URL = "https://pyscal.lovable.app/tick-size-idx";
+const URL = "https://scalc.alfindigital.com/tick-size-idx";
 const TITLE = "Tick Size / Fraksi Harga Saham BEI — Tabel Lengkap 2025";
 const DESC =
   "Tabel lengkap tick size (fraksi harga) saham di Bursa Efek Indonesia per rentang harga. Aturan minimum kenaikan harga, contoh, dan cara PYSCAL menegakkan tick size di pyramid bid.";

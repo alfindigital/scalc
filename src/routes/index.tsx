@@ -9,10 +9,10 @@ export const Route = createFileRoute("/")({
     meta: [
       { title: "PYSCAL — Pyramid Bid Calculator untuk Trader IDX" },
       { name: "description", content: "Kalkulator pyramid averaging-down untuk trader saham IDX. Hitung bid berlapis, simpan history, dan jalankan offline tanpa daftar." },
-      { property: "og:url", content: "https://pyscal.lovable.app/" },
+      { property: "og:url", content: "https://scalc.alfindigital.com/" },
     ],
     links: [
-      { rel: "canonical", href: "https://pyscal.lovable.app/" },
+      { rel: "canonical", href: "https://scalc.alfindigital.com/" },
     ],
   }),
 });
