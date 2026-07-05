@@ -158,7 +158,13 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <Outlet />
-      <Toaster position="top-center" richColors closeButton />
+      <Toaster
+        position="top-center"
+        richColors
+        closeButton
+        hotkey={["Escape"]}
+        toastOptions={{ closeButton: true }}
+      />
     </QueryClientProvider>
   );
 }
