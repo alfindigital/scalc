@@ -1,9 +1,13 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
 import {
+  consumeResumeTarget,
   isBookmarked,
+  loadPosition,
   loadLastRead,
+  markResumeTarget,
+  savePosition,
   setLastRead,
   toggleBookmark,
 } from "@/lib/bookmarks";
@@ -16,6 +20,40 @@ interface Props {
 export function TutorialBookmark({ path, title }: Props) {
   const [saved, setSaved] = useState(false);
   const [resume, setResume] = useState<{ path: string; title: string } | null>(null);
+  const activeToastId = useRef<string | number | null>(null);
+
+  // ---- Restore scroll on mount (from prior visit or explicit "Lanjutkan") ----
+  useEffect(() => {
+    const savedY = loadPosition(path);
+    const isResume = consumeResumeTarget(path);
+    if (savedY > 40 && (isResume || window.scrollY < 20)) {
+      // Wait one frame so layout is stable, then restore scroll accurately.
+      requestAnimationFrame(() => {
+        window.scrollTo({ top: savedY, behavior: "auto" });
+      });
+    }
+  }, [path]);
+
+  // ---- Persist scroll position (throttled via rAF) ----
+  useEffect(() => {
+    let ticking = false;
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        savePosition(path, window.scrollY);
+        ticking = false;
+      });
+    };
+    const onLeave = () => savePosition(path, window.scrollY);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("pagehide", onLeave);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("pagehide", onLeave);
+      onLeave();
+    };
+  }, [path]);
 
   useEffect(() => {
     // Track last-read only on real navigation, not on future turns.
@@ -29,32 +67,70 @@ export function TutorialBookmark({ path, title }: Props) {
     // from the last-read tutorial (when it differs from the current page).
     if (alreadySaved && prev && prev.path !== path) {
       const id = `resume:${path}`;
+      activeToastId.current = id;
       toast(`Tutorial ini sudah kamu simpan`, {
         id,
         description: `Lanjutkan dari terakhir: ${prev.title}`,
-        duration: 8000,
+        duration: 12000,
+        dismissible: true,
         action: {
           label: "Lanjutkan",
           onClick: () => {
+            markResumeTarget(prev.path);
             window.location.href = prev.path;
           },
         },
+        onDismiss: () => {
+          activeToastId.current = null;
+        },
+        onAutoClose: () => {
+          activeToastId.current = null;
+        },
       });
-    }
 
+      // Move focus to the toast's action button so keyboard users can
+      // press Enter to resume, or Escape to dismiss.
+      const focusTimer = window.setTimeout(() => {
+        const el = document.querySelector<HTMLElement>(
+          `[data-sonner-toast][data-id="${id}"] [data-button]`,
+        );
+        el?.focus();
+      }, 80);
+
+      const onKey = (e: KeyboardEvent) => {
+        if (e.key === "Escape" && activeToastId.current) {
+          toast.dismiss(activeToastId.current);
+          activeToastId.current = null;
+        }
+      };
+      window.addEventListener("keydown", onKey);
+
+      return () => {
+        window.clearTimeout(focusTimer);
+        window.removeEventListener("keydown", onKey);
+      };
+    }
+  }, [path, title]);
+
+  useEffect(() => {
     const onChange = () => setSaved(isBookmarked(path));
     window.addEventListener("pyscal:bookmarks-changed", onChange);
     return () => window.removeEventListener("pyscal:bookmarks-changed", onChange);
-  }, [path, title]);
+  }, [path]);
 
   return (
-    <div className="pyscal-bookmark" role="group" aria-label="Kontrol bookmark tutorial">
+    <div
+      className="pyscal-bookmark"
+      role="group"
+      aria-label="Kontrol bookmark tutorial"
+    >
       {resume ? (
         <Link
           to={resume.path}
           className="pyscal-bookmark__resume"
           aria-label={`Lanjutkan tutorial: ${resume.title}`}
           title={`Lanjutkan: ${resume.title}`}
+          onClick={() => markResumeTarget(resume.path)}
         >
           <span className="pyscal-bookmark__resume-label" aria-hidden="true">Lanjutkan</span>
           <span className="pyscal-bookmark__resume-title">{resume.title}</span>
