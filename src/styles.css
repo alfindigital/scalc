@@ -233,11 +233,11 @@ html[data-pyscal-theme="dark"] {
 .pyscal-article__nav {
   position: sticky; top: 0; z-index: 20;
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
   margin: 0 calc(-1 * clamp(16px, 4.5vw, 28px)) clamp(20px, 4vw, 28px);
-  padding: 10px clamp(16px, 4.5vw, 28px);
+  padding: 8px clamp(12px, 4vw, 28px);
   background: color-mix(in oklab, var(--art-bg) 82%, transparent);
   backdrop-filter: saturate(140%) blur(10px);
   -webkit-backdrop-filter: saturate(140%) blur(10px);
@@ -255,27 +255,123 @@ html[data-pyscal-theme="dark"] {
 }
 .pyscal-article__nav a[data-nav="back"] {
   display: inline-flex; align-items: center; gap: 6px;
-  min-height: 40px; padding: 0 4px 0 0;
+  min-height: 40px; padding: 0 6px 0 2px;
+  min-width: 0;
   color: var(--art-text-m);
   font-weight: 600;
   border-bottom: 0 !important;
   text-decoration: none;
   border-radius: 6px;
   transition: color .15s;
+  white-space: nowrap;
 }
 .pyscal-article__nav a[data-nav="back"]:hover { color: var(--art-brand); }
 .pyscal-article__nav a[data-nav="back"]:focus-visible { outline: 2px solid var(--art-brand); outline-offset: 3px; }
 .pyscal-article__nav-label {
-  grid-column: 3;
+  grid-column: 2;
+  justify-self: center;
   font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--art-text-d);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+@media (max-width: 419px) {
+  .pyscal-article__nav-label { display: none; }
 }
 /* Hide any sibling links in nav — sibling articles live in the footer module */
 .pyscal-article__nav a:not([data-nav="back"]) { display: none; }
+
+/* ---- Bookmark controls in nav ---- */
+.pyscal-bookmark {
+  grid-column: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.pyscal-bookmark__resume {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: min(46vw, 260px);
+  min-height: 32px;
+  padding: 4px 8px;
+  background: var(--art-surface);
+  border: 1px solid var(--art-border) !important;
+  border-radius: 4px;
+  color: var(--art-text-2) !important;
+  font-size: 11px;
+  text-decoration: none;
+  border-bottom: 0 !important;
+  transition: border-color .15s, color .15s, background .15s;
+  overflow: hidden;
+}
+.pyscal-bookmark__resume:hover {
+  color: var(--art-brand) !important;
+  border-color: color-mix(in oklab, var(--art-brand) 45%, var(--art-border)) !important;
+  background: color-mix(in oklab, var(--art-brand) 6%, var(--art-surface));
+}
+.pyscal-bookmark__resume:focus-visible { outline: 2px solid var(--art-brand); outline-offset: 2px; }
+.pyscal-bookmark__resume-label {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--art-brand);
+  flex-shrink: 0;
+}
+.pyscal-bookmark__resume-title {
+  font-size: 11px;
+  color: var(--art-text-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+@media (max-width: 519px) {
+  .pyscal-bookmark__resume-title { display: none; }
+  .pyscal-bookmark__resume { padding: 4px 8px; }
+}
+.pyscal-bookmark__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 4px 10px;
+  background: var(--art-surface);
+  border: 1px solid var(--art-border);
+  border-radius: 4px;
+  color: var(--art-text-m);
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color .15s, border-color .15s, background .15s;
+  flex-shrink: 0;
+}
+.pyscal-bookmark__btn:hover {
+  color: var(--art-brand);
+  border-color: color-mix(in oklab, var(--art-brand) 45%, var(--art-border));
+}
+.pyscal-bookmark__btn:focus-visible { outline: 2px solid var(--art-brand); outline-offset: 2px; }
+.pyscal-bookmark__btn[data-saved="true"] {
+  color: var(--art-brand);
+  border-color: color-mix(in oklab, var(--art-brand) 50%, var(--art-border));
+  background: var(--art-brand-soft);
+}
+@media (max-width: 419px) {
+  .pyscal-bookmark__btn-label { display: none; }
+  .pyscal-bookmark__btn { padding: 4px 8px; }
+}
 
 /* ---- Header block ---- */
 .pyscal-article__header {
@@ -435,7 +531,7 @@ html[data-pyscal-theme="dark"] {
   margin: 16px 0 20px;
   font-family: 'JetBrains Mono', ui-monospace, monospace;
   font-variant-numeric: tabular-nums;
-  font-size: 12.5px;
+  font-size: 12px;
   border: 1px solid var(--art-border);
   border-radius: 6px;
   overflow: hidden;
@@ -443,10 +539,11 @@ html[data-pyscal-theme="dark"] {
   display: block;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
-  white-space: nowrap;
+  white-space: normal;
+  max-width: 100%;
 }
 @media (min-width: 640px) {
-  .pyscal-article table { display: table; white-space: normal; }
+  .pyscal-article table { display: table; font-size: 12.5px; }
 }
 .pyscal-article thead { background: var(--art-surface-2); }
 .pyscal-article th {
@@ -456,16 +553,17 @@ html[data-pyscal-theme="dark"] {
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--art-text-m);
-  padding: 10px 12px;
+  padding: 8px 10px;
   text-align: left;
   border-bottom: 1px solid var(--art-border-strong);
   white-space: nowrap;
 }
 .pyscal-article td {
-  padding: 10px 12px;
+  padding: 8px 10px;
   border-bottom: 1px solid var(--art-border);
   color: var(--art-text-2);
   vertical-align: top;
+  word-break: break-word;
 }
 .pyscal-article tr:last-child td { border-bottom: 0; }
 .pyscal-article tbody tr:hover td { background: color-mix(in oklab, var(--art-brand) 5%, transparent); }

@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { TutorialBookmark } from "@/components/TutorialBookmark";
 
 const URL = "https://pyscal.lovable.app/panduan-averaging-down";
 const TITLE = "Panduan Averaging Down Saham IDX — Kapan Pakai, Kapan Hindari";
@@ -40,9 +41,8 @@ function PanduanPage() {
       <div className="pyscal-article__inner">
         <nav className="pyscal-article__nav" aria-label="Navigasi">
           <Link to="/" data-nav="back">← Kalkulator</Link>
-          <Link to="/rumus-fee-broker-idx">Rumus fee broker</Link>
-          <Link to="/tick-size-idx">Tick size BEI</Link>
           <span className="pyscal-article__nav-label">PYSCAL / EDU</span>
+          <TutorialBookmark path="/panduan-averaging-down" title="Panduan Averaging Down Saham IDX" />
         </nav>
         <header className="pyscal-article__header">
           <div className="pyscal-article__tags">
