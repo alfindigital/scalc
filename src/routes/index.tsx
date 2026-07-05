@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import Pyscal from "@/components/Pyscal";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { setupPWA, bindInstallPrompt } from "@/lib/pwa";
+
+const Pyscal = lazy(() => import("@/components/Pyscal"));
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -31,7 +32,9 @@ function Index() {
     <>
       <main id="main">
         {mounted ? (
-          <Pyscal />
+          <Suspense fallback={null}>
+            <Pyscal />
+          </Suspense>
         ) : (
           <div style={{ minHeight: "60vh", padding: "24px" }}>
             <h1 style={{ fontSize: "28px", fontWeight: 700, margin: 0 }}>PYSCAL</h1>
