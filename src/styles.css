@@ -552,7 +552,9 @@ html[data-pyscal-theme="dark"] {
   -webkit-overflow-scrolling: touch;
   white-space: normal;
   max-width: 100%;
+  scroll-margin-top: 72px;
 }
+.pyscal-article h2 { scroll-margin-top: 72px; }
 @media (min-width: 640px) {
   .pyscal-article table { display: table; font-size: 12.5px; }
 }
