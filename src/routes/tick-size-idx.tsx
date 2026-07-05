@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { TutorialBookmark } from "@/components/TutorialBookmark";
+import { TagChips } from "@/components/TagChips";
 
 const URL = "https://pyscal.lovable.app/tick-size-idx";
 const TITLE = "Tick Size / Fraksi Harga Saham BEI — Tabel Lengkap 2025";
@@ -45,10 +46,7 @@ function TickPage() {
           <TutorialBookmark path="/tick-size-idx" title="Tick Size / Fraksi Harga Saham BEI" />
         </nav>
         <header className="pyscal-article__header">
-          <div className="pyscal-article__tags">
-            <span className="pyscal-article__tag">Market Rules</span>
-            <span className="pyscal-article__tag" data-variant="muted">Referensi</span>
-          </div>
+          <TagChips items={[{ label: "Market Rules" }, { label: "Referensi", variant: "muted" }]} />
           <h1>Tick Size / Fraksi Harga Saham BEI</h1>
           <p className="pyscal-article__lede">
             Tabel fraksi harga resmi Bursa Efek Indonesia — minimum kenaikan / penurunan

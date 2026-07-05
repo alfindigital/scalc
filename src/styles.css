@@ -389,6 +389,7 @@ html[data-pyscal-theme="dark"] {
 .pyscal-article__tag {
   display: inline-flex; align-items: center;
   padding: 4px 8px;
+  margin: 0;
   font-family: 'JetBrains Mono', ui-monospace, monospace;
   font-size: 10px; font-weight: 700;
   text-transform: uppercase; letter-spacing: 0.08em;
@@ -400,10 +401,17 @@ html[data-pyscal-theme="dark"] {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  cursor: default;
+  -webkit-appearance: none;
+  appearance: none;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  line-height: 1.4;
 }
 .pyscal-article__tag:focus-visible {
   outline: 2px solid var(--art-brand);
   outline-offset: 2px;
+  color: var(--art-brand);
+  background: color-mix(in oklab, var(--art-brand) 12%, var(--art-brand-soft));
 }
 .pyscal-article__tag[data-variant="muted"] {
   color: var(--art-text-m);
@@ -587,6 +595,8 @@ html[data-pyscal-theme="dark"] {
   margin-top: clamp(48px, 8vw, 72px);
   padding-top: clamp(20px, 4vw, 28px);
   border-top: 1px solid var(--art-border);
+  content-visibility: auto;
+  contain-intrinsic-size: 320px;
 }
 .pyscal-article__more-h {
   font-family: 'JetBrains Mono', ui-monospace, monospace;
