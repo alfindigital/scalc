@@ -2429,24 +2429,6 @@ function InfoModal({ onClose, shortcuts }) {
               </li>
             </ol>
           </section>
-
-          <section className="info-sec">
-            <h3 className="info-h">Pelajari lebih lanjut</h3>
-            <div className="info-links">
-              <a className="info-link" href="/panduan-averaging-down">
-                <span className="info-link-t">Panduan averaging-down saham</span>
-                <span className="info-link-d">Kapan pakai, kapan hindari.</span>
-              </a>
-              <a className="info-link" href="/rumus-fee-broker-idx">
-                <span className="info-link-t">Rumus fee broker IDX</span>
-                <span className="info-link-d">Cara hitung biaya beli &amp; jual saham.</span>
-              </a>
-              <a className="info-link" href="/tick-size-idx">
-                <span className="info-link-t">Tick size / fraksi harga BEI</span>
-                <span className="info-link-d">Tabel lengkap per rentang harga.</span>
-              </a>
-            </div>
-          </section>
         </div>
       </div>
     </div>
