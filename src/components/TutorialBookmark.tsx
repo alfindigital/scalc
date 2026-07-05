@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
+import { toast } from "sonner";
 import {
   isBookmarked,
   loadLastRead,
@@ -21,7 +22,25 @@ export function TutorialBookmark({ path, title }: Props) {
     const prev = loadLastRead();
     if (prev && prev.path !== path) setResume(prev);
     setLastRead(path, title);
-    setSaved(isBookmarked(path));
+    const alreadySaved = isBookmarked(path);
+    setSaved(alreadySaved);
+
+    // If user opens a tutorial they previously bookmarked, offer to resume
+    // from the last-read tutorial (when it differs from the current page).
+    if (alreadySaved && prev && prev.path !== path) {
+      const id = `resume:${path}`;
+      toast(`Tutorial ini sudah kamu simpan`, {
+        id,
+        description: `Lanjutkan dari terakhir: ${prev.title}`,
+        duration: 8000,
+        action: {
+          label: "Lanjutkan",
+          onClick: () => {
+            window.location.href = prev.path;
+          },
+        },
+      });
+    }
 
     const onChange = () => setSaved(isBookmarked(path));
     window.addEventListener("pyscal:bookmarks-changed", onChange);
@@ -29,7 +48,7 @@ export function TutorialBookmark({ path, title }: Props) {
   }, [path, title]);
 
   return (
-    <div className="pyscal-bookmark">
+    <div className="pyscal-bookmark" role="group" aria-label="Kontrol bookmark tutorial">
       {resume ? (
         <Link
           to={resume.path}
@@ -37,13 +56,20 @@ export function TutorialBookmark({ path, title }: Props) {
           aria-label={`Lanjutkan tutorial: ${resume.title}`}
           title={`Lanjutkan: ${resume.title}`}
         >
-          <span className="pyscal-bookmark__resume-label">Lanjutkan</span>
+          <span className="pyscal-bookmark__resume-label" aria-hidden="true">Lanjutkan</span>
           <span className="pyscal-bookmark__resume-title">{resume.title}</span>
         </Link>
       ) : null}
       <button
         type="button"
-        onClick={() => setSaved(toggleBookmark(path, title))}
+        onClick={() => {
+          const now = toggleBookmark(path, title);
+          setSaved(now);
+          toast[now ? "success" : "message"](
+            now ? "Tutorial disimpan" : "Bookmark dihapus",
+            { description: title, duration: 2500 },
+          );
+        }}
         className="pyscal-bookmark__btn"
         aria-pressed={saved}
         aria-label={saved ? "Hapus bookmark" : "Simpan bookmark"}
