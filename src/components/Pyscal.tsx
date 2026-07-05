@@ -1,6 +1,7 @@
 // @ts-nocheck
 const escHtml = (s) => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 import { useState, useMemo, useCallback, useEffect, useRef } from "react";
+import { Pin } from "lucide-react";
 import logoUrl from "@/assets/logo-pyscal.png";
 import { getTickSize, ceilTick, computeRows } from "@/lib/compute";
 import { n, nDec, nShort, terbilang, fmtPct, fmtPL, fmtTime } from "@/lib/format";
@@ -2270,7 +2271,7 @@ function HistoryModal({ history, viewingId, setViewingId, onClose, onDelete, onR
                       >
                         <div className="history-info">
                           <div className="history-avg" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                            {t.pinned && <span aria-label="Ter-pin" style={{ color: 'var(--brand)' }}>📌</span>}
+                            {t.pinned && <Pin size={12} strokeWidth={2.25} aria-label="Ter-pin" style={{ color: 'var(--brand)', fill: 'currentColor' }} />}
                             {isRenaming ? (
                               <input
                                 autoFocus
@@ -2310,7 +2311,7 @@ function HistoryModal({ history, viewingId, setViewingId, onClose, onDelete, onR
                             aria-pressed={!!t.pinned}
                             aria-label={t.pinned ? 'Lepas pin' : 'Pin trade'}
 
-                          >📌</button>
+                          ><Pin size={14} strokeWidth={2.25} style={t.pinned ? { fill: 'currentColor' } : undefined} /></button>
                           <button
                             className="history-act"
                             onClick={() => isRenaming ? commitRename() : startRename(t)}
