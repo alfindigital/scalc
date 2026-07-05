@@ -2,7 +2,7 @@
 const escHtml = (s) => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { Pin } from "lucide-react";
-import logoUrl from "@/assets/logo-pyscal.png";
+import logoUrl from "@/assets/logo-pyscal.webp";
 import { getTickSize, ceilTick, computeRows } from "@/lib/compute";
 import { n, nDec, nShort, terbilang, fmtPct, fmtPL, fmtTime } from "@/lib/format";
 import {
