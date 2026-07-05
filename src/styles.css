@@ -382,6 +382,9 @@ html[data-pyscal-theme="dark"] {
 .pyscal-article__tags {
   display: flex; flex-wrap: wrap; gap: 6px;
   margin-bottom: 14px;
+  /* Cap to ~2 rows on mobile so header doesn't balloon */
+  max-height: calc((1em + 12px) * 2 + 6px);
+  overflow: hidden;
 }
 .pyscal-article__tag {
   display: inline-flex; align-items: center;
@@ -393,6 +396,14 @@ html[data-pyscal-theme="dark"] {
   background: var(--art-brand-soft);
   border: 1px solid color-mix(in oklab, var(--art-brand) 30%, transparent);
   border-radius: 3px;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pyscal-article__tag:focus-visible {
+  outline: 2px solid var(--art-brand);
+  outline-offset: 2px;
 }
 .pyscal-article__tag[data-variant="muted"] {
   color: var(--art-text-m);
