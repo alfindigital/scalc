@@ -1,5 +1,4 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { TutorialBookmark } from "@/components/TutorialBookmark";
 import { TagChips } from "@/components/TagChips";
 
 const URL = "https://scalc.alfindigital.com/tick-size-idx";
@@ -43,7 +42,6 @@ function TickPage() {
         <nav className="pyscal-article__nav" aria-label="Navigasi">
           <Link to="/" data-nav="back">← Kalkulator</Link>
           <span className="pyscal-article__nav-label">PYSCAL / EDU</span>
-          <TutorialBookmark path="/tick-size-idx" title="Tick Size / Fraksi Harga Saham BEI" />
         </nav>
         <header className="pyscal-article__header">
           <TagChips items={[{ label: "Market Rules" }, { label: "Referensi", variant: "muted" }]} />

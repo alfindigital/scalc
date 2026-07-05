@@ -1,5 +1,4 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { TutorialBookmark } from "@/components/TutorialBookmark";
 import { TagChips } from "@/components/TagChips";
 
 const URL = "https://scalc.alfindigital.com/rumus-fee-broker-idx";
@@ -43,7 +42,6 @@ function FeePage() {
         <nav className="pyscal-article__nav" aria-label="Navigasi">
           <Link to="/" data-nav="back">← Kalkulator</Link>
           <span className="pyscal-article__nav-label">PYSCAL / EDU</span>
-          <TutorialBookmark path="/rumus-fee-broker-idx" title="Rumus Fee Broker Saham IDX" />
         </nav>
         <header className="pyscal-article__header">
           <TagChips items={[{ label: "Fees" }, { label: "Dasar", variant: "muted" }]} />

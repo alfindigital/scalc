@@ -1,5 +1,4 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { TutorialBookmark } from "@/components/TutorialBookmark";
 import { TagChips } from "@/components/TagChips";
 
 const URL = "https://scalc.alfindigital.com/panduan-averaging-down";
@@ -43,7 +42,6 @@ function PanduanPage() {
         <nav className="pyscal-article__nav" aria-label="Navigasi">
           <Link to="/" data-nav="back">← Kalkulator</Link>
           <span className="pyscal-article__nav-label">PYSCAL / EDU</span>
-          <TutorialBookmark path="/panduan-averaging-down" title="Panduan Averaging Down Saham IDX" />
         </nav>
         <header className="pyscal-article__header">
           <TagChips items={[{ label: "Strategi" }, { label: "Menengah", variant: "muted" }]} />
