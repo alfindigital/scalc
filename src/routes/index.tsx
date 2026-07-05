@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import Pyscal from "@/components/Pyscal";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { setupPWA, bindInstallPrompt } from "@/lib/pwa";
+
+const Pyscal = lazy(() => import("@/components/Pyscal"));
 
 export const Route = createFileRoute("/")({
   component: Index,
