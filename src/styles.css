@@ -172,39 +172,3 @@
   border-radius: 4px;
 }
 
-/* =====================================================================
-   Article / SEO pages — "Terminal-doc" aesthetic
-   Dark-first technical reference. Theme-aware via <html data-pyscal-theme>.
-   ===================================================================== */
-:root {
-  --art-bg: #ffffff;
-  --art-surface: #fafafa;
-  --art-surface-2: #f4f4f5;
-  --art-surface-3: #ffffff;
-  --art-border: #e4e4e7;
-  --art-border-strong: #d4d4d8;
-  --art-text: #09090b;
-  --art-text-2: #27272a;
-  --art-text-m: #71717a;
-  --art-text-d: #a1a1aa;
-  --art-brand: #A16207;
-  --art-brand-h: #854D0E;
-  --art-brand-soft: rgba(202, 138, 4, 0.10);
-  --art-brand-glow: 0 0 0 rgba(0,0,0,0);
-}
-html[data-pyscal-theme="dark"] {
-  --art-bg: #09090b;
-  --art-surface: #18181b;
-  --art-surface-2: #0f0f11;
-  --art-surface-3: #000000;
-  --art-border: #27272a;
-  --art-border-strong: #3f3f46;
-  --art-text: #fafafa;
-  --art-text-2: #e4e4e7;
-  --art-text-m: #a1a1aa;
-  --art-text-d: #71717a;
-  --art-brand: #EAB308;
-  --art-brand-h: #FACC15;
-  --art-brand-soft: rgba(234, 179, 8, 0.10);
-  --art-brand-glow: 0 0 12px rgba(234, 179, 8, 0.35);
-}
