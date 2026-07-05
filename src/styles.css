@@ -595,6 +595,8 @@ html[data-pyscal-theme="dark"] {
   margin-top: clamp(48px, 8vw, 72px);
   padding-top: clamp(20px, 4vw, 28px);
   border-top: 1px solid var(--art-border);
+  content-visibility: auto;
+  contain-intrinsic-size: 320px;
 }
 .pyscal-article__more-h {
   font-family: 'JetBrains Mono', ui-monospace, monospace;
