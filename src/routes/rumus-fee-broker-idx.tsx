@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { TutorialBookmark } from "@/components/TutorialBookmark";
 
 const URL = "https://pyscal.lovable.app/rumus-fee-broker-idx";
 const TITLE = "Rumus Fee Broker Saham IDX — Cara Hitung Biaya Beli & Jual";
@@ -40,9 +41,8 @@ function FeePage() {
       <div className="pyscal-article__inner">
         <nav className="pyscal-article__nav" aria-label="Navigasi">
           <Link to="/" data-nav="back">← Kalkulator</Link>
-          <Link to="/panduan-averaging-down">Panduan averaging-down</Link>
-          <Link to="/tick-size-idx">Tick size BEI</Link>
           <span className="pyscal-article__nav-label">PYSCAL / EDU</span>
+          <TutorialBookmark path="/rumus-fee-broker-idx" title="Rumus Fee Broker Saham IDX" />
         </nav>
         <header className="pyscal-article__header">
           <div className="pyscal-article__tags">

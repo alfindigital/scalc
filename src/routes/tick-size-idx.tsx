@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { TutorialBookmark } from "@/components/TutorialBookmark";
 
 const URL = "https://pyscal.lovable.app/tick-size-idx";
 const TITLE = "Tick Size / Fraksi Harga Saham BEI — Tabel Lengkap 2025";
@@ -40,9 +41,8 @@ function TickPage() {
       <div className="pyscal-article__inner">
         <nav className="pyscal-article__nav" aria-label="Navigasi">
           <Link to="/" data-nav="back">← Kalkulator</Link>
-          <Link to="/panduan-averaging-down">Panduan averaging-down</Link>
-          <Link to="/rumus-fee-broker-idx">Rumus fee broker</Link>
           <span className="pyscal-article__nav-label">PYSCAL / EDU</span>
+          <TutorialBookmark path="/tick-size-idx" title="Tick Size / Fraksi Harga Saham BEI" />
         </nav>
         <header className="pyscal-article__header">
           <div className="pyscal-article__tags">
