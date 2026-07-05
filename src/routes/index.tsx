@@ -32,7 +32,9 @@ function Index() {
     <>
       <main id="main">
         {mounted ? (
-          <Pyscal />
+          <Suspense fallback={null}>
+            <Pyscal />
+          </Suspense>
         ) : (
           <div style={{ minHeight: "60vh", padding: "24px" }}>
             <h1 style={{ fontSize: "28px", fontWeight: 700, margin: 0 }}>PYSCAL</h1>
