@@ -28,12 +28,19 @@ function Index() {
     return unbind;
   }, []);
   return (
-    <main id="main">
+    <>
+      <main id="main">
+        {mounted ? (
+          <Suspense fallback={null}>
+            <Pyscal />
+          </Suspense>
+        ) : null}
+      </main>
       {mounted ? (
         <Suspense fallback={null}>
-          <Pyscal />
+          <Footer />
         </Suspense>
       ) : null}
-    </main>
+    </>
   );
 }
