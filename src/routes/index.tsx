@@ -3,6 +3,7 @@ import { lazy, Suspense, useEffect, useState } from "react";
 import { setupPWA, bindInstallPrompt } from "@/lib/pwa";
 
 const Pyscal = lazy(() => import("@/components/Pyscal"));
+const Footer = lazy(() => import("@/components/Footer"));
 
 export const Route = createFileRoute("/")({
   component: Index,
