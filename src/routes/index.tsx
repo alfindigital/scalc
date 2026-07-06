@@ -3,6 +3,7 @@ import { lazy, Suspense, useEffect, useState } from "react";
 import { setupPWA, bindInstallPrompt } from "@/lib/pwa";
 
 const Pyscal = lazy(() => import("@/components/Pyscal"));
+const Footer = lazy(() => import("@/components/Footer"));
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -27,12 +28,19 @@ function Index() {
     return unbind;
   }, []);
   return (
-    <main id="main">
+    <>
+      <main id="main">
+        {mounted ? (
+          <Suspense fallback={null}>
+            <Pyscal />
+          </Suspense>
+        ) : null}
+      </main>
       {mounted ? (
         <Suspense fallback={null}>
-          <Pyscal />
+          <Footer />
         </Suspense>
       ) : null}
-    </main>
+    </>
   );
 }
