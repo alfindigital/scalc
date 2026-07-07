@@ -336,19 +336,19 @@ html[data-pyscal-theme="dark"] .afd-rot:hover .afd-item.active .afd-ico::after {
   }
   .afd-item {
     height: 28px;
-    gap: 6px;
-    font-size: 12px;
+    gap: 5px;
+    font-size: 11px;
   }
   .afd-item b {
-    display: none;
+    font-size: 10px;
   }
   .afd-ico {
-    width: 28px;
-    height: 28px;
+    width: 24px;
+    height: 24px;
   }
   .afd-ico svg {
-    width: 15px;
-    height: 15px;
+    width: 12px;
+    height: 12px;
   }
   @keyframes afd-ripple {
     0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--primary) 50%, transparent); }
