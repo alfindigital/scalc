@@ -310,3 +310,52 @@ html[data-pyscal-theme="dark"] .afd-rot:hover .afd-item.active .afd-ico::after {
   100% { box-shadow: 0 0 0 22px transparent; }
 }
 
+
+/* Footer mobile compact */
+@media (max-width: 640px) {
+  .afd-foot {
+    padding: 10px 14px;
+    gap: 8px;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+  }
+  .afd-cr {
+    font-size: 11px;
+    padding-left: 8px;
+    border-left-width: 2px;
+    white-space: nowrap;
+  }
+  .afd-caret {
+    width: 6px;
+    height: 12px;
+    margin-left: 2px;
+  }
+  .afd-rot {
+    height: 28px;
+    min-width: auto;
+  }
+  .afd-item {
+    height: 28px;
+    gap: 6px;
+    font-size: 12px;
+  }
+  .afd-item b {
+    display: none;
+  }
+  .afd-ico {
+    width: 28px;
+    height: 28px;
+  }
+  .afd-ico svg {
+    width: 15px;
+    height: 15px;
+  }
+  @keyframes afd-ripple {
+    0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--primary) 50%, transparent); }
+    100% { box-shadow: 0 0 0 14px transparent; }
+  }
+  @keyframes afd-ripple-dark {
+    0% { box-shadow: 0 0 0 0 rgba(255,255,255,0.5); }
+    100% { box-shadow: 0 0 0 14px transparent; }
+  }
+}
