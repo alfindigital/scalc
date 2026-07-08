@@ -97,7 +97,28 @@ const CSS = `
 }
 
 .pyscal{font-family:'Funnel Sans',system-ui,sans-serif;background:var(--bg);color:var(--text);
-  min-height:100vh;-webkit-font-smoothing:antialiased;transition:background .25s,color .25s}
+  min-height:100vh;-webkit-font-smoothing:antialiased;transition:background .25s,color .25s;
+  -webkit-text-size-adjust:100%;text-size-adjust:100%;text-rendering:optimizeLegibility}
+.pyscal button,.pyscal a,.pyscal [role="button"]{touch-action:manipulation}
+/* mobile a11y: enforce 44x44 min tap target for interactive controls */
+@media (max-width:700px) and (pointer:coarse){
+  .pyscal button,.pyscal a[role="button"],.pyscal .gear-btn,.pyscal .mode-toggle button,
+  .pyscal .btn,.pyscal .il-toggle,.pyscal .history-item,.pyscal input[type="checkbox"],
+  .pyscal input[type="radio"]{min-height:44px}
+  .pyscal .gear-btn,.pyscal .modal-close{min-width:44px}
+}
+/* offline notice banner */
+.offline-banner{position:sticky;top:0;z-index:100;background:var(--red);color:#fff;
+  font-family:'Funnel Sans',sans-serif;font-size:13px;font-weight:600;
+  padding:8px 14px;text-align:center;letter-spacing:.2px;
+  box-shadow:0 2px 6px rgba(0,0,0,0.15);display:flex;align-items:center;justify-content:center;gap:8px}
+.offline-banner .dot{width:8px;height:8px;border-radius:50%;background:#fff;
+  box-shadow:0 0 0 3px rgba(255,255,255,0.25);animation:pyOfflinePulse 1.6s ease-in-out infinite}
+@keyframes pyOfflinePulse{0%,100%{opacity:.6}50%{opacity:1}}
+@media (prefers-reduced-motion:reduce){
+  .offline-banner .dot{animation:none}
+  .pyscal *,.pyscal *::before,.pyscal *::after{animation-duration:.001ms!important;transition-duration:.001ms!important}
+}
 .pyscal-inner{min-height:100vh;padding:24px 16px 56px}
 .ctn{max-width:880px;margin:0 auto}
 
