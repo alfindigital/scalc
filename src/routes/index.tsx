@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { lazy, Suspense, useEffect, useState } from "react";
-import { setupPWA, bindInstallPrompt } from "@/lib/pwa";
+import { toast } from "sonner";
+import { setupPWA, bindInstallPrompt, onUpdateAvailable, applyUpdate } from "@/lib/pwa";
 
 const Pyscal = lazy(() => import("@/components/Pyscal"));
 const Footer = lazy(() => import("@/components/Footer"));
@@ -25,7 +26,20 @@ function Index() {
     setMounted(true);
     setupPWA();
     const unbind = bindInstallPrompt();
-    return unbind;
+    const unsubUpdate = onUpdateAvailable(() => {
+      toast("Versi baru PYSCAL tersedia", {
+        description: "Reload untuk pakai versi terbaru. Kalkulator offline tetap jalan sampai kamu reload.",
+        duration: Infinity,
+        action: {
+          label: "Reload",
+          onClick: () => applyUpdate(),
+        },
+      });
+    });
+    return () => {
+      unbind();
+      unsubUpdate();
+    };
   }, []);
   return (
     <>
