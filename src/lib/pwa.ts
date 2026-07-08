@@ -3,6 +3,37 @@
 // — they actively unregister any leftover one to keep the preview clean.
 // Production host registers /sw.js for offline-first.
 
+const updateListeners = new Set<() => void>();
+let waitingWorker: ServiceWorker | null = null;
+
+export function onUpdateAvailable(cb: () => void): () => void {
+  updateListeners.add(cb);
+  if (waitingWorker) cb();
+  return () => updateListeners.delete(cb);
+}
+
+function notifyUpdate(worker: ServiceWorker) {
+  waitingWorker = worker;
+  updateListeners.forEach((cb) => cb());
+}
+
+export function applyUpdate(): void {
+  if (!waitingWorker) {
+    // Fallback — no waiting worker tracked, just reload.
+    window.location.reload();
+    return;
+  }
+  const w = waitingWorker;
+  // Reload once the new worker takes control.
+  let reloaded = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (reloaded) return;
+    reloaded = true;
+    window.location.reload();
+  });
+  w.postMessage({ type: 'SKIP_WAITING' });
+}
+
 export function setupPWA(): void {
   if (typeof window === "undefined") return;
   if (!("serviceWorker" in navigator)) return;
@@ -32,9 +63,28 @@ export function setupPWA(): void {
 
   // Production: register SW.
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("/sw.js").catch((err) => {
-      console.warn("[pyscal] SW register failed:", err);
-    });
+    navigator.serviceWorker
+      .register("/sw.js")
+      .then((reg) => {
+        // If a waiting worker already exists at load, notify immediately.
+        if (reg.waiting && navigator.serviceWorker.controller) {
+          notifyUpdate(reg.waiting);
+        }
+        reg.addEventListener("updatefound", () => {
+          const nw = reg.installing;
+          if (!nw) return;
+          nw.addEventListener("statechange", () => {
+            if (nw.state === "installed" && navigator.serviceWorker.controller) {
+              notifyUpdate(nw);
+            }
+          });
+        });
+        // Poll for updates every hour while the tab is open.
+        setInterval(() => reg.update().catch(() => {}), 60 * 60 * 1000);
+      })
+      .catch((err) => {
+        console.warn("[pyscal] SW register failed:", err);
+      });
   });
 }
 
