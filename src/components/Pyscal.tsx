@@ -28,6 +28,29 @@ import {
 } from "@/lib/storage";
 
 /* ==================== ICONS ==================== */
+function OfflineBanner() {
+  const [online, setOnline] = useState(
+    typeof navigator === 'undefined' ? true : navigator.onLine
+  );
+  useEffect(() => {
+    const on = () => setOnline(true);
+    const off = () => setOnline(false);
+    window.addEventListener('online', on);
+    window.addEventListener('offline', off);
+    return () => {
+      window.removeEventListener('online', on);
+      window.removeEventListener('offline', off);
+    };
+  }, []);
+  if (online) return null;
+  return (
+    <div className="offline-banner" role="status" aria-live="polite">
+      <span className="dot" aria-hidden="true" />
+      <span>Mode offline — kalkulator tetap jalan, data tersimpan lokal.</span>
+    </div>
+  );
+}
+
 const BoltIcon = () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>;
 const GearIcon = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>;
 const PlusIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>;
@@ -97,7 +120,28 @@ const CSS = `
 }
 
 .pyscal{font-family:'Funnel Sans',system-ui,sans-serif;background:var(--bg);color:var(--text);
-  min-height:100vh;-webkit-font-smoothing:antialiased;transition:background .25s,color .25s}
+  min-height:100vh;-webkit-font-smoothing:antialiased;transition:background .25s,color .25s;
+  -webkit-text-size-adjust:100%;text-size-adjust:100%;text-rendering:optimizeLegibility}
+.pyscal button,.pyscal a,.pyscal [role="button"]{touch-action:manipulation}
+/* mobile a11y: enforce 44x44 min tap target for interactive controls */
+@media (max-width:700px) and (pointer:coarse){
+  .pyscal button,.pyscal a[role="button"],.pyscal .gear-btn,.pyscal .mode-toggle button,
+  .pyscal .btn,.pyscal .il-toggle,.pyscal .history-item,.pyscal input[type="checkbox"],
+  .pyscal input[type="radio"]{min-height:44px}
+  .pyscal .gear-btn,.pyscal .modal-close{min-width:44px}
+}
+/* offline notice banner */
+.offline-banner{position:sticky;top:0;z-index:100;background:var(--red);color:#fff;
+  font-family:'Funnel Sans',sans-serif;font-size:13px;font-weight:600;
+  padding:8px 14px;text-align:center;letter-spacing:.2px;
+  box-shadow:0 2px 6px rgba(0,0,0,0.15);display:flex;align-items:center;justify-content:center;gap:8px}
+.offline-banner .dot{width:8px;height:8px;border-radius:50%;background:#fff;
+  box-shadow:0 0 0 3px rgba(255,255,255,0.25);animation:pyOfflinePulse 1.6s ease-in-out infinite}
+@keyframes pyOfflinePulse{0%,100%{opacity:.6}50%{opacity:1}}
+@media (prefers-reduced-motion:reduce){
+  .offline-banner .dot{animation:none}
+  .pyscal *,.pyscal *::before,.pyscal *::after{animation-duration:.001ms!important;transition-duration:.001ms!important}
+}
 .pyscal-inner{min-height:100vh;padding:24px 16px 56px}
 .ctn{max-width:880px;margin:0 auto}
 
@@ -1606,6 +1650,7 @@ export default function PYSCAL() {
     <>
       <style>{CSS}</style>
       <div className="pyscal" data-theme={theme}>
+        <OfflineBanner />
         <div className="pyscal-inner">
           <div className="ctn">
 
