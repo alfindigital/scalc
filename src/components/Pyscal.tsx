@@ -1650,6 +1650,7 @@ export default function PYSCAL() {
     <>
       <style>{CSS}</style>
       <div className="pyscal" data-theme={theme}>
+        <OfflineBanner />
         <div className="pyscal-inner">
           <div className="ctn">
 
