@@ -42,13 +42,22 @@ export function setupPWA(): void {
     try { return window.self !== window.top; } catch { return true; }
   })();
   const host = window.location.hostname;
+  // E2E escape hatch: allow forcing SW on localhost/127.0.0.1 via ?e2e-sw=1 (persisted in sessionStorage for reloads).
+  let forceSW = false;
+  try {
+    const qs = new URLSearchParams(window.location.search);
+    if (qs.get("e2e-sw") === "1") {
+      sessionStorage.setItem("__pyscal_e2e_sw", "1");
+    }
+    forceSW = sessionStorage.getItem("__pyscal_e2e_sw") === "1";
+  } catch {}
   const isPreviewHost =
     host.includes("id-preview--") ||
     host.includes("lovableproject.com") ||
     host.includes("localhost") ||
     host.includes("127.0.0.1");
 
-  if (inIframe || isPreviewHost) {
+  if ((inIframe || isPreviewHost) && !forceSW) {
     // Kill-switch: clean up any SW + caches that may have been installed previously.
     navigator.serviceWorker.getRegistrations().then((rs) => {
       rs.forEach((r) => r.unregister().catch(() => {}));

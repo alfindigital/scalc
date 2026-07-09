@@ -28,10 +28,11 @@ function Index() {
     const unbind = bindInstallPrompt();
     const unsubUpdate = onUpdateAvailable(() => {
       toast("Versi baru PYSCAL tersedia", {
+        id: "sw-update-toast",
         description: "Reload untuk pakai versi terbaru. Kalkulator offline tetap jalan sampai kamu reload.",
         duration: Infinity,
         action: {
-          label: "Reload",
+          label: "Reload sekarang",
           onClick: () => applyUpdate(),
         },
       });
