@@ -1771,6 +1771,7 @@ export default function PYSCAL() {
                     </div>
                     <input className="if" type="number" value={existingAvg || ''} min={0} step={0.01}
                       inputMode="decimal" enterKeyHint="next"
+                      aria-label="Avg Existing (termasuk fee)"
                       aria-invalid={!!validateExistingAvg(existingAvg, mode).error}
                       onChange={e => setExistingAvg(+e.target.value || 0)} />
                     <FieldHint status={validateExistingAvg(existingAvg, mode)} />
@@ -1780,6 +1781,7 @@ export default function PYSCAL() {
                     </div>
                     <input className="if" type="number" value={existingLot || ''} min={0}
                       inputMode="numeric" enterKeyHint="next"
+                      aria-label="Lot Existing"
                       aria-invalid={!!validateExistingLot(existingLot, mode).error}
                       onChange={e => setExistingLot(+e.target.value || 0)} />
                     <FieldHint status={validateExistingLot(existingLot, mode)} />
@@ -1792,6 +1794,7 @@ export default function PYSCAL() {
                   </div>
                   <input ref={bidAwalRef} className="if" type="number" value={bids[0] || ''} min={1}
                     inputMode="decimal" enterKeyHint="next"
+                    aria-label={mode === 'position' ? 'Bid Awal beli baru' : 'Bid Awal'}
                     aria-invalid={!!validateBid(bids[0]).error}
                     onChange={e => setBidAt(0, +e.target.value)} />
                   <FieldHint status={validateBid(bids[0])} />
@@ -1801,6 +1804,7 @@ export default function PYSCAL() {
                   </div>
                   <input className="if" type="number" value={baseLot} min={1}
                     inputMode="numeric" enterKeyHint="next"
+                    aria-label="Lot dasar"
                     aria-invalid={!!validateLot(baseLot).error}
                     onChange={e => setBaseLot(+e.target.value)} />
                   <FieldHint status={validateLot(baseLot)} />
@@ -1810,6 +1814,7 @@ export default function PYSCAL() {
                   </div>
                   <input className="if" type="number" value={targetTicks} min={1} max={20}
                     inputMode="numeric" enterKeyHint="next"
+                    aria-label="Target tick"
                     aria-invalid={!!validateTargetTicks(targetTicks).error}
                     onChange={e => setTargetTicks(+e.target.value)} />
                   <FieldHint status={validateTargetTicks(targetTicks)} />
@@ -1819,6 +1824,7 @@ export default function PYSCAL() {
                   </div>
                   <input className="if" type="number" value={targetProfit} min={0} step={0.1}
                     inputMode="decimal" enterKeyHint="done"
+                    aria-label="Minimum profit persen"
                     aria-invalid={!!validateTargetProfit(targetProfit).error}
                     onChange={e => setTargetProfit(+e.target.value)} />
                   <FieldHint status={validateTargetProfit(targetProfit)} />
