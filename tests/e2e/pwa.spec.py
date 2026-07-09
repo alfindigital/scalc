@@ -40,6 +40,16 @@ async def wait_for_sw(page, timeout=10000):
         timeout=timeout,
     )
 
+async def register_sw(page):
+    """Force-register /sw.js from the page context (belt & suspenders)."""
+    await page.evaluate("""
+        async () => {
+          if ('serviceWorker' in navigator) {
+            try { await navigator.serviceWorker.register('/sw.js'); } catch {}
+          }
+        }
+    """)
+
 async def run_device(pw, label, device_opts):
     print(f"\n=== Device: {label} ===")
     browser = await pw.chromium.launch(headless=True)
@@ -49,9 +59,11 @@ async def run_device(pw, label, device_opts):
     # T1: SW registers under ?e2e-sw=1
     try:
         await page.goto(f"{BASE}/?e2e-sw=1", wait_until="networkidle")
-        # First load: page controls no SW yet. Reload to get controller.
-        await page.reload(wait_until="networkidle")
-        await wait_for_sw(page, timeout=8000)
+        # Belt & suspenders: also register directly.
+        await register_sw(page)
+        await page.wait_for_timeout(500)
+        await page.reload(wait_until="domcontentloaded")
+        await wait_for_sw(page, timeout=15000)
         ctrl = await page.evaluate("() => !!navigator.serviceWorker.controller")
         await page.screenshot(path=str(OUT / f"{label}_1_sw.png"))
         record(f"{label}/T1 SW registers", ctrl, f"controller={ctrl}")
