@@ -102,6 +102,13 @@ async def run_device(pw, label, device_opts):
                 served_sw.write_text(bumped)
             try:
                 await page.reload(wait_until="networkidle")
+                # Force SW update check — browsers only auto-check on 24h boundary.
+                await page.evaluate("""
+                    async () => {
+                      const reg = await navigator.serviceWorker.getRegistration();
+                      if (reg) await reg.update();
+                    }
+                """)
                 # Wait for the toast content
                 await page.wait_for_selector("text=Versi baru PYSCAL tersedia", timeout=15000)
                 await page.wait_for_selector("text=Reload sekarang", timeout=5000)
