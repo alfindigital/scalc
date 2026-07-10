@@ -70,8 +70,9 @@ export function setupPWA(): void {
     return;
   }
 
-  // Production: register SW.
-  window.addEventListener("load", () => {
+  // Production: register SW. Run immediately if load already fired
+  // (setupPWA is called from useEffect, which may run after `load`).
+  const doRegister = () => {
     navigator.serviceWorker
       .register("/sw.js")
       .then((reg) => {
@@ -94,7 +95,9 @@ export function setupPWA(): void {
       .catch((err) => {
         console.warn("[pyscal] SW register failed:", err);
       });
-  });
+  };
+  if (document.readyState === "complete") doRegister();
+  else window.addEventListener("load", doRegister, { once: true });
 }
 
 // Install prompt helper. Returns a handle the UI can use to trigger install.
