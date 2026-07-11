@@ -312,7 +312,7 @@ html[data-pyscal-theme="dark"] .afd-rot:hover .afd-item.active .afd-ico::after {
 
 
 /* Footer mobile compact — tap targets >= 44px */
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   .afd-foot {
     padding: 4px 10px;
     gap: 6px;
