@@ -311,13 +311,14 @@ html[data-pyscal-theme="dark"] .afd-rot:hover .afd-item.active .afd-ico::after {
 }
 
 
-/* Footer mobile compact */
-@media (max-width: 640px) {
+/* Footer mobile compact — tap targets >= 44px */
+@media (max-width: 768px) {
   .afd-foot {
-    padding: 6px 10px;
+    padding: 4px 10px;
     gap: 6px;
     flex-wrap: nowrap;
     justify-content: space-between;
+    min-height: 52px;
   }
   .afd-cr {
     font-size: 10px;
@@ -331,31 +332,53 @@ html[data-pyscal-theme="dark"] .afd-rot:hover .afd-item.active .afd-ico::after {
     margin-left: 2px;
   }
   .afd-rot {
-    height: 20px;
+    height: 44px;
     min-width: auto;
+    display: flex;
+    align-items: center;
   }
   .afd-item {
-    height: 20px;
-    gap: 4px;
-    font-size: 10px;
+    height: 44px;
+    min-width: 44px;
+    gap: 6px;
+    font-size: 11px;
+    transform: translateY(8px);
+  }
+  .afd-item.active {
+    transform: translateY(0);
   }
   .afd-item b {
-    font-size: 9px;
+    font-size: 10px;
   }
   .afd-ico {
-    width: 16px;
-    height: 16px;
+    width: 40px;
+    height: 40px;
   }
   .afd-ico svg {
-    width: 10px;
-    height: 10px;
+    width: 18px;
+    height: 18px;
   }
   @keyframes afd-ripple {
     0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--primary) 50%, transparent); }
-    100% { box-shadow: 0 0 0 12px transparent; }
+    100% { box-shadow: 0 0 0 18px transparent; }
   }
   @keyframes afd-ripple-dark {
     0% { box-shadow: 0 0 0 0 rgba(255,255,255,0.5); }
-    100% { box-shadow: 0 0 0 12px transparent; }
+    100% { box-shadow: 0 0 0 18px transparent; }
+  }
+}
+
+/* Extra-small screens: keep icon+text from wrapping */
+@media (max-width: 360px) {
+  .afd-item b {
+    display: none;
+  }
+  .afd-ico {
+    width: 44px;
+    height: 44px;
+  }
+  .afd-ico svg {
+    width: 20px;
+    height: 20px;
   }
 }
