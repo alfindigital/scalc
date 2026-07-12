@@ -292,7 +292,7 @@
   opacity: 1;
   transform: translateY(0);
   pointer-events: auto;
-  outline: 2px solid var(--ring, var(--primary));
+  outline: 2px solid var(--primary);
   outline-offset: 3px;
   border-radius: 8px;
   z-index: 2;
