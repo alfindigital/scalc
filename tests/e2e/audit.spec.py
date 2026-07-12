@@ -156,8 +156,20 @@ async def audit_viewport(browser, vp_name, viewport):
             const el = document.activeElement;
             const s = getComputedStyle(el);
             const bg = getComputedStyle(document.querySelector('.afd-foot')).backgroundColor;
+            // Normalize any CSS color (rgb, lab, oklch, color-mix) to rgb via canvas
+            const norm = (c) => {
+              const cvs = document.createElement('canvas');
+              cvs.width = cvs.height = 1;
+              const ctx = cvs.getContext('2d');
+              ctx.fillStyle = '#000';
+              ctx.fillStyle = c;
+              ctx.fillRect(0,0,1,1);
+              const [r,g,b] = ctx.getImageData(0,0,1,1).data;
+              return `rgb(${r}, ${g}, ${b})`;
+            };
             return {
-              style: s.outlineStyle, width: s.outlineWidth, color: s.outlineColor, bg
+              style: s.outlineStyle, width: s.outlineWidth,
+              color: norm(s.outlineColor), bg: norm(bg)
             };
           }
         """)
