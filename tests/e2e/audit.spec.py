@@ -103,6 +103,22 @@ async def set_theme(page, theme):
     await page.wait_for_timeout(80)
 
 
+async def freeze_footer(page):
+    """Force social rotator to a deterministic state for stable snapshots:
+    disable animations, pin the first social link as .active, hide the blinking caret."""
+    await page.add_style_tag(content="""
+      .afd-caret, .afd-glow { visibility: hidden !important; }
+      .afd-item, .afd-ico, .afd-ico::after { animation: none !important; transition: none !important; }
+    """)
+    await page.evaluate("""
+      () => {
+        const items = document.querySelectorAll('.afd-rot a.afd-item');
+        items.forEach((el, i) => el.classList.toggle('active', i === 0));
+      }
+    """)
+    await page.wait_for_timeout(80)
+
+
 async def audit_viewport(browser, vp_name, viewport):
     ctx = await browser.new_context(viewport=viewport, has_touch=viewport["width"] < 768)
     page = await ctx.new_page()
@@ -113,6 +129,7 @@ async def audit_viewport(browser, vp_name, viewport):
 
     for theme in ("light", "dark"):
         await set_theme(page, theme)
+        await freeze_footer(page)
 
         # (1) Visual regression snapshot for footer & first icon
         await snapshot(page, ".afd-foot", f"footer_{vp_name}_{theme}")
