@@ -287,6 +287,21 @@
   100% { box-shadow: 0 0 0 22px transparent; }
 }
 
+/* Keyboard focus: reveal focused item + visible outline (WCAG 2.4.7) */
+.afd-item:focus-visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+  outline: 2px solid var(--ring, var(--primary));
+  outline-offset: 3px;
+  border-radius: 8px;
+  z-index: 2;
+}
+.afd-item:focus-visible .afd-ico {
+  background: var(--primary);
+  color: var(--card);
+}
+
 /* Footer dark mode overrides */
 html[data-pyscal-theme="dark"] .afd-foot {
   background: #111A2E;
@@ -304,6 +319,13 @@ html[data-pyscal-theme="dark"] .afd-ico { background: rgba(255,255,255,0.11); co
 html[data-pyscal-theme="dark"] .afd-rot:hover .afd-item.active .afd-ico { background: #FFFFFF; color: #111A2E; }
 html[data-pyscal-theme="dark"] .afd-rot:hover .afd-item.active .afd-ico::after {
   animation-name: afd-ripple-dark;
+}
+html[data-pyscal-theme="dark"] .afd-item:focus-visible {
+  outline-color: #FFFFFF;
+}
+html[data-pyscal-theme="dark"] .afd-item:focus-visible .afd-ico {
+  background: #FFFFFF;
+  color: #111A2E;
 }
 @keyframes afd-ripple-dark {
   0% { box-shadow: 0 0 0 0 rgba(255,255,255,0.5); }
