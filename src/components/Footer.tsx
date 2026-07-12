@@ -67,10 +67,13 @@ export default function Footer() {
         </a>
         <span className="afd-caret" />
       </span>
-      <div
+      <nav
         className="afd-rot"
+        aria-label="Ikuti kami di media sosial"
         onMouseEnter={() => setPaused(true)}
         onMouseLeave={() => setPaused(false)}
+        onFocus={() => setPaused(true)}
+        onBlur={() => setPaused(false)}
       >
         {SOCIALS.map((s, idx) => (
           <a
@@ -79,17 +82,19 @@ export default function Footer() {
             href={s.href}
             target="_blank"
             rel="noopener noreferrer"
-            aria-label={s.label}
+            aria-label={`${s.label} ${s.handle} (buka di tab baru)`}
+            aria-current={idx === active ? "true" : undefined}
+            onFocus={() => setActive(idx)}
           >
-            <span className="afd-ico">
-              <svg viewBox="0 0 24 24" fill="currentColor">
+            <span className="afd-ico" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="currentColor" focusable="false" aria-hidden="true">
                 <path d={s.path} />
               </svg>
             </span>
-            <b>{s.handle}</b>
+            <b aria-hidden="true">{s.handle}</b>
           </a>
         ))}
-      </div>
+      </nav>
     </footer>
   );
 }
