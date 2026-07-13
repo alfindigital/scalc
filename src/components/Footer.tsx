@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { subscribeMotion, computeEffective, getMotionSetting } from "@/lib/motion";
 
 const SOCIALS = [
   {
@@ -34,12 +35,12 @@ export default function Footer() {
   const [reducedMotion, setReducedMotion] = useState(false);
 
   useEffect(() => {
-    if (typeof window === "undefined" || !window.matchMedia) return;
-    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const update = () => setReducedMotion(mq.matches);
-    update();
-    mq.addEventListener?.("change", update);
-    return () => mq.removeEventListener?.("change", update);
+    // Effective reduced-motion = OS pref OR manual override in Settings.
+    // Subscribing here means the toggle takes effect immediately: the
+    // rotator interval and glow randomizer stop the moment the user picks
+    // "Kurangi" without a reload.
+    setReducedMotion(computeEffective(getMotionSetting()) === "reduce");
+    return subscribeMotion((eff) => setReducedMotion(eff === "reduce"));
   }, []);
 
   useEffect(() => {

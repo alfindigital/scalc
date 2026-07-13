@@ -13,6 +13,9 @@ import {
   isInstallAvailable, isStandalone, subscribeInstallPrompt, triggerInstall, detectPlatform,
 } from "@/lib/pwa";
 import {
+  getMotionSetting, setMotionSetting, subscribeMotion, computeEffective,
+} from "@/lib/motion";
+import {
   DEFAULT_SHORTCUTS,
   DEFAULT_STATE,
   loadShortcutsVersioned,
@@ -813,7 +816,7 @@ function renderToastText(text) {
 }
 
 /* ==================== BID STEP INPUT ==================== */
-function BidStepInput({ value, onChange, onFocus, disabled, className = '', variant = 'desktop' }) {
+function BidStepInput({ value, onChange, onFocus, disabled, className = '', variant = 'desktop', ...rest }) {
   const inputRef = useRef(null);
   const [focused, setFocused] = useState(false);
 
@@ -865,6 +868,7 @@ function BidStepInput({ value, onChange, onFocus, disabled, className = '', vari
         onFocus={e => { setFocused(true); e.target.select(); if (onFocus) onFocus(e); }}
         onBlur={() => setFocused(false)}
         onKeyDown={handleKeyDown}
+        {...rest}
       />
     </div>
   );
@@ -992,6 +996,17 @@ export default function PYSCAL() {
   const [showSettings, setShowSettings] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
+  // Manual reduced-motion override. "auto" follows the OS pref; "reduce"
+  // and "normal" force it on or off immediately (no reload).
+  const [motion, setMotion] = useState(() => getMotionSetting());
+  useEffect(() => {
+    // Keep local state in sync if the OS pref or another tab changes it.
+    return subscribeMotion((_eff, setting) => setMotion(setting));
+  }, []);
+  const changeMotion = useCallback((next) => {
+    setMotion(next);
+    setMotionSetting(next);
+  }, []);
   const [viewingTradeId, setViewingTradeId] = useState(null);
   const [showHint, setShowHint] = useState(() => {
     if (typeof window === 'undefined') return false;
@@ -1683,6 +1698,7 @@ export default function PYSCAL() {
                     exportAll, importAll,
                     shortcuts, setShortcuts: persistShortcuts,
                     recordingShortcut, setRecordingShortcut,
+                    motion, setMotion: changeMotion,
                   }} />
                 )}
               </div>
@@ -1949,6 +1965,7 @@ function SettingsPanel({
   exportPresets, importPresets,
   exportAll, importAll,
   shortcuts, setShortcuts, recordingShortcut, setRecordingShortcut,
+  motion, setMotion,
 }) {
   const fileInputRef = useRef(null);
   const fullBackupInputRef = useRef(null);
@@ -1963,6 +1980,36 @@ function SettingsPanel({
           <button className={theme === 'dark' ? 'active' : ''} onClick={() => setTheme('dark')}>
             <MoonIcon /> Dark
           </button>
+        </div>
+      </div>
+
+      <div className="sp-section">
+        <div className="sp-title">Animasi</div>
+        <div className="theme-pill" role="radiogroup" aria-label="Reduced motion">
+          <button
+            className={motion === 'auto' ? 'active' : ''}
+            role="radio"
+            aria-checked={motion === 'auto'}
+            data-motion="auto"
+            onClick={() => setMotion('auto')}
+          >Auto</button>
+          <button
+            className={motion === 'normal' ? 'active' : ''}
+            role="radio"
+            aria-checked={motion === 'normal'}
+            data-motion="normal"
+            onClick={() => setMotion('normal')}
+          >Normal</button>
+          <button
+            className={motion === 'reduce' ? 'active' : ''}
+            role="radio"
+            aria-checked={motion === 'reduce'}
+            data-motion="reduce"
+            onClick={() => setMotion('reduce')}
+          >Kurangi</button>
+        </div>
+        <div className="sp-empty" style={{ marginTop: 6 }}>
+          Auto ikut pengaturan OS. Kurangi mematikan rotator sosial &amp; animasi UI segera.
         </div>
       </div>
 
@@ -2105,6 +2152,7 @@ function ResultsTable({ results, bidRiseWarnings, targetProfit, totalLot, totalC
                         className={`bid-edit ${isWarn ? 'bid-edit-w' : ''}`}
                         value={r.bid}
                         onChange={v => setBidAt(li, v)}
+                        aria-label={`Bid papan ${r.layer}`}
                       />
                     )}
                   </td>
@@ -2114,7 +2162,8 @@ function ResultsTable({ results, bidRiseWarnings, targetProfit, totalLot, totalC
                         value={r.lot} min={1} step={100}
                         inputMode="numeric" enterKeyHint="done"
                         onChange={e => setLotAt(li, +e.target.value)}
-                        onFocus={e => e.target.select()} />
+                        onFocus={e => e.target.select()}
+                        aria-label={`Lot papan ${r.layer}`} />
                     ) : n(r.lot)}
                   </td>
                   <td className="c-avg">{r.avg.toFixed(2)}</td>

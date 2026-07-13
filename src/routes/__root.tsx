@@ -144,7 +144,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
           // (or system preference) to <html> before React mounts.
           dangerouslySetInnerHTML={{
             __html:
-              "(function(){try{var t=localStorage.getItem('pyscal_theme');if(t!=='dark'&&t!=='light'){t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.dataset.pyscalTheme=t;document.documentElement.style.colorScheme=t;}catch(e){}})();",
+              "(function(){try{var t=localStorage.getItem('pyscal_theme');if(t!=='dark'&&t!=='light'){t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.dataset.pyscalTheme=t;document.documentElement.style.colorScheme=t;}catch(e){}try{var m=localStorage.getItem('pyscal_motion');if(m!=='reduce'&&m!=='normal'&&m!=='auto')m='auto';var eff=m==='reduce'?'reduce':m==='normal'?'normal':(matchMedia('(prefers-reduced-motion: reduce)').matches?'reduce':'normal');document.documentElement.setAttribute('data-pyscal-motion',m);document.documentElement.setAttribute('data-pyscal-motion-effective',eff);}catch(e){}})();",
           }}
         />
         <HeadContent />
