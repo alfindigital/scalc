@@ -173,10 +173,10 @@
 }
 
 /* Ensure keyboard focus outlines are visible on inline calc icon buttons. */
-.gear-btn:focus-visible,
-.mode-toggle button:focus-visible {
-  outline: 2px solid var(--primary);
-  outline-offset: 2px;
+.pyscal .gear-btn:focus-visible,
+.pyscal .mode-toggle button:focus-visible {
+  outline: 2px solid var(--primary) !important;
+  outline-offset: 2px !important;
 }
 
 /* ==================== FOOTER ==================== */
