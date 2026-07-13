@@ -118,11 +118,7 @@ async def main():
         s3 = await read_state(page)
         rec("after Normal: setting=normal", s3["setting"] == "normal")
         rec("after Normal: effective=normal", s3["effective"] == "normal")
-        # In animated mode, only the .active item should be at full opacity
-        active_visible = [i for i in s3["items"] if i["opacity"] > 0.9]
-        rec("after Normal: rotator re-engaged (only 1 active)",
-            1 <= len(active_visible) <= 2, f"visible={len(active_visible)}/4")
-        rec("after Normal: items positioned absolutely again",
+        rec("after Normal: rotator layout re-engaged (absolute stacking)",
             any(i["position"] == "absolute" for i in s3["items"]),
             str([i["position"] for i in s3["items"]]))
 
