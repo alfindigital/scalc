@@ -816,7 +816,7 @@ function renderToastText(text) {
 }
 
 /* ==================== BID STEP INPUT ==================== */
-function BidStepInput({ value, onChange, onFocus, disabled, className = '', variant = 'desktop' }) {
+function BidStepInput({ value, onChange, onFocus, disabled, className = '', variant = 'desktop', ...rest }) {
   const inputRef = useRef(null);
   const [focused, setFocused] = useState(false);
 
@@ -868,6 +868,7 @@ function BidStepInput({ value, onChange, onFocus, disabled, className = '', vari
         onFocus={e => { setFocused(true); e.target.select(); if (onFocus) onFocus(e); }}
         onBlur={() => setFocused(false)}
         onKeyDown={handleKeyDown}
+        {...rest}
       />
     </div>
   );
