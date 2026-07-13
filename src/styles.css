@@ -405,10 +405,11 @@ html[data-pyscal-theme="dark"] .afd-item:focus-visible .afd-ico {
   }
 }
 
-/* Respect prefers-reduced-motion: disable rotator, glow, caret blink,
- * ripple, and all transitions. Show all social items statically in a row
- * so no content is hidden behind the paused rotator. */
-@media (prefers-reduced-motion: reduce) {
+/* Reduced-motion: honor the OS media query AND the manual override in
+ * Settings. The effective state is written to
+ * `html[data-pyscal-motion-effective]` before hydration, so toggling the
+ * setting takes effect immediately with no reload. */
+html[data-pyscal-motion-effective="reduce"] {
   .afd-glow,
   .afd-caret {
     animation: none !important;
@@ -446,8 +447,8 @@ html[data-pyscal-theme="dark"] .afd-item:focus-visible .afd-ico {
     background: color-mix(in srgb, var(--primary) 11%, transparent);
     color: var(--primary);
   }
-  html[data-pyscal-theme="dark"] .afd-rot:hover .afd-item .afd-ico {
+}
+html[data-pyscal-motion-effective="reduce"][data-pyscal-theme="dark"] .afd-rot:hover .afd-item .afd-ico {
     background: rgba(255, 255, 255, 0.11);
     color: #FFFFFF;
-  }
 }
