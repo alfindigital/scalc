@@ -2151,6 +2151,7 @@ function ResultsTable({ results, bidRiseWarnings, targetProfit, totalLot, totalC
                         className={`bid-edit ${isWarn ? 'bid-edit-w' : ''}`}
                         value={r.bid}
                         onChange={v => setBidAt(li, v)}
+                        aria-label={`Bid papan ${r.layer}`}
                       />
                     )}
                   </td>
@@ -2160,7 +2161,8 @@ function ResultsTable({ results, bidRiseWarnings, targetProfit, totalLot, totalC
                         value={r.lot} min={1} step={100}
                         inputMode="numeric" enterKeyHint="done"
                         onChange={e => setLotAt(li, +e.target.value)}
-                        onFocus={e => e.target.select()} />
+                        onFocus={e => e.target.select()}
+                        aria-label={`Lot papan ${r.layer}`} />
                     ) : n(r.lot)}
                   </td>
                   <td className="c-avg">{r.avg.toFixed(2)}</td>
