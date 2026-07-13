@@ -31,15 +31,27 @@ export default function Footer() {
   const [active, setActive] = useState(0);
   const [paused, setPaused] = useState(false);
   const glowRef = useRef<HTMLDivElement>(null);
+  const [reducedMotion, setReducedMotion] = useState(false);
 
   useEffect(() => {
+    if (typeof window === "undefined" || !window.matchMedia) return;
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update = () => setReducedMotion(mq.matches);
+    update();
+    mq.addEventListener?.("change", update);
+    return () => mq.removeEventListener?.("change", update);
+  }, []);
+
+  useEffect(() => {
+    if (reducedMotion) return;
     const id = setInterval(() => {
       if (!paused) setActive((i) => (i + 1) % SOCIALS.length);
     }, 2300);
     return () => clearInterval(id);
-  }, [paused]);
+  }, [paused, reducedMotion]);
 
   useEffect(() => {
+    if (reducedMotion) return;
     const glow = glowRef.current;
     if (!glow) return;
     let timeout: ReturnType<typeof setTimeout>;
@@ -50,7 +62,7 @@ export default function Footer() {
     };
     move();
     return () => clearTimeout(timeout);
-  }, []);
+  }, [reducedMotion]);
 
   return (
     <footer className="afd-foot">
