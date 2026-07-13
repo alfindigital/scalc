@@ -404,3 +404,50 @@ html[data-pyscal-theme="dark"] .afd-item:focus-visible .afd-ico {
     height: 20px;
   }
 }
+
+/* Respect prefers-reduced-motion: disable rotator, glow, caret blink,
+ * ripple, and all transitions. Show all social items statically in a row
+ * so no content is hidden behind the paused rotator. */
+@media (prefers-reduced-motion: reduce) {
+  .afd-glow,
+  .afd-caret {
+    animation: none !important;
+    transition: none !important;
+  }
+  .afd-glow { display: none; }
+  .afd-caret { opacity: 1; }
+
+  .afd-rot {
+    height: auto;
+    min-width: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+  }
+  .afd-item {
+    position: static;
+    opacity: 1 !important;
+    transform: none !important;
+    pointer-events: auto !important;
+    transition: none !important;
+  }
+  .afd-ico,
+  .afd-item {
+    transition: none !important;
+  }
+  .afd-rot:hover .afd-item.active .afd-ico::after,
+  .afd-item.active .afd-ico::after {
+    animation: none !important;
+    content: none !important;
+  }
+  .afd-rot:hover .afd-item .afd-ico {
+    background: color-mix(in srgb, var(--primary) 11%, transparent);
+    color: var(--primary);
+  }
+  html[data-pyscal-theme="dark"] .afd-rot:hover .afd-item .afd-ico {
+    background: rgba(255, 255, 255, 0.11);
+    color: #FFFFFF;
+  }
+}
