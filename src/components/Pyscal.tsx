@@ -816,8 +816,10 @@ function renderToastText(text) {
 }
 
 /* ==================== BID STEP INPUT ==================== */
-function BidStepInput({ value, onChange, onFocus, disabled, className = '', variant = 'desktop', ...rest }) {
+function BidStepInput({ value, onChange, onFocus, disabled, className = '', variant = 'desktop', label, ...rest }) {
   const inputRef = useRef(null);
+  const reactId = useId();
+  const inputId = rest.id || `bid-input-${reactId}`;
   const [focused, setFocused] = useState(false);
 
   const haptic = () => {
@@ -852,11 +854,17 @@ function BidStepInput({ value, onChange, onFocus, disabled, className = '', vari
   };
 
   const downDisabled = (value || 0) <= 1;
+  const restNoId = { ...rest };
+  delete restNoId.id;
 
   return (
     <div className={`bid-step-wrap ${variant === 'mobile' ? 'bid-step-mobile' : ''} ${focused ? 'focused' : ''}`}>
+      {label ? (
+        <label htmlFor={inputId} className="pyscal-sr-only">{label}</label>
+      ) : null}
       <input
         ref={inputRef}
+        id={inputId}
         type="number"
         inputMode="decimal"
         enterKeyHint="done"
@@ -868,7 +876,7 @@ function BidStepInput({ value, onChange, onFocus, disabled, className = '', vari
         onFocus={e => { setFocused(true); e.target.select(); if (onFocus) onFocus(e); }}
         onBlur={() => setFocused(false)}
         onKeyDown={handleKeyDown}
-        {...rest}
+        {...restNoId}
       />
     </div>
   );
