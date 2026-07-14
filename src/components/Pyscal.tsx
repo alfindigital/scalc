@@ -2232,6 +2232,7 @@ function ResultsTable({ results, bidRiseWarnings, targetProfit, totalLot, totalC
                         variant="mobile"
                         value={r.bid}
                         onChange={v => setBidAt(li, v)}
+                        label={`Bid papan ${r.layer}`}
                       />
                     )}
                   </div>
