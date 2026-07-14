@@ -159,6 +159,8 @@ const CSS = `
 .gear-btn{width:38px;height:38px;border:1px solid var(--border);background:var(--surface);
   color:var(--text-m);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s}
 .gear-btn:hover,.gear-btn.active{border-color:var(--brand);color:var(--brand)}
+/* a11y: ensure keyboard/programmatic focus outline is always drawn */
+.gear-btn:focus,.gear-btn:focus-visible{outline:2px solid var(--brand)!important;outline-offset:2px!important}
 
 /* mode toggle */
 .mode-toggle{display:flex;background:var(--surface);border:1px solid var(--border);margin-bottom:14px}
