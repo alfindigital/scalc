@@ -1,6 +1,6 @@
 // @ts-nocheck
 const escHtml = (s) => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
-import { useState, useMemo, useCallback, useEffect, useRef } from "react";
+import { useState, useMemo, useCallback, useEffect, useRef, useId } from "react";
 import { Pin } from "lucide-react";
 import logoUrl from "@/assets/logo-pyscal.webp";
 import { getTickSize, ceilTick, computeRows } from "@/lib/compute";
