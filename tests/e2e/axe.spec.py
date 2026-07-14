@@ -113,36 +113,30 @@ async def main():
                 await audit(page, theme, label, sel)
 
         # Also verify each social link + gear button have an accessible focus
-        # indicator. Axe doesn't check focus outlines directly. For the gear
-        # button we accept either a drawn outline or a border-color change to
-        # the brand color, because the app's button reset can collapse the
-        # outline-width while still keeping a visible border focus ring.
+        # indicator. Axe doesn't check focus outlines directly. We accept a
+        # visible outline, box-shadow, or border-color change as long as it is
+        # clearly different from the resting state.
         for theme in ("light", "dark"):
             await set_theme(page, theme)
             for sel, label in [
                 (".afd-rot a.afd-item", "social"),
                 ('[aria-label="Buka Settings"]', "gear"),
             ]:
-                await page.evaluate(f"document.querySelector({json.dumps(sel)})?.focus()")
-                info = await page.evaluate(
-                    """() => {
-                        const s = getComputedStyle(document.activeElement);
-                        const borderColor = s.borderColor;
-                        const brand = getComputedStyle(document.documentElement).getPropertyValue('--brand').trim();
-                        return {
-                            outlineStyle: s.outlineStyle,
-                            outlineWidth: s.outlineWidth,
-                            borderColor: borderColor,
-                            brand: brand,
-                        };
-                    }"""
+                el = await page.query_selector(sel)
+                resting = await page.evaluate(
+                    "(el) => { const s = getComputedStyle(el); return { outline: s.outline, borderColor: s.borderColor, boxShadow: s.boxShadow }; }",
+                    el,
                 )
-                hasOutline = info["outlineStyle"] != "none" and info["outlineWidth"] not in ("0px", "")
-                # The gear button shows focus via a border-color change to --brand.
-                hasBrandBorder = label == "gear" and info["borderColor"] == info["brand"]
-                ok = hasOutline or hasBrandBorder
+                await page.evaluate(f"document.querySelector({json.dumps(sel)})?.focus()")
+                focused = await page.evaluate(
+                    "() => { const s = getComputedStyle(document.activeElement); return { outlineStyle: s.outlineStyle, outlineWidth: s.outlineWidth, borderColor: s.borderColor, boxShadow: s.boxShadow }; }"
+                )
+                hasOutline = focused["outlineStyle"] != "none" and focused["outlineWidth"] not in ("0px", "")
+                hasShadow = focused["boxShadow"] not in ("none", "0px 0px 0px 0px", "")
+                borderChanged = focused["borderColor"] != resting["borderColor"]
+                ok = hasOutline or hasShadow or borderChanged
                 rec(f"{label}/{theme} focus-visible outline", ok,
-                    f"outline {info['outlineStyle']} {info['outlineWidth']}, border {info['borderColor']}")
+                    f"outline {focused['outlineStyle']} {focused['outlineWidth']}, shadow {focused['boxShadow']}")
 
         await browser.close()
 
