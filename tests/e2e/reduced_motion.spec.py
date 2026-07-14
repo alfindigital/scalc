@@ -1,10 +1,11 @@
 """Verify prefers-reduced-motion: rotator paused, all items visible, no animations, snapshots stable."""
-import asyncio, hashlib
+import asyncio, hashlib, os
 from pathlib import Path
 from playwright.async_api import async_playwright
 
-OUT = Path(__file__).parent / "screenshots"
-OUT.mkdir(exist_ok=True)
+ENGINE = os.environ.get("PYSCAL_E2E_BROWSER", "chromium")
+OUT = Path(__file__).parent / "screenshots" / ENGINE
+OUT.mkdir(parents=True, exist_ok=True)
 
 async def check(page, theme):
     # force theme
@@ -48,7 +49,8 @@ async def check(page, theme):
 
 async def main():
     async with async_playwright() as pw:
-        browser = await pw.chromium.launch(headless=True)
+        bt = getattr(pw, ENGINE)
+        browser = await bt.launch(headless=True)
         context = await browser.new_context(
             viewport={"width": 1280, "height": 900},
             reduced_motion="reduce",
@@ -59,6 +61,6 @@ async def main():
         for theme in ("light", "dark"):
             await check(page, theme)
         await browser.close()
-    print("PASS")
+    print(f"PASS ({ENGINE})")
 
 asyncio.run(main())

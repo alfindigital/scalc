@@ -21,11 +21,12 @@ from playwright.async_api import async_playwright
 
 BASE = os.environ.get("PYSCAL_E2E_URL", "http://localhost:8080")
 UPDATE = os.environ.get("UPDATE_SNAPSHOTS") == "1"
+ENGINE = os.environ.get("PYSCAL_E2E_BROWSER", "chromium")
 ROOT = Path(__file__).parent
-SNAP = ROOT / "snapshots"
-DIFF = ROOT / "screenshots"
-SNAP.mkdir(exist_ok=True)
-DIFF.mkdir(exist_ok=True)
+SNAP = ROOT / "snapshots" / ENGINE
+DIFF = ROOT / "screenshots" / ENGINE
+SNAP.mkdir(parents=True, exist_ok=True)
+DIFF.mkdir(parents=True, exist_ok=True)
 
 VIEWPORTS = [
     ("w320",      {"width": 320, "height": 720}),
@@ -120,7 +121,11 @@ async def freeze_footer(page):
 
 
 async def audit_viewport(browser, vp_name, viewport):
-    ctx = await browser.new_context(viewport=viewport, has_touch=viewport["width"] < 768)
+    ctx_opts = {"viewport": viewport}
+    # Firefox does not support has_touch context option.
+    if ENGINE != "firefox" and viewport["width"] < 768:
+        ctx_opts["has_touch"] = True
+    ctx = await browser.new_context(**ctx_opts)
     page = await ctx.new_page()
     await page.goto(BASE, wait_until="domcontentloaded")
     await page.wait_for_selector(".afd-foot")
@@ -246,12 +251,13 @@ async def audit_viewport(browser, vp_name, viewport):
 
 async def main():
     async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=True)
+        bt = getattr(p, ENGINE)
+        browser = await bt.launch(headless=True)
         for name, vp in VIEWPORTS:
             await audit_viewport(browser, name, vp)
         await browser.close()
     fails = [r for r in results if not r[1]]
-    print(f"\n=== {len(results) - len(fails)}/{len(results)} PASS ===")
+    print(f"\n=== [{ENGINE}] {len(results) - len(fails)}/{len(results)} PASS ===")
     if fails:
         for n, _, d in fails:
             print(f"  FAIL: {n} — {d}")
