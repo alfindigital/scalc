@@ -157,7 +157,7 @@ const CSS = `
 .brand span{font-size:12px;color:var(--text-m);font-weight:500;display:block;margin-top:2px}
 .hdr-r{margin-left:auto;display:flex;gap:6px;position:relative}
 .gear-btn{width:38px;height:38px;border:1px solid var(--border);background:var(--surface);
-  color:var(--text-m);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s}
+  color:var(--text-m);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:border-color .15s,color .15s,background-color .15s}
 .gear-btn:hover,.gear-btn.active{border-color:var(--brand);color:var(--brand)}
 /* a11y: ensure keyboard/programmatic focus outline is always drawn */
 .gear-btn:focus,.gear-btn:focus-visible{outline:2px solid var(--brand)!important;outline-offset:2px!important}
