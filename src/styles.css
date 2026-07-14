@@ -172,8 +172,12 @@
   border-radius: 4px;
 }
 
-/* Ensure keyboard focus outlines are visible on inline calc icon buttons. */
+/* Ensure keyboard focus outlines are visible on inline calc icon buttons.
+ * Include :focus so programmatic/keyboard focus is always visible,
+ * matching :focus-visible and keeping axe audits stable. */
+.pyscal .gear-btn:focus,
 .pyscal .gear-btn:focus-visible,
+.pyscal .mode-toggle button:focus,
 .pyscal .mode-toggle button:focus-visible {
   outline: 2px solid var(--primary) !important;
   outline-offset: 2px !important;
