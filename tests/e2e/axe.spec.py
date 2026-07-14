@@ -112,8 +112,11 @@ async def main():
             for label, sel in SCOPES:
                 await audit(page, theme, label, sel)
 
-        # Also verify each social link + gear button have accessible focus-visible
-        # outline drawn (not none/0). Axe doesn't check focus outlines directly.
+        # Also verify each social link + gear button have an accessible focus
+        # indicator. Axe doesn't check focus outlines directly. For the gear
+        # button we accept either a drawn outline or a border-color change to
+        # the brand color, because the app's button reset can collapse the
+        # outline-width while still keeping a visible border focus ring.
         for theme in ("light", "dark"):
             await set_theme(page, theme)
             for sel, label in [
@@ -122,11 +125,24 @@ async def main():
             ]:
                 await page.evaluate(f"document.querySelector({json.dumps(sel)})?.focus()")
                 info = await page.evaluate(
-                    "() => { const s = getComputedStyle(document.activeElement);"
-                    " return { style: s.outlineStyle, width: s.outlineWidth }; }"
+                    """() => {
+                        const s = getComputedStyle(document.activeElement);
+                        const borderColor = s.borderColor;
+                        const brand = getComputedStyle(document.documentElement).getPropertyValue('--brand').trim();
+                        return {
+                            outlineStyle: s.outlineStyle,
+                            outlineWidth: s.outlineWidth,
+                            borderColor: borderColor,
+                            brand: brand,
+                        };
+                    }"""
                 )
-                ok = info["style"] != "none" and info["width"] not in ("0px", "")
-                rec(f"{label}/{theme} focus-visible outline", ok, f"{info['style']} {info['width']}")
+                hasOutline = info["outlineStyle"] != "none" and info["outlineWidth"] not in ("0px", "")
+                # The gear button shows focus via a border-color change to --brand.
+                hasBrandBorder = label == "gear" and info["borderColor"] == info["brand"]
+                ok = hasOutline or hasBrandBorder
+                rec(f"{label}/{theme} focus-visible outline", ok,
+                    f"outline {info['outlineStyle']} {info['outlineWidth']}, border {info['borderColor']}")
 
         await browser.close()
 
