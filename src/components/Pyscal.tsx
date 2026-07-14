@@ -2160,7 +2160,7 @@ function ResultsTable({ results, bidRiseWarnings, targetProfit, totalLot, totalC
                         className={`bid-edit ${isWarn ? 'bid-edit-w' : ''}`}
                         value={r.bid}
                         onChange={v => setBidAt(li, v)}
-                        aria-label={`Bid papan ${r.layer}`}
+                        label={`Bid papan ${r.layer}`}
                       />
                     )}
                   </td>
