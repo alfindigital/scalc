@@ -121,7 +121,11 @@ async def freeze_footer(page):
 
 
 async def audit_viewport(browser, vp_name, viewport):
-    ctx = await browser.new_context(viewport=viewport, has_touch=viewport["width"] < 768)
+    ctx_opts = {"viewport": viewport}
+    # Firefox does not support has_touch context option.
+    if ENGINE != "firefox" and viewport["width"] < 768:
+        ctx_opts["has_touch"] = True
+    ctx = await browser.new_context(**ctx_opts)
     page = await ctx.new_page()
     await page.goto(BASE, wait_until="domcontentloaded")
     await page.wait_for_selector(".afd-foot")
