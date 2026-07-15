@@ -818,7 +818,51 @@ function renderToastText(text) {
 }
 
 /* ==================== BID STEP INPUT ==================== */
-function BidStepInput({ value, onChange, onFocus, disabled, className = '', variant = 'desktop', label, ...rest }) {
+// Grid-cell keyboard navigation helpers (Enter / Shift+Enter / Alt+Arrows)
+function focusGridCell(row, col) {
+  if (row == null || col == null) return false;
+  const el = document.querySelector(`[data-grid-row="${row}"][data-grid-col="${col}"]`);
+  if (el && typeof el.focus === 'function') {
+    el.focus();
+    if (typeof el.select === 'function') { try { el.select(); } catch {} }
+    return true;
+  }
+  return false;
+}
+function handleGridNavKey(e, row, col) {
+  const r = Number(row);
+  if (Number.isNaN(r) || !col) return false;
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    if (e.shiftKey) {
+      if (!focusGridCell(r - 1, col)) focusGridCell(0, col);
+    } else if (!focusGridCell(r + 1, col)) {
+      // wrap to opposite column on same row when at end
+      focusGridCell(r, col === 'bid' ? 'lot' : 'bid');
+    }
+    return true;
+  }
+  if (e.altKey && e.key === 'ArrowDown') { e.preventDefault(); focusGridCell(r + 1, col); return true; }
+  if (e.altKey && e.key === 'ArrowUp') { e.preventDefault(); focusGridCell(r - 1, col); return true; }
+  if (e.altKey && e.key === 'ArrowRight') { e.preventDefault(); focusGridCell(r, col === 'bid' ? 'lot' : 'bid'); return true; }
+  if (e.altKey && e.key === 'ArrowLeft') { e.preventDefault(); focusGridCell(r, col === 'lot' ? 'bid' : 'lot'); return true; }
+  return false;
+}
+// Enter / Shift+Enter navigation across setup-panel inputs (data-kbdnav="setup")
+function handleSetupEnter(e) {
+  if (e.key !== 'Enter') return;
+  const nodes = Array.from(document.querySelectorAll('[data-kbdnav="setup"]'));
+  const i = nodes.indexOf(e.currentTarget);
+  if (i < 0) return;
+  const next = e.shiftKey ? nodes[i - 1] : nodes[i + 1];
+  if (next) {
+    e.preventDefault();
+    next.focus();
+    if (typeof next.select === 'function') { try { next.select(); } catch {} }
+  }
+}
+
+function BidStepInput({ value, onChange, onFocus, disabled, className = '', variant = 'desktop', label, gridRow, gridCol, ...rest }) {
   const inputRef = useRef(null);
   const reactId = useId();
   const inputId = rest.id || `bid-input-${reactId}`;
@@ -846,6 +890,7 @@ function BidStepInput({ value, onChange, onFocus, disabled, className = '', vari
   };
 
   const handleKeyDown = (e) => {
+    if (handleGridNavKey(e, gridRow, gridCol)) return;
     if (e.key === 'ArrowUp') {
       e.preventDefault();
       stepUp(false);
@@ -874,6 +919,8 @@ function BidStepInput({ value, onChange, onFocus, disabled, className = '', vari
         value={value}
         min={1}
         disabled={disabled}
+        data-grid-row={gridRow}
+        data-grid-col={gridCol}
         onChange={e => onChange(+e.target.value)}
         onFocus={e => { setFocused(true); e.target.select(); if (onFocus) onFocus(e); }}
         onBlur={() => setFocused(false)}
@@ -1799,7 +1846,8 @@ export default function PYSCAL() {
                       inputMode="decimal" enterKeyHint="next"
                       aria-label="Avg Existing (termasuk fee)"
                       aria-invalid={!!validateExistingAvg(existingAvg, mode).error}
-                      onChange={e => setExistingAvg(+e.target.value || 0)} />
+                      onChange={e => setExistingAvg(+e.target.value || 0)}
+                      data-kbdnav="setup" onKeyDown={handleSetupEnter} />
                     <FieldHint status={validateExistingAvg(existingAvg, mode)} />
                   </div>
                   <div>
@@ -1809,7 +1857,8 @@ export default function PYSCAL() {
                       inputMode="numeric" enterKeyHint="next"
                       aria-label="Lot Existing"
                       aria-invalid={!!validateExistingLot(existingLot, mode).error}
-                      onChange={e => setExistingLot(+e.target.value || 0)} />
+                      onChange={e => setExistingLot(+e.target.value || 0)}
+                      data-kbdnav="setup" onKeyDown={handleSetupEnter} />
                     <FieldHint status={validateExistingLot(existingLot, mode)} />
                   </div>
                 </div>
@@ -1822,7 +1871,8 @@ export default function PYSCAL() {
                     inputMode="decimal" enterKeyHint="next"
                     aria-label={mode === 'position' ? 'Bid Awal beli baru' : 'Bid Awal'}
                     aria-invalid={!!validateBid(bids[0]).error}
-                    onChange={e => setBidAt(0, +e.target.value)} />
+                    onChange={e => setBidAt(0, +e.target.value)}
+                    data-kbdnav="setup" onKeyDown={handleSetupEnter} />
                   <FieldHint status={validateBid(bids[0])} />
                 </div>
                 <div>
@@ -1832,7 +1882,8 @@ export default function PYSCAL() {
                     inputMode="numeric" enterKeyHint="next"
                     aria-label="Lot dasar"
                     aria-invalid={!!validateLot(baseLot).error}
-                    onChange={e => setBaseLot(+e.target.value)} />
+                    onChange={e => setBaseLot(+e.target.value)}
+                    data-kbdnav="setup" onKeyDown={handleSetupEnter} />
                   <FieldHint status={validateLot(baseLot)} />
                 </div>
                 <div>
@@ -1842,7 +1893,8 @@ export default function PYSCAL() {
                     inputMode="numeric" enterKeyHint="next"
                     aria-label="Target tick"
                     aria-invalid={!!validateTargetTicks(targetTicks).error}
-                    onChange={e => setTargetTicks(+e.target.value)} />
+                    onChange={e => setTargetTicks(+e.target.value)}
+                    data-kbdnav="setup" onKeyDown={handleSetupEnter} />
                   <FieldHint status={validateTargetTicks(targetTicks)} />
                 </div>
                 <div>
@@ -1852,7 +1904,8 @@ export default function PYSCAL() {
                     inputMode="decimal" enterKeyHint="done"
                     aria-label="Minimum profit persen"
                     aria-invalid={!!validateTargetProfit(targetProfit).error}
-                    onChange={e => setTargetProfit(+e.target.value)} />
+                    onChange={e => setTargetProfit(+e.target.value)}
+                    data-kbdnav="setup" onKeyDown={handleSetupEnter} />
                   <FieldHint status={validateTargetProfit(targetProfit)} />
                 </div>
               </div>
@@ -2163,6 +2216,8 @@ function ResultsTable({ results, bidRiseWarnings, targetProfit, totalLot, totalC
                         value={r.bid}
                         onChange={v => setBidAt(li, v)}
                         label={`Bid papan ${r.layer}`}
+                        gridRow={li}
+                        gridCol="bid"
                       />
                     )}
                   </td>
@@ -2173,6 +2228,9 @@ function ResultsTable({ results, bidRiseWarnings, targetProfit, totalLot, totalC
                         inputMode="numeric" enterKeyHint="done"
                         onChange={e => setLotAt(li, +e.target.value)}
                         onFocus={e => e.target.select()}
+                        data-grid-row={li}
+                        data-grid-col="lot"
+                        onKeyDown={e => handleGridNavKey(e, li, 'lot')}
                         aria-label={`Lot papan ${r.layer}`} />
                     ) : n(r.lot)}
                   </td>
@@ -2235,6 +2293,8 @@ function ResultsTable({ results, bidRiseWarnings, targetProfit, totalLot, totalC
                         value={r.bid}
                         onChange={v => setBidAt(li, v)}
                         label={`Bid papan ${r.layer}`}
+                        gridRow={li}
+                        gridCol="bid"
                       />
                     )}
                   </div>
@@ -2244,7 +2304,10 @@ function ResultsTable({ results, bidRiseWarnings, targetProfit, totalLot, totalC
                       <input type="number" className="mhi-inp lot-edit-m" value={r.lot} min={1} step={100}
                         inputMode="numeric" enterKeyHint="done"
                         onChange={e => setLotAt(li, +e.target.value)}
-                        onFocus={e => e.target.select()} />
+                        onFocus={e => e.target.select()}
+                        data-grid-row={li}
+                        data-grid-col="lot"
+                        onKeyDown={e => handleGridNavKey(e, li, 'lot')} />
                     ) : <span>{n(r.lot)}</span>}
                   </div>
                   <div className="mhi"><label>Sell</label><span>{r.sell}</span></div>
