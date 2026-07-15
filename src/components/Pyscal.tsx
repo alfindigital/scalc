@@ -818,7 +818,51 @@ function renderToastText(text) {
 }
 
 /* ==================== BID STEP INPUT ==================== */
-function BidStepInput({ value, onChange, onFocus, disabled, className = '', variant = 'desktop', label, ...rest }) {
+// Grid-cell keyboard navigation helpers (Enter / Shift+Enter / Alt+Arrows)
+function focusGridCell(row, col) {
+  if (row == null || col == null) return false;
+  const el = document.querySelector(`[data-grid-row="${row}"][data-grid-col="${col}"]`);
+  if (el && typeof el.focus === 'function') {
+    el.focus();
+    if (typeof el.select === 'function') { try { el.select(); } catch {} }
+    return true;
+  }
+  return false;
+}
+function handleGridNavKey(e, row, col) {
+  const r = Number(row);
+  if (Number.isNaN(r) || !col) return false;
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    if (e.shiftKey) {
+      if (!focusGridCell(r - 1, col)) focusGridCell(0, col);
+    } else if (!focusGridCell(r + 1, col)) {
+      // wrap to opposite column on same row when at end
+      focusGridCell(r, col === 'bid' ? 'lot' : 'bid');
+    }
+    return true;
+  }
+  if (e.altKey && e.key === 'ArrowDown') { e.preventDefault(); focusGridCell(r + 1, col); return true; }
+  if (e.altKey && e.key === 'ArrowUp') { e.preventDefault(); focusGridCell(r - 1, col); return true; }
+  if (e.altKey && e.key === 'ArrowRight') { e.preventDefault(); focusGridCell(r, col === 'bid' ? 'lot' : 'bid'); return true; }
+  if (e.altKey && e.key === 'ArrowLeft') { e.preventDefault(); focusGridCell(r, col === 'lot' ? 'bid' : 'lot'); return true; }
+  return false;
+}
+// Enter / Shift+Enter navigation across setup-panel inputs (data-kbdnav="setup")
+function handleSetupEnter(e) {
+  if (e.key !== 'Enter') return;
+  const nodes = Array.from(document.querySelectorAll('[data-kbdnav="setup"]'));
+  const i = nodes.indexOf(e.currentTarget);
+  if (i < 0) return;
+  const next = e.shiftKey ? nodes[i - 1] : nodes[i + 1];
+  if (next) {
+    e.preventDefault();
+    next.focus();
+    if (typeof next.select === 'function') { try { next.select(); } catch {} }
+  }
+}
+
+function BidStepInput({ value, onChange, onFocus, disabled, className = '', variant = 'desktop', label, gridRow, gridCol, ...rest }) {
   const inputRef = useRef(null);
   const reactId = useId();
   const inputId = rest.id || `bid-input-${reactId}`;
@@ -846,6 +890,7 @@ function BidStepInput({ value, onChange, onFocus, disabled, className = '', vari
   };
 
   const handleKeyDown = (e) => {
+    if (handleGridNavKey(e, gridRow, gridCol)) return;
     if (e.key === 'ArrowUp') {
       e.preventDefault();
       stepUp(false);
@@ -874,6 +919,8 @@ function BidStepInput({ value, onChange, onFocus, disabled, className = '', vari
         value={value}
         min={1}
         disabled={disabled}
+        data-grid-row={gridRow}
+        data-grid-col={gridCol}
         onChange={e => onChange(+e.target.value)}
         onFocus={e => { setFocused(true); e.target.select(); if (onFocus) onFocus(e); }}
         onBlur={() => setFocused(false)}
