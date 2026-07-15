@@ -1,89 +1,964 @@
 [
   {
-    "id": "label",
-    "impact": "critical",
+    "id": "color-contrast",
+    "impact": "serious",
     "tags": [
-      "cat.forms",
-      "wcag2a",
-      "wcag412",
-      "section508",
-      "section508.22.n",
+      "cat.color",
+      "wcag2aa",
+      "wcag143",
       "TTv5",
-      "TT5.c",
+      "TT13.c",
       "EN-301-549",
-      "EN-9.4.1.2",
+      "EN-9.1.4.3",
       "ACT",
       "RGAAv4",
-      "RGAA-11.1.1"
+      "RGAA-3.2.1"
     ],
-    "description": "Ensure every form element has a label",
-    "help": "Form elements must have labels",
-    "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/label?application=axeAPI",
+    "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/color-contrast?application=axeAPI",
     "nodes": [
       {
         "any": [
           {
-            "id": "implicit-label",
-            "data": null,
-            "relatedNodes": [],
-            "impact": "critical",
-            "message": "Element does not have an implicit (wrapped) <label>"
-          },
-          {
-            "id": "explicit-label",
-            "data": null,
-            "relatedNodes": [],
-            "impact": "critical",
-            "message": "Element does not have an explicit <label>"
-          },
-          {
-            "id": "aria-label",
-            "data": null,
-            "relatedNodes": [],
-            "impact": "critical",
-            "message": "aria-label attribute does not exist or is empty"
-          },
-          {
-            "id": "aria-labelledby",
-            "data": null,
-            "relatedNodes": [],
-            "impact": "critical",
-            "message": "aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty"
-          },
-          {
-            "id": "non-empty-title",
+            "id": "color-contrast",
             "data": {
-              "messageKey": "noAttr"
+              "fgColor": "#92959c",
+              "bgColor": "#fbfcfd",
+              "contrastRatio": 2.92,
+              "fontSize": "12.0pt (16px)",
+              "fontWeight": "bold",
+              "messageKey": null,
+              "expectedContrastRatio": "4.5:1",
+              "shadowColor": null,
+              "colorParse": null
             },
-            "relatedNodes": [],
-            "impact": "critical",
-            "message": "Element has no title attribute"
-          },
-          {
-            "id": "non-empty-placeholder",
-            "data": {
-              "messageKey": "noAttr"
-            },
-            "relatedNodes": [],
-            "impact": "critical",
-            "message": "Element has no placeholder attribute"
-          },
-          {
-            "id": "presentational-role",
-            "data": null,
-            "relatedNodes": [],
-            "impact": "critical",
-            "message": "Element's default semantics were not overridden with role=\"none\" or role=\"presentation\""
+            "relatedNodes": [
+              {
+                "html": "<div class=\"onboarding\" role=\"region\" aria-label=\"Petunjuk singkat\" data-tsd-source=\"/src/components/Pyscal.tsx:1729:13\">",
+                "target": [
+                  ".onboarding"
+                ]
+              },
+              {
+                "html": "<div class=\"pyscal\" data-theme=\"light\" data-tsd-source=\"/src/components/Pyscal.tsx:1677:7\">",
+                "target": [
+                  ".pyscal"
+                ]
+              }
+            ],
+            "impact": "serious",
+            "message": "Element has insufficient color contrast of 2.92 (foreground color: #92959c, background color: #fbfcfd, font size: 12.0pt (16px), font weight: bold). Expected contrast ratio of 4.5:1"
           }
         ],
         "all": [],
         "none": [],
-        "impact": "critical",
-        "html": "<input inputmode=\"decimal\" enterkeyhint=\"done\" class=\"bid-edit \" min=\"1\" data-tsd-source=\"/src/components/Pyscal.tsx:858:7\" type=\"number\" value=\"100\">",
+        "impact": "serious",
+        "html": "<div class=\"onboarding-title\" data-tsd-source=\"/src/components/Pyscal.tsx:1736:17\">Selamat datang di PYSCAL</div>",
         "target": [
-          ".bid-edit"
+          ".onboarding-title"
         ],
-        "failureSummary": "Fix any of the following:\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element has no placeholder attribute\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\""
+        "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.92 (foreground color: #92959c, background color: #fbfcfd, font size: 12.0pt (16px), font weight: bold). Expected contrast ratio of 4.5:1"
+      },
+      {
+        "any": [
+          {
+            "id": "color-contrast",
+            "data": {
+              "fgColor": "#afb3bb",
+              "bgColor": "#fbfcfd",
+              "contrastRatio": 2.04,
+              "fontSize": "9.8pt (13px)",
+              "fontWeight": "normal",
+              "messageKey": null,
+              "expectedContrastRatio": "4.5:1",
+              "shadowColor": null,
+              "colorParse": null
+            },
+            "relatedNodes": [
+              {
+                "html": "<div class=\"onboarding\" role=\"region\" aria-label=\"Petunjuk singkat\" data-tsd-source=\"/src/components/Pyscal.tsx:1729:13\">",
+                "target": [
+                  ".onboarding"
+                ]
+              },
+              {
+                "html": "<div class=\"pyscal\" data-theme=\"light\" data-tsd-source=\"/src/components/Pyscal.tsx:1677:7\">",
+                "target": [
+                  ".pyscal"
+                ]
+              }
+            ],
+            "impact": "serious",
+            "message": "Element has insufficient color contrast of 2.04 (foreground color: #afb3bb, background color: #fbfcfd, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1"
+          }
+        ],
+        "all": [],
+        "none": [],
+        "impact": "serious",
+        "html": "<div class=\"onboarding-sub\" data-tsd-source=\"/src/components/Pyscal.tsx:1737:17\">Kalkulator pyramid bid untuk avg-down terukur. 4 hal yang perlu kamu tahu:</div>",
+        "target": [
+          ".onboarding-sub"
+        ],
+        "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.04 (foreground color: #afb3bb, background color: #fbfcfd, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1"
+      },
+      {
+        "any": [
+          {
+            "id": "color-contrast",
+            "data": {
+              "fgColor": "#92959c",
+              "bgColor": "#fbfcfd",
+              "contrastRatio": 2.92,
+              "fontSize": "9.8pt (13px)",
+              "fontWeight": "normal",
+              "messageKey": null,
+              "expectedContrastRatio": "4.5:1",
+              "shadowColor": null,
+              "colorParse": null
+            },
+            "relatedNodes": [
+              {
+                "html": "<div class=\"onboarding\" role=\"region\" aria-label=\"Petunjuk singkat\" data-tsd-source=\"/src/components/Pyscal.tsx:1729:13\">",
+                "target": [
+                  ".onboarding"
+                ]
+              },
+              {
+                "html": "<div class=\"pyscal\" data-theme=\"light\" data-tsd-source=\"/src/components/Pyscal.tsx:1677:7\">",
+                "target": [
+                  ".pyscal"
+                ]
+              }
+            ],
+            "impact": "serious",
+            "message": "Element has insufficient color contrast of 2.92 (foreground color: #92959c, background color: #fbfcfd, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1"
+          }
+        ],
+        "all": [],
+        "none": [],
+        "impact": "serious",
+        "html": "<div data-tsd-source=\"/src/components/Pyscal.tsx:1743:21\"><strong data-tsd-source=\"/src/components/Pyscal.tsx:1744:23\">Isi Bid Awal &amp; Lot</strong> di kartu di bawah, lalu atur target tick &amp; min profit. Hasil hitung otomatis muncul.</div>",
+        "target": [
+          "li:nth-child(1) > div"
+        ],
+        "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.92 (foreground color: #92959c, background color: #fbfcfd, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1"
+      },
+      {
+        "any": [
+          {
+            "id": "color-contrast",
+            "data": {
+              "fgColor": "#92959c",
+              "bgColor": "#fbfcfd",
+              "contrastRatio": 2.92,
+              "fontSize": "9.8pt (13px)",
+              "fontWeight": "bold",
+              "messageKey": null,
+              "expectedContrastRatio": "4.5:1",
+              "shadowColor": null,
+              "colorParse": null
+            },
+            "relatedNodes": [
+              {
+                "html": "<div class=\"onboarding\" role=\"region\" aria-label=\"Petunjuk singkat\" data-tsd-source=\"/src/components/Pyscal.tsx:1729:13\">",
+                "target": [
+                  ".onboarding"
+                ]
+              },
+              {
+                "html": "<div class=\"pyscal\" data-theme=\"light\" data-tsd-source=\"/src/components/Pyscal.tsx:1677:7\">",
+                "target": [
+                  ".pyscal"
+                ]
+              }
+            ],
+            "impact": "serious",
+            "message": "Element has insufficient color contrast of 2.92 (foreground color: #92959c, background color: #fbfcfd, font size: 9.8pt (13px), font weight: bold). Expected contrast ratio of 4.5:1"
+          }
+        ],
+        "all": [],
+        "none": [],
+        "impact": "serious",
+        "html": "<strong data-tsd-source=\"/src/components/Pyscal.tsx:1744:23\">Isi Bid Awal &amp; Lot</strong>",
+        "target": [
+          "li:nth-child(1) > div > strong"
+        ],
+        "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.92 (foreground color: #92959c, background color: #fbfcfd, font size: 9.8pt (13px), font weight: bold). Expected contrast ratio of 4.5:1"
+      },
+      {
+        "any": [
+          {
+            "id": "color-contrast",
+            "data": {
+              "fgColor": "#92959c",
+              "bgColor": "#fbfcfd",
+              "contrastRatio": 2.92,
+              "fontSize": "9.8pt (13px)",
+              "fontWeight": "normal",
+              "messageKey": null,
+              "expectedContrastRatio": "4.5:1",
+              "shadowColor": null,
+              "colorParse": null
+            },
+            "relatedNodes": [
+              {
+                "html": "<div class=\"onboarding\" role=\"region\" aria-label=\"Petunjuk singkat\" data-tsd-source=\"/src/components/Pyscal.tsx:1729:13\">",
+                "target": [
+                  ".onboarding"
+                ]
+              },
+              {
+                "html": "<div class=\"pyscal\" data-theme=\"light\" data-tsd-source=\"/src/components/Pyscal.tsx:1677:7\">",
+                "target": [
+                  ".pyscal"
+                ]
+              }
+            ],
+            "impact": "serious",
+            "message": "Element has insufficient color contrast of 2.92 (foreground color: #92959c, background color: #fbfcfd, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1"
+          }
+        ],
+        "all": [],
+        "none": [],
+        "impact": "serious",
+        "html": "<div data-tsd-source=\"/src/components/Pyscal.tsx:1750:21\"><strong data-tsd-source=\"/src/components/Pyscal.tsx:1751:23\">Tambah papan</strong> untuk simulasi avg-down per layer.<span class=\"ob-kbd\" data-tsd-source=\"/src/components/Pyscal.tsx:1752:23\">Ctrl + N</span></div>",
+        "target": [
+          "li:nth-child(2) > div"
+        ],
+        "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.92 (foreground color: #92959c, background color: #fbfcfd, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1"
+      },
+      {
+        "any": [
+          {
+            "id": "color-contrast",
+            "data": {
+              "fgColor": "#92959c",
+              "bgColor": "#fbfcfd",
+              "contrastRatio": 2.92,
+              "fontSize": "9.8pt (13px)",
+              "fontWeight": "bold",
+              "messageKey": null,
+              "expectedContrastRatio": "4.5:1",
+              "shadowColor": null,
+              "colorParse": null
+            },
+            "relatedNodes": [
+              {
+                "html": "<div class=\"onboarding\" role=\"region\" aria-label=\"Petunjuk singkat\" data-tsd-source=\"/src/components/Pyscal.tsx:1729:13\">",
+                "target": [
+                  ".onboarding"
+                ]
+              },
+              {
+                "html": "<div class=\"pyscal\" data-theme=\"light\" data-tsd-source=\"/src/components/Pyscal.tsx:1677:7\">",
+                "target": [
+                  ".pyscal"
+                ]
+              }
+            ],
+            "impact": "serious",
+            "message": "Element has insufficient color contrast of 2.92 (foreground color: #92959c, background color: #fbfcfd, font size: 9.8pt (13px), font weight: bold). Expected contrast ratio of 4.5:1"
+          }
+        ],
+        "all": [],
+        "none": [],
+        "impact": "serious",
+        "html": "<strong data-tsd-source=\"/src/components/Pyscal.tsx:1751:23\">Tambah papan</strong>",
+        "target": [
+          "li:nth-child(2) > div > strong"
+        ],
+        "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.92 (foreground color: #92959c, background color: #fbfcfd, font size: 9.8pt (13px), font weight: bold). Expected contrast ratio of 4.5:1"
+      },
+      {
+        "any": [
+          {
+            "id": "color-contrast",
+            "data": {
+              "fgColor": "#afb3bb",
+              "bgColor": "#ffffff",
+              "contrastRatio": 2.1,
+              "fontSize": "8.3pt (11px)",
+              "fontWeight": "normal",
+              "messageKey": null,
+              "expectedContrastRatio": "4.5:1",
+              "shadowColor": null,
+              "colorParse": null
+            },
+            "relatedNodes": [
+              {
+                "html": "<span class=\"ob-kbd\" data-tsd-source=\"/src/components/Pyscal.tsx:1752:23\">Ctrl + N</span>",
+                "target": [
+                  "li:nth-child(2) > div > .ob-kbd"
+                ]
+              }
+            ],
+            "impact": "serious",
+            "message": "Element has insufficient color contrast of 2.1 (foreground color: #afb3bb, background color: #ffffff, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
+          }
+        ],
+        "all": [],
+        "none": [],
+        "impact": "serious",
+        "html": "<span class=\"ob-kbd\" data-tsd-source=\"/src/components/Pyscal.tsx:1752:23\">Ctrl + N</span>",
+        "target": [
+          "li:nth-child(2) > div > .ob-kbd"
+        ],
+        "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.1 (foreground color: #afb3bb, background color: #ffffff, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
+      },
+      {
+        "any": [
+          {
+            "id": "color-contrast",
+            "data": {
+              "fgColor": "#92959c",
+              "bgColor": "#fbfcfd",
+              "contrastRatio": 2.92,
+              "fontSize": "9.8pt (13px)",
+              "fontWeight": "normal",
+              "messageKey": null,
+              "expectedContrastRatio": "4.5:1",
+              "shadowColor": null,
+              "colorParse": null
+            },
+            "relatedNodes": [
+              {
+                "html": "<div class=\"onboarding\" role=\"region\" aria-label=\"Petunjuk singkat\" data-tsd-source=\"/src/components/Pyscal.tsx:1729:13\">",
+                "target": [
+                  ".onboarding"
+                ]
+              },
+              {
+                "html": "<div class=\"pyscal\" data-theme=\"light\" data-tsd-source=\"/src/components/Pyscal.tsx:1677:7\">",
+                "target": [
+                  ".pyscal"
+                ]
+              }
+            ],
+            "impact": "serious",
+            "message": "Element has insufficient color contrast of 2.92 (foreground color: #92959c, background color: #fbfcfd, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1"
+          }
+        ],
+        "all": [],
+        "none": [],
+        "impact": "serious",
+        "html": "<div data-tsd-source=\"/src/components/Pyscal.tsx:1757:21\">",
+        "target": [
+          "li:nth-child(3) > div"
+        ],
+        "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.92 (foreground color: #92959c, background color: #fbfcfd, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1"
+      },
+      {
+        "any": [
+          {
+            "id": "color-contrast",
+            "data": {
+              "fgColor": "#92959c",
+              "bgColor": "#fbfcfd",
+              "contrastRatio": 2.92,
+              "fontSize": "9.8pt (13px)",
+              "fontWeight": "bold",
+              "messageKey": null,
+              "expectedContrastRatio": "4.5:1",
+              "shadowColor": null,
+              "colorParse": null
+            },
+            "relatedNodes": [
+              {
+                "html": "<div class=\"onboarding\" role=\"region\" aria-label=\"Petunjuk singkat\" data-tsd-source=\"/src/components/Pyscal.tsx:1729:13\">",
+                "target": [
+                  ".onboarding"
+                ]
+              },
+              {
+                "html": "<div class=\"pyscal\" data-theme=\"light\" data-tsd-source=\"/src/components/Pyscal.tsx:1677:7\">",
+                "target": [
+                  ".pyscal"
+                ]
+              }
+            ],
+            "impact": "serious",
+            "message": "Element has insufficient color contrast of 2.92 (foreground color: #92959c, background color: #fbfcfd, font size: 9.8pt (13px), font weight: bold). Expected contrast ratio of 4.5:1"
+          }
+        ],
+        "all": [],
+        "none": [],
+        "impact": "serious",
+        "html": "<strong data-tsd-source=\"/src/components/Pyscal.tsx:1758:23\">Simpan ke History</strong>",
+        "target": [
+          "li:nth-child(3) > div > strong"
+        ],
+        "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.92 (foreground color: #92959c, background color: #fbfcfd, font size: 9.8pt (13px), font weight: bold). Expected contrast ratio of 4.5:1"
+      },
+      {
+        "any": [
+          {
+            "id": "color-contrast",
+            "data": {
+              "fgColor": "#afb3bb",
+              "bgColor": "#ffffff",
+              "contrastRatio": 2.1,
+              "fontSize": "8.3pt (11px)",
+              "fontWeight": "normal",
+              "messageKey": null,
+              "expectedContrastRatio": "4.5:1",
+              "shadowColor": null,
+              "colorParse": null
+            },
+            "relatedNodes": [
+              {
+                "html": "<span class=\"ob-kbd\" data-tsd-source=\"/src/components/Pyscal.tsx:1759:23\">Ctrl + Shift + S</span>",
+                "target": [
+                  "li:nth-child(3) > div > .ob-kbd"
+                ]
+              }
+            ],
+            "impact": "serious",
+            "message": "Element has insufficient color contrast of 2.1 (foreground color: #afb3bb, background color: #ffffff, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
+          }
+        ],
+        "all": [],
+        "none": [],
+        "impact": "serious",
+        "html": "<span class=\"ob-kbd\" data-tsd-source=\"/src/components/Pyscal.tsx:1759:23\">Ctrl + Shift + S</span>",
+        "target": [
+          "li:nth-child(3) > div > .ob-kbd"
+        ],
+        "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.1 (foreground color: #afb3bb, background color: #ffffff, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
+      },
+      {
+        "any": [
+          {
+            "id": "color-contrast",
+            "data": {
+              "fgColor": "#92959c",
+              "bgColor": "#fbfcfd",
+              "contrastRatio": 2.92,
+              "fontSize": "9.8pt (13px)",
+              "fontWeight": "normal",
+              "messageKey": null,
+              "expectedContrastRatio": "4.5:1",
+              "shadowColor": null,
+              "colorParse": null
+            },
+            "relatedNodes": [
+              {
+                "html": "<div class=\"onboarding\" role=\"region\" aria-label=\"Petunjuk singkat\" data-tsd-source=\"/src/components/Pyscal.tsx:1729:13\">",
+                "target": [
+                  ".onboarding"
+                ]
+              },
+              {
+                "html": "<div class=\"pyscal\" data-theme=\"light\" data-tsd-source=\"/src/components/Pyscal.tsx:1677:7\">",
+                "target": [
+                  ".pyscal"
+                ]
+              }
+            ],
+            "impact": "serious",
+            "message": "Element has insufficient color contrast of 2.92 (foreground color: #92959c, background color: #fbfcfd, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1"
+          }
+        ],
+        "all": [],
+        "none": [],
+        "impact": "serious",
+        "html": "<div data-tsd-source=\"/src/components/Pyscal.tsx:1764:21\"><strong data-tsd-source=\"/src/components/Pyscal.tsx:1765:23\">Settings</strong> untuk fee broker, balance, preset, theme &amp; backup JSON.<span class=\"ob-kbd\" data-tsd-source=\"/src/components/Pyscal.tsx:1766:23\">Ctrl + ,</span></div>",
+        "target": [
+          "li:nth-child(4) > div"
+        ],
+        "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.92 (foreground color: #92959c, background color: #fbfcfd, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1"
+      },
+      {
+        "any": [
+          {
+            "id": "color-contrast",
+            "data": {
+              "fgColor": "#92959c",
+              "bgColor": "#fbfcfd",
+              "contrastRatio": 2.92,
+              "fontSize": "9.8pt (13px)",
+              "fontWeight": "bold",
+              "messageKey": null,
+              "expectedContrastRatio": "4.5:1",
+              "shadowColor": null,
+              "colorParse": null
+            },
+            "relatedNodes": [
+              {
+                "html": "<div class=\"onboarding\" role=\"region\" aria-label=\"Petunjuk singkat\" data-tsd-source=\"/src/components/Pyscal.tsx:1729:13\">",
+                "target": [
+                  ".onboarding"
+                ]
+              },
+              {
+                "html": "<div class=\"pyscal\" data-theme=\"light\" data-tsd-source=\"/src/components/Pyscal.tsx:1677:7\">",
+                "target": [
+                  ".pyscal"
+                ]
+              }
+            ],
+            "impact": "serious",
+            "message": "Element has insufficient color contrast of 2.92 (foreground color: #92959c, background color: #fbfcfd, font size: 9.8pt (13px), font weight: bold). Expected contrast ratio of 4.5:1"
+          }
+        ],
+        "all": [],
+        "none": [],
+        "impact": "serious",
+        "html": "<strong data-tsd-source=\"/src/components/Pyscal.tsx:1765:23\">Settings</strong>",
+        "target": [
+          "li:nth-child(4) > div > strong"
+        ],
+        "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.92 (foreground color: #92959c, background color: #fbfcfd, font size: 9.8pt (13px), font weight: bold). Expected contrast ratio of 4.5:1"
+      },
+      {
+        "any": [
+          {
+            "id": "color-contrast",
+            "data": {
+              "fgColor": "#afb3bb",
+              "bgColor": "#ffffff",
+              "contrastRatio": 2.1,
+              "fontSize": "8.3pt (11px)",
+              "fontWeight": "normal",
+              "messageKey": null,
+              "expectedContrastRatio": "4.5:1",
+              "shadowColor": null,
+              "colorParse": null
+            },
+            "relatedNodes": [
+              {
+                "html": "<span class=\"ob-kbd\" data-tsd-source=\"/src/components/Pyscal.tsx:1766:23\">Ctrl + ,</span>",
+                "target": [
+                  "li:nth-child(4) > div > .ob-kbd"
+                ]
+              }
+            ],
+            "impact": "serious",
+            "message": "Element has insufficient color contrast of 2.1 (foreground color: #afb3bb, background color: #ffffff, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
+          }
+        ],
+        "all": [],
+        "none": [],
+        "impact": "serious",
+        "html": "<span class=\"ob-kbd\" data-tsd-source=\"/src/components/Pyscal.tsx:1766:23\">Ctrl + ,</span>",
+        "target": [
+          "li:nth-child(4) > div > .ob-kbd"
+        ],
+        "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.1 (foreground color: #afb3bb, background color: #ffffff, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
+      },
+      {
+        "any": [
+          {
+            "id": "color-contrast",
+            "data": {
+              "fgColor": "#ffffff",
+              "bgColor": "#92959c",
+              "contrastRatio": 2.99,
+              "fontSize": "9.8pt (13px)",
+              "fontWeight": "bold",
+              "messageKey": null,
+              "expectedContrastRatio": "4.5:1",
+              "shadowColor": null,
+              "colorParse": null
+            },
+            "relatedNodes": [
+              {
+                "html": "<button class=\"btn-primary-pyscal\" data-tsd-source=\"/src/components/Pyscal.tsx:1771:19\">Mengerti, mulai pakai</button>",
+                "target": [
+                  ".btn-primary-pyscal"
+                ]
+              }
+            ],
+            "impact": "serious",
+            "message": "Element has insufficient color contrast of 2.99 (foreground color: #ffffff, background color: #92959c, font size: 9.8pt (13px), font weight: bold). Expected contrast ratio of 4.5:1"
+          }
+        ],
+        "all": [],
+        "none": [],
+        "impact": "serious",
+        "html": "<button class=\"btn-primary-pyscal\" data-tsd-source=\"/src/components/Pyscal.tsx:1771:19\">Mengerti, mulai pakai</button>",
+        "target": [
+          ".btn-primary-pyscal"
+        ],
+        "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.99 (foreground color: #ffffff, background color: #92959c, font size: 9.8pt (13px), font weight: bold). Expected contrast ratio of 4.5:1"
+      },
+      {
+        "any": [
+          {
+            "id": "color-contrast",
+            "data": {
+              "fgColor": "#8e929a",
+              "bgColor": "#f7f8fb",
+              "contrastRatio": 2.93,
+              "fontSize": "10.5pt (14px)",
+              "fontWeight": "bold",
+              "messageKey": null,
+              "expectedContrastRatio": "4.5:1",
+              "shadowColor": null,
+              "colorParse": null
+            },
+            "relatedNodes": [
+              {
+                "html": "<div class=\"card\" data-tsd-source=\"/src/components/Pyscal.tsx:1898:13\" style=\"padding: 0px;\">",
+                "target": [
+                  ".card:nth-child(5)"
+                ]
+              }
+            ],
+            "impact": "serious",
+            "message": "Element has insufficient color contrast of 2.93 (foreground color: #8e929a, background color: #f7f8fb, font size: 10.5pt (14px), font weight: bold). Expected contrast ratio of 4.5:1"
+          }
+        ],
+        "all": [],
+        "none": [],
+        "impact": "serious",
+        "html": "<input id=\"bid-input-_r_0_\" inputmode=\"decimal\" enterkeyhint=\"done\" class=\"bid-edit \" min=\"1\" data-tsd-source=\"/src/components/Pyscal.tsx:867:7\" type=\"number\" value=\"100\">",
+        "target": [
+          "#bid-input-_r_0_"
+        ],
+        "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.93 (foreground color: #8e929a, background color: #f7f8fb, font size: 10.5pt (14px), font weight: bold). Expected contrast ratio of 4.5:1"
+      },
+      {
+        "any": [
+          {
+            "id": "color-contrast",
+            "data": {
+              "fgColor": "#8e929a",
+              "bgColor": "#f7f8fb",
+              "contrastRatio": 2.93,
+              "fontSize": "10.5pt (14px)",
+              "fontWeight": "bold",
+              "messageKey": null,
+              "expectedContrastRatio": "4.5:1",
+              "shadowColor": null,
+              "colorParse": null
+            },
+            "relatedNodes": [
+              {
+                "html": "<div class=\"card\" data-tsd-source=\"/src/components/Pyscal.tsx:1898:13\" style=\"padding: 0px;\">",
+                "target": [
+                  ".card:nth-child(5)"
+                ]
+              }
+            ],
+            "impact": "serious",
+            "message": "Element has insufficient color contrast of 2.93 (foreground color: #8e929a, background color: #f7f8fb, font size: 10.5pt (14px), font weight: bold). Expected contrast ratio of 4.5:1"
+          }
+        ],
+        "all": [],
+        "none": [],
+        "impact": "serious",
+        "html": "<td class=\"c-lot\" data-tsd-source=\"/src/components/Pyscal.tsx:2169:19\">100</td>",
+        "target": [
+          "tr:nth-child(1) > .c-lot"
+        ],
+        "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.93 (foreground color: #8e929a, background color: #f7f8fb, font size: 10.5pt (14px), font weight: bold). Expected contrast ratio of 4.5:1"
+      },
+      {
+        "any": [
+          {
+            "id": "color-contrast",
+            "data": {
+              "fgColor": "#aaafb9",
+              "bgColor": "#f7f8fb",
+              "contrastRatio": 2.07,
+              "fontSize": "10.5pt (14px)",
+              "fontWeight": "normal",
+              "messageKey": null,
+              "expectedContrastRatio": "4.5:1",
+              "shadowColor": null,
+              "colorParse": null
+            },
+            "relatedNodes": [
+              {
+                "html": "<div class=\"card\" data-tsd-source=\"/src/components/Pyscal.tsx:1898:13\" style=\"padding: 0px;\">",
+                "target": [
+                  ".card:nth-child(5)"
+                ]
+              }
+            ],
+            "impact": "serious",
+            "message": "Element has insufficient color contrast of 2.07 (foreground color: #aaafb9, background color: #f7f8fb, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+          }
+        ],
+        "all": [],
+        "none": [],
+        "impact": "serious",
+        "html": "<td class=\"c-avg\" data-tsd-source=\"/src/components/Pyscal.tsx:2179:19\">100.15</td>",
+        "target": [
+          ".c-avg"
+        ],
+        "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.07 (foreground color: #aaafb9, background color: #f7f8fb, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+      },
+      {
+        "any": [
+          {
+            "id": "color-contrast",
+            "data": {
+              "fgColor": "#8e929a",
+              "bgColor": "#f7f8fb",
+              "contrastRatio": 2.93,
+              "fontSize": "10.5pt (14px)",
+              "fontWeight": "bold",
+              "messageKey": null,
+              "expectedContrastRatio": "4.5:1",
+              "shadowColor": null,
+              "colorParse": null
+            },
+            "relatedNodes": [
+              {
+                "html": "<div class=\"card\" data-tsd-source=\"/src/components/Pyscal.tsx:1898:13\" style=\"padding: 0px;\">",
+                "target": [
+                  ".card:nth-child(5)"
+                ]
+              }
+            ],
+            "impact": "serious",
+            "message": "Element has insufficient color contrast of 2.93 (foreground color: #8e929a, background color: #f7f8fb, font size: 10.5pt (14px), font weight: bold). Expected contrast ratio of 4.5:1"
+          }
+        ],
+        "all": [],
+        "none": [],
+        "impact": "serious",
+        "html": "<td class=\"c-sell\" data-tsd-source=\"/src/components/Pyscal.tsx:2180:19\">101</td>",
+        "target": [
+          ".c-sell"
+        ],
+        "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.93 (foreground color: #8e929a, background color: #f7f8fb, font size: 10.5pt (14px), font weight: bold). Expected contrast ratio of 4.5:1"
+      },
+      {
+        "any": [
+          {
+            "id": "color-contrast",
+            "data": {
+              "fgColor": "#aaafb9",
+              "bgColor": "#f7f8fb",
+              "contrastRatio": 2.07,
+              "fontSize": "9.8pt (13px)",
+              "fontWeight": "normal",
+              "messageKey": null,
+              "expectedContrastRatio": "4.5:1",
+              "shadowColor": null,
+              "colorParse": null
+            },
+            "relatedNodes": [
+              {
+                "html": "<div class=\"card\" data-tsd-source=\"/src/components/Pyscal.tsx:1898:13\" style=\"padding: 0px;\">",
+                "target": [
+                  ".card:nth-child(5)"
+                ]
+              }
+            ],
+            "impact": "serious",
+            "message": "Element has insufficient color contrast of 2.07 (foreground color: #aaafb9, background color: #f7f8fb, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1"
+          }
+        ],
+        "all": [],
+        "none": [],
+        "impact": "serious",
+        "html": "<td class=\"c-cost\" data-tsd-source=\"/src/components/Pyscal.tsx:2181:19\">1.001.500</td>",
+        "target": [
+          ".c-cost"
+        ],
+        "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.07 (foreground color: #aaafb9, background color: #f7f8fb, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1"
+      },
+      {
+        "any": [
+          {
+            "id": "color-contrast",
+            "data": {
+              "fgColor": "#92c3a6",
+              "bgColor": "#f7f8fb",
+              "contrastRatio": 1.86,
+              "fontSize": "10.5pt (14px)",
+              "fontWeight": "bold",
+              "messageKey": null,
+              "expectedContrastRatio": "4.5:1",
+              "shadowColor": null,
+              "colorParse": null
+            },
+            "relatedNodes": [
+              {
+                "html": "<div class=\"card\" data-tsd-source=\"/src/components/Pyscal.tsx:1898:13\" style=\"padding: 0px;\">",
+                "target": [
+                  ".card:nth-child(5)"
+                ]
+              }
+            ],
+            "impact": "serious",
+            "message": "Element has insufficient color contrast of 1.86 (foreground color: #92c3a6, background color: #f7f8fb, font size: 10.5pt (14px), font weight: bold). Expected contrast ratio of 4.5:1"
+          }
+        ],
+        "all": [],
+        "none": [],
+        "impact": "serious",
+        "html": "<td class=\"c-plp\" data-tsd-source=\"/src/components/Pyscal.tsx:2182:19\">5.975,00</td>",
+        "target": [
+          ".c-plp"
+        ],
+        "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.86 (foreground color: #92c3a6, background color: #f7f8fb, font size: 10.5pt (14px), font weight: bold). Expected contrast ratio of 4.5:1"
+      },
+      {
+        "any": [
+          {
+            "id": "color-contrast",
+            "data": {
+              "fgColor": "#92c3a6",
+              "bgColor": "#f7f8fb",
+              "contrastRatio": 1.86,
+              "fontSize": "9.8pt (13px)",
+              "fontWeight": "bold",
+              "messageKey": null,
+              "expectedContrastRatio": "4.5:1",
+              "shadowColor": null,
+              "colorParse": null
+            },
+            "relatedNodes": [
+              {
+                "html": "<div class=\"card\" data-tsd-source=\"/src/components/Pyscal.tsx:1898:13\" style=\"padding: 0px;\">",
+                "target": [
+                  ".card:nth-child(5)"
+                ]
+              }
+            ],
+            "impact": "serious",
+            "message": "Element has insufficient color contrast of 1.86 (foreground color: #92c3a6, background color: #f7f8fb, font size: 9.8pt (13px), font weight: bold). Expected contrast ratio of 4.5:1"
+          }
+        ],
+        "all": [],
+        "none": [],
+        "impact": "serious",
+        "html": "<span class=\"pp pp-g\" data-tsd-source=\"/src/components/Pyscal.tsx:2184:21\">0.60%</span>",
+        "target": [
+          ".pp"
+        ],
+        "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.86 (foreground color: #92c3a6, background color: #f7f8fb, font size: 9.8pt (13px), font weight: bold). Expected contrast ratio of 4.5:1"
+      },
+      {
+        "any": [
+          {
+            "id": "color-contrast",
+            "data": {
+              "fgColor": "#8e929a",
+              "bgColor": "#eff0f3",
+              "contrastRatio": 2.73,
+              "fontSize": "10.5pt (14px)",
+              "fontWeight": "bold",
+              "messageKey": null,
+              "expectedContrastRatio": "4.5:1",
+              "shadowColor": null,
+              "colorParse": null
+            },
+            "relatedNodes": [
+              {
+                "html": "<td class=\"total-label\" data-tsd-source=\"/src/components/Pyscal.tsx:2198:15\">Total Beli</td>",
+                "target": [
+                  ".total-label"
+                ]
+              },
+              {
+                "html": "<div class=\"card\" data-tsd-source=\"/src/components/Pyscal.tsx:1898:13\" style=\"padding: 0px;\">",
+                "target": [
+                  ".card:nth-child(5)"
+                ]
+              }
+            ],
+            "impact": "serious",
+            "message": "Element has insufficient color contrast of 2.73 (foreground color: #8e929a, background color: #eff0f3, font size: 10.5pt (14px), font weight: bold). Expected contrast ratio of 4.5:1"
+          }
+        ],
+        "all": [],
+        "none": [],
+        "impact": "serious",
+        "html": "<td class=\"total-label\" data-tsd-source=\"/src/components/Pyscal.tsx:2198:15\">Total Beli</td>",
+        "target": [
+          ".total-label"
+        ],
+        "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.73 (foreground color: #8e929a, background color: #eff0f3, font size: 10.5pt (14px), font weight: bold). Expected contrast ratio of 4.5:1"
+      },
+      {
+        "any": [
+          {
+            "id": "color-contrast",
+            "data": {
+              "fgColor": "#8e929a",
+              "bgColor": "#eff0f3",
+              "contrastRatio": 2.73,
+              "fontSize": "10.5pt (14px)",
+              "fontWeight": "bold",
+              "messageKey": null,
+              "expectedContrastRatio": "4.5:1",
+              "shadowColor": null,
+              "colorParse": null
+            },
+            "relatedNodes": [
+              {
+                "html": "<td class=\"c-lot\" data-tsd-source=\"/src/components/Pyscal.tsx:2199:15\">100</td>",
+                "target": [
+                  ".total-row > .c-lot"
+                ]
+              },
+              {
+                "html": "<div class=\"card\" data-tsd-source=\"/src/components/Pyscal.tsx:1898:13\" style=\"padding: 0px;\">",
+                "target": [
+                  ".card:nth-child(5)"
+                ]
+              }
+            ],
+            "impact": "serious",
+            "message": "Element has insufficient color contrast of 2.73 (foreground color: #8e929a, background color: #eff0f3, font size: 10.5pt (14px), font weight: bold). Expected contrast ratio of 4.5:1"
+          }
+        ],
+        "all": [],
+        "none": [],
+        "impact": "serious",
+        "html": "<td class=\"c-lot\" data-tsd-source=\"/src/components/Pyscal.tsx:2199:15\">100</td>",
+        "target": [
+          ".total-row > .c-lot"
+        ],
+        "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.73 (foreground color: #8e929a, background color: #eff0f3, font size: 10.5pt (14px), font weight: bold). Expected contrast ratio of 4.5:1"
+      },
+      {
+        "any": [
+          {
+            "id": "color-contrast",
+            "data": {
+              "fgColor": "#8e929a",
+              "bgColor": "#eff0f3",
+              "contrastRatio": 2.73,
+              "fontSize": "10.5pt (14px)",
+              "fontWeight": "bold",
+              "messageKey": null,
+              "expectedContrastRatio": "4.5:1",
+              "shadowColor": null,
+              "colorParse": null
+            },
+            "relatedNodes": [
+              {
+                "html": "<td data-tsd-source=\"/src/components/Pyscal.tsx:2200:15\" style=\"font-family: &quot;JetBrains Mono&quot;, monospace;\">1jt</td>",
+                "target": [
+                  ".total-row > td:nth-child(6)"
+                ]
+              },
+              {
+                "html": "<div class=\"card\" data-tsd-source=\"/src/components/Pyscal.tsx:1898:13\" style=\"padding: 0px;\">",
+                "target": [
+                  ".card:nth-child(5)"
+                ]
+              }
+            ],
+            "impact": "serious",
+            "message": "Element has insufficient color contrast of 2.73 (foreground color: #8e929a, background color: #eff0f3, font size: 10.5pt (14px), font weight: bold). Expected contrast ratio of 4.5:1"
+          }
+        ],
+        "all": [],
+        "none": [],
+        "impact": "serious",
+        "html": "<td data-tsd-source=\"/src/components/Pyscal.tsx:2200:15\" style=\"font-family: &quot;JetBrains Mono&quot;, monospace;\">1jt</td>",
+        "target": [
+          ".total-row > td:nth-child(6)"
+        ],
+        "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.73 (foreground color: #8e929a, background color: #eff0f3, font size: 10.5pt (14px), font weight: bold). Expected contrast ratio of 4.5:1"
       }
     ]
   }
