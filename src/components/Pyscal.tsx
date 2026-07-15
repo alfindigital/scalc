@@ -1846,7 +1846,8 @@ export default function PYSCAL() {
                       inputMode="decimal" enterKeyHint="next"
                       aria-label="Avg Existing (termasuk fee)"
                       aria-invalid={!!validateExistingAvg(existingAvg, mode).error}
-                      onChange={e => setExistingAvg(+e.target.value || 0)} />
+                      onChange={e => setExistingAvg(+e.target.value || 0)}
+                      data-kbdnav="setup" onKeyDown={handleSetupEnter} />
                     <FieldHint status={validateExistingAvg(existingAvg, mode)} />
                   </div>
                   <div>
@@ -1856,7 +1857,8 @@ export default function PYSCAL() {
                       inputMode="numeric" enterKeyHint="next"
                       aria-label="Lot Existing"
                       aria-invalid={!!validateExistingLot(existingLot, mode).error}
-                      onChange={e => setExistingLot(+e.target.value || 0)} />
+                      onChange={e => setExistingLot(+e.target.value || 0)}
+                      data-kbdnav="setup" onKeyDown={handleSetupEnter} />
                     <FieldHint status={validateExistingLot(existingLot, mode)} />
                   </div>
                 </div>
@@ -1869,7 +1871,8 @@ export default function PYSCAL() {
                     inputMode="decimal" enterKeyHint="next"
                     aria-label={mode === 'position' ? 'Bid Awal beli baru' : 'Bid Awal'}
                     aria-invalid={!!validateBid(bids[0]).error}
-                    onChange={e => setBidAt(0, +e.target.value)} />
+                    onChange={e => setBidAt(0, +e.target.value)}
+                    data-kbdnav="setup" onKeyDown={handleSetupEnter} />
                   <FieldHint status={validateBid(bids[0])} />
                 </div>
                 <div>
@@ -1879,7 +1882,8 @@ export default function PYSCAL() {
                     inputMode="numeric" enterKeyHint="next"
                     aria-label="Lot dasar"
                     aria-invalid={!!validateLot(baseLot).error}
-                    onChange={e => setBaseLot(+e.target.value)} />
+                    onChange={e => setBaseLot(+e.target.value)}
+                    data-kbdnav="setup" onKeyDown={handleSetupEnter} />
                   <FieldHint status={validateLot(baseLot)} />
                 </div>
                 <div>
@@ -1889,7 +1893,8 @@ export default function PYSCAL() {
                     inputMode="numeric" enterKeyHint="next"
                     aria-label="Target tick"
                     aria-invalid={!!validateTargetTicks(targetTicks).error}
-                    onChange={e => setTargetTicks(+e.target.value)} />
+                    onChange={e => setTargetTicks(+e.target.value)}
+                    data-kbdnav="setup" onKeyDown={handleSetupEnter} />
                   <FieldHint status={validateTargetTicks(targetTicks)} />
                 </div>
                 <div>
@@ -1899,7 +1904,8 @@ export default function PYSCAL() {
                     inputMode="decimal" enterKeyHint="done"
                     aria-label="Minimum profit persen"
                     aria-invalid={!!validateTargetProfit(targetProfit).error}
-                    onChange={e => setTargetProfit(+e.target.value)} />
+                    onChange={e => setTargetProfit(+e.target.value)}
+                    data-kbdnav="setup" onKeyDown={handleSetupEnter} />
                   <FieldHint status={validateTargetProfit(targetProfit)} />
                 </div>
               </div>
