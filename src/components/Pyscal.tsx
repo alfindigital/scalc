@@ -2210,6 +2210,8 @@ function ResultsTable({ results, bidRiseWarnings, targetProfit, totalLot, totalC
                         value={r.bid}
                         onChange={v => setBidAt(li, v)}
                         label={`Bid papan ${r.layer}`}
+                        gridRow={li}
+                        gridCol="bid"
                       />
                     )}
                   </td>
@@ -2220,6 +2222,9 @@ function ResultsTable({ results, bidRiseWarnings, targetProfit, totalLot, totalC
                         inputMode="numeric" enterKeyHint="done"
                         onChange={e => setLotAt(li, +e.target.value)}
                         onFocus={e => e.target.select()}
+                        data-grid-row={li}
+                        data-grid-col="lot"
+                        onKeyDown={e => handleGridNavKey(e, li, 'lot')}
                         aria-label={`Lot papan ${r.layer}`} />
                     ) : n(r.lot)}
                   </td>
@@ -2282,6 +2287,8 @@ function ResultsTable({ results, bidRiseWarnings, targetProfit, totalLot, totalC
                         value={r.bid}
                         onChange={v => setBidAt(li, v)}
                         label={`Bid papan ${r.layer}`}
+                        gridRow={li}
+                        gridCol="bid"
                       />
                     )}
                   </div>
@@ -2291,7 +2298,10 @@ function ResultsTable({ results, bidRiseWarnings, targetProfit, totalLot, totalC
                       <input type="number" className="mhi-inp lot-edit-m" value={r.lot} min={1} step={100}
                         inputMode="numeric" enterKeyHint="done"
                         onChange={e => setLotAt(li, +e.target.value)}
-                        onFocus={e => e.target.select()} />
+                        onFocus={e => e.target.select()}
+                        data-grid-row={li}
+                        data-grid-col="lot"
+                        onKeyDown={e => handleGridNavKey(e, li, 'lot')} />
                     ) : <span>{n(r.lot)}</span>}
                   </div>
                   <div className="mhi"><label>Sell</label><span>{r.sell}</span></div>
