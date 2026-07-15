@@ -131,7 +131,16 @@ const CSS = `
   .pyscal button,.pyscal a[role="button"],.pyscal .gear-btn,.pyscal .mode-toggle button,
   .pyscal .btn,.pyscal .il-toggle,.pyscal .history-item,.pyscal input[type="checkbox"],
   .pyscal input[type="radio"]{min-height:44px}
-  .pyscal .gear-btn,.pyscal .modal-close{min-width:44px}
+  .pyscal .gear-btn,.pyscal .modal-close{min-width:48px}
+  /* Larger, comfortable tap targets on touch mobile */
+  .pyscal .gear-btn{width:48px;height:48px}
+  .pyscal .hdr-r{gap:8px}
+  .pyscal .mode-toggle button{min-height:48px;padding:14px 12px;font-size:14px}
+  /* Keep focus indicator clearly visible on the larger targets */
+  .pyscal .gear-btn:focus,.pyscal .gear-btn:focus-visible,
+  .pyscal .mode-toggle button:focus,.pyscal .mode-toggle button:focus-visible{
+    outline:2px solid var(--brand)!important;outline-offset:3px!important;
+    box-shadow:0 0 0 3px var(--brand-d)!important;z-index:1;position:relative}
 }
 /* offline notice banner */
 .offline-banner{position:sticky;top:0;z-index:100;background:var(--red);color:#fff;
