@@ -112,22 +112,62 @@ async def main():
             for label, sel in SCOPES:
                 await audit(page, theme, label, sel)
 
-        # Also verify each social link + gear button have an accessible focus
-        # indicator. Axe doesn't check focus outlines directly. We accept a
-        # visible outline, box-shadow, or border-color change as long as it is
-        # clearly different from the resting state.
+        # Also verify each social link + gear button + a calculator control
+        # have an accessible focus indicator when reached via keyboard Tab
+        # navigation (not programmatic .focus()). This exercises the real
+        # :focus-visible path a keyboard user experiences. We accept a
+        # visible outline, box-shadow, or border-color change vs resting.
+        async def tab_until(selector, max_tabs=200):
+            """Press Tab (and Shift+Tab as fallback) until the element matching
+            `selector` becomes document.activeElement. Returns True on match."""
+            # Start from a known anchor before the target so Tab order is
+            # deterministic across runs.
+            await page.evaluate("() => { if (document.activeElement && document.activeElement !== document.body) document.activeElement.blur(); }")
+            await page.evaluate("() => document.body.focus()")
+            for _ in range(max_tabs):
+                await page.keyboard.press("Tab")
+                matched = await page.evaluate(
+                    "(sel) => { const t = document.querySelector(sel); return !!t && document.activeElement === t; }",
+                    selector,
+                )
+                if matched:
+                    return True
+            return False
+
         for theme in ("light", "dark"):
             await set_theme(page, theme)
             for sel, label in [
+                ('#main button, #main input, #main [tabindex]:not([tabindex="-1"])', "calc"),
                 (".afd-rot a.afd-item", "social"),
                 ('[aria-label="Buka Settings"]', "gear"),
             ]:
+                # Resolve the first matching element for resting-style capture.
                 el = await page.query_selector(sel)
+                if not el:
+                    rec(f"{label}/{theme} focus-visible via Tab", False, "target not found")
+                    continue
                 resting = await page.evaluate(
                     "(el) => { const s = getComputedStyle(el); return { outline: s.outline, borderColor: s.borderColor, boxShadow: s.boxShadow }; }",
                     el,
                 )
-                await page.evaluate(f"document.querySelector({json.dumps(sel)})?.focus()")
+                # Build a concrete selector that Tab navigation can match
+                # against document.activeElement. For the composite calc
+                # selector, target the first matching element by id/tag.
+                concrete_sel = await page.evaluate(
+                    """(sel) => {
+                        const el = document.querySelector(sel);
+                        if (!el) return null;
+                        if (el.id) return '#' + CSS.escape(el.id);
+                        // Fall back to the original selector — activeElement
+                        // check uses strict equality against querySelector.
+                        return sel;
+                    }""",
+                    sel,
+                )
+                reached = await tab_until(concrete_sel or sel)
+                if not reached:
+                    rec(f"{label}/{theme} focus-visible via Tab", False, "Tab never landed on target")
+                    continue
                 focused = await page.evaluate(
                     "() => { const s = getComputedStyle(document.activeElement); return { outlineStyle: s.outlineStyle, outlineWidth: s.outlineWidth, borderColor: s.borderColor, boxShadow: s.boxShadow }; }"
                 )
@@ -135,7 +175,7 @@ async def main():
                 hasShadow = focused["boxShadow"] not in ("none", "0px 0px 0px 0px", "")
                 borderChanged = focused["borderColor"] != resting["borderColor"]
                 ok = hasOutline or hasShadow or borderChanged
-                rec(f"{label}/{theme} focus-visible outline", ok,
+                rec(f"{label}/{theme} focus-visible via Tab", ok,
                     f"outline {focused['outlineStyle']} {focused['outlineWidth']}, shadow {focused['boxShadow']}")
 
         await browser.close()
