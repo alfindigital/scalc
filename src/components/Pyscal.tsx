@@ -1565,6 +1565,22 @@ export default function PYSCAL() {
   const totalBuyLot = buyRows.reduce((s, r) => s + r.lot, 0);
   const totalBuyCost = buyRows.reduce((s, r) => s + r.cost, 0);
 
+  // Live region summary — announces final avg/sell/PL when results change,
+  // debounced so rapid input changes don't spam assistive tech.
+  const [liveSummary, setLiveSummary] = useState('');
+  useEffect(() => {
+    if (!data || !data.results.length) { setLiveSummary(''); return; }
+    const last = data.results[data.results.length - 1];
+    const t = setTimeout(() => {
+      setLiveSummary(
+        `${data.results.length} papan, total ${n(totalBuyLot)} lot. ` +
+        `Avg final ${last.avg.toFixed(2)}, sell target ${last.sell}, ` +
+        `estimasi P/L ${nDec(last.pl)} (${last.pct.toFixed(2)}%).`
+      );
+    }, 500);
+    return () => clearTimeout(t);
+  }, [data, totalBuyLot]);
+
   // Copy
   const [copyState, setCopyState] = useState('idle');
   const copyResults = useCallback(() => {
