@@ -51,7 +51,7 @@ async def audit(page, theme):
     await set_theme(page, theme)
 
     # Walk Tab forward until we've collected all grid controls or footer reached.
-    await page.evaluate("() => document.body.focus()")
+    await page.evaluate("() => { const skip = document.querySelector(\"a.pyscal-sr-only\"); if (skip) skip.focus(); else document.body.focus(); }")
     seen = {"bid": set(), "lot": set(), "row-x": set()}
     ring_missing = []
     for _ in range(120):
