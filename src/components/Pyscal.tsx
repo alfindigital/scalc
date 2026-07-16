@@ -344,7 +344,7 @@ const CSS = `
 /* lot-edit inputs (custom lot mode) */
 .lot-edit{background:var(--inp-bg);border:1px solid var(--brand);color:var(--text);
   font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;letter-spacing:-0.3px;
-  padding:6px 8px;width:80px;text-align:right;outline:none;transition:all .15s;-moz-appearance:textfield}
+  padding:6px 8px;width:80px;text-align:right;outline:none;transition:border-color .15s,background-color .15s;-moz-appearance:textfield}
 .lot-edit::-webkit-outer-spin-button,.lot-edit::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 .lot-edit:focus{border-color:var(--brand-h);background:var(--brand-d)}
 .lot-edit:focus,.lot-edit:focus-visible,.lot-edit-m:focus,.lot-edit-m:focus-visible{outline-style:solid!important;outline-width:2px!important;outline-color:var(--brand)!important;outline-offset:2px!important}
