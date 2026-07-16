@@ -880,10 +880,11 @@ function handleSetupEnter(e) {
   }
 }
 
-function BidStepInput({ value, onChange, onFocus, disabled, className = '', variant = 'desktop', label, gridRow, gridCol, ...rest }) {
+function BidStepInput({ value, onChange, onFocus, disabled, className = '', variant = 'desktop', label, warning, gridRow, gridCol, ...rest }) {
   const inputRef = useRef(null);
   const reactId = useId();
   const inputId = rest.id || `bid-input-${reactId}`;
+  const hintId = `${inputId}-hint`;
   const [focused, setFocused] = useState(false);
 
   const haptic = () => {
@@ -937,6 +938,8 @@ function BidStepInput({ value, onChange, onFocus, disabled, className = '', vari
         value={value}
         min={1}
         disabled={disabled}
+        aria-invalid={!!warning || undefined}
+        aria-describedby={warning ? hintId : undefined}
         data-grid-row={gridRow}
         data-grid-col={gridCol}
         onChange={e => onChange(+e.target.value)}
@@ -945,6 +948,11 @@ function BidStepInput({ value, onChange, onFocus, disabled, className = '', vari
         onKeyDown={handleKeyDown}
         {...restNoId}
       />
+      {warning ? (
+        <span id={hintId} role="alert" aria-live="polite" className="pyscal-sr-only">
+          {warning}
+        </span>
+      ) : null}
     </div>
   );
 }
