@@ -347,6 +347,7 @@ const CSS = `
   padding:6px 8px;width:80px;text-align:right;outline:none;transition:all .15s;-moz-appearance:textfield}
 .lot-edit::-webkit-outer-spin-button,.lot-edit::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 .lot-edit:focus{border-color:var(--brand-h);background:var(--brand-d)}
+.lot-edit:focus,.lot-edit:focus-visible,.lot-edit-m:focus,.lot-edit-m:focus-visible{outline:2px solid var(--brand)!important;outline-offset:2px!important}
 .lot-edit-m{border-color:var(--brand)!important}
 
 /* table */
