@@ -2018,6 +2018,14 @@ export default function PYSCAL() {
                   removePapan={removePapan}
                   bidsCount={bids.length}
                 />
+                <div
+                  className="pyscal-sr-only"
+                  role="status"
+                  aria-live="polite"
+                  aria-atomic="true"
+                >
+                  {liveSummary}
+                </div>
               </div>
             )}
 
