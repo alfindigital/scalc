@@ -776,11 +776,16 @@ function InstallAppRow() {
   );
 }
 
-function FieldHint({ status }) {
+function FieldHint({ status, id }) {
   if (!status || (!status.error && !status.warning)) return null;
   const isErr = !!status.error;
   return (
-    <div className={`field-hint ${isErr ? 'error' : 'warning'}`} role={isErr ? 'alert' : 'status'}>
+    <div
+      id={id}
+      className={`field-hint ${isErr ? 'error' : 'warning'}`}
+      role={isErr ? 'alert' : 'status'}
+      aria-live={isErr ? 'assertive' : 'polite'}
+    >
       {isErr ? '✕ ' : '⚠ '}{status.error || status.warning}
     </div>
   );
