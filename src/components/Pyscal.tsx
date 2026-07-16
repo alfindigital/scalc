@@ -424,6 +424,8 @@ tbody td:last-child{padding:14px 8px;width:1%}
 .row-x{background:transparent;border:none;color:var(--text-d);cursor:pointer;padding:4px;
   display:flex;align-items:center;margin-left:auto;transition:color .15s}
 .row-x:hover{color:var(--red)}
+.row-x:focus,.row-x:focus-visible{outline:2px solid var(--brand)!important;outline-offset:2px!important;color:var(--red);border-radius:4px}
+.m-remove:focus,.m-remove:focus-visible{outline:2px solid var(--brand)!important;outline-offset:2px!important;border-radius:6px}
 
 .total-row td{border-top:1px solid var(--border-strong)!important;border-bottom:none!important;
   font-weight:700!important;color:var(--text)!important;padding-top:16px!important;font-size:14px!important;
