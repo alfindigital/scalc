@@ -1790,10 +1790,20 @@ export default function PYSCAL() {
 
             {/* Mode toggle */}
             <div className="mode-toggle">
-              <button className={mode === 'entry' ? 'active' : ''} onClick={() => setMode('entry')}>
+              <button
+                className={mode === 'entry' ? 'active' : ''}
+                onClick={() => setMode('entry')}
+                aria-pressed={mode === 'entry'}
+                aria-label="Mode entry (New)"
+              >
                 New
               </button>
-              <button className={mode === 'position' ? 'active' : ''} onClick={() => setMode('position')}>
+              <button
+                className={mode === 'position' ? 'active' : ''}
+                onClick={() => setMode('position')}
+                aria-pressed={mode === 'position'}
+                aria-label="Mode existing position"
+              >
                 Existing
               </button>
             </div>
