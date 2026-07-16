@@ -776,11 +776,16 @@ function InstallAppRow() {
   );
 }
 
-function FieldHint({ status }) {
+function FieldHint({ status, id }) {
   if (!status || (!status.error && !status.warning)) return null;
   const isErr = !!status.error;
   return (
-    <div className={`field-hint ${isErr ? 'error' : 'warning'}`} role={isErr ? 'alert' : 'status'}>
+    <div
+      id={id}
+      className={`field-hint ${isErr ? 'error' : 'warning'}`}
+      role={isErr ? 'alert' : 'status'}
+      aria-live={isErr ? 'assertive' : 'polite'}
+    >
       {isErr ? '✕ ' : '⚠ '}{status.error || status.warning}
     </div>
   );
@@ -875,10 +880,11 @@ function handleSetupEnter(e) {
   }
 }
 
-function BidStepInput({ value, onChange, onFocus, disabled, className = '', variant = 'desktop', label, gridRow, gridCol, ...rest }) {
+function BidStepInput({ value, onChange, onFocus, disabled, className = '', variant = 'desktop', label, warning, gridRow, gridCol, ...rest }) {
   const inputRef = useRef(null);
   const reactId = useId();
   const inputId = rest.id || `bid-input-${reactId}`;
+  const hintId = `${inputId}-hint`;
   const [focused, setFocused] = useState(false);
 
   const haptic = () => {
@@ -932,6 +938,8 @@ function BidStepInput({ value, onChange, onFocus, disabled, className = '', vari
         value={value}
         min={1}
         disabled={disabled}
+        aria-invalid={!!warning || undefined}
+        aria-describedby={warning ? hintId : undefined}
         data-grid-row={gridRow}
         data-grid-col={gridCol}
         onChange={e => onChange(+e.target.value)}
@@ -940,6 +948,11 @@ function BidStepInput({ value, onChange, onFocus, disabled, className = '', vari
         onKeyDown={handleKeyDown}
         {...restNoId}
       />
+      {warning ? (
+        <span id={hintId} role="alert" aria-live="polite" className="pyscal-sr-only">
+          {warning}
+        </span>
+      ) : null}
     </div>
   );
 }
@@ -1885,9 +1898,10 @@ export default function PYSCAL() {
                       inputMode="decimal" enterKeyHint="next"
                       aria-label="Avg Existing (termasuk fee)"
                       aria-invalid={!!validateExistingAvg(existingAvg, mode).error}
+                      aria-describedby="pyscal-hint-existing-avg"
                       onChange={e => setExistingAvg(+e.target.value || 0)}
                       data-kbdnav="setup" onKeyDown={handleSetupEnter} />
-                    <FieldHint status={validateExistingAvg(existingAvg, mode)} />
+                    <FieldHint id="pyscal-hint-existing-avg" status={validateExistingAvg(existingAvg, mode)} />
                   </div>
                   <div>
                     <div className="il il-wrap">Lot Existing
@@ -1896,9 +1910,10 @@ export default function PYSCAL() {
                       inputMode="numeric" enterKeyHint="next"
                       aria-label="Lot Existing"
                       aria-invalid={!!validateExistingLot(existingLot, mode).error}
+                      aria-describedby="pyscal-hint-existing-lot"
                       onChange={e => setExistingLot(+e.target.value || 0)}
                       data-kbdnav="setup" onKeyDown={handleSetupEnter} />
-                    <FieldHint status={validateExistingLot(existingLot, mode)} />
+                    <FieldHint id="pyscal-hint-existing-lot" status={validateExistingLot(existingLot, mode)} />
                   </div>
                 </div>
               )}
@@ -1910,9 +1925,10 @@ export default function PYSCAL() {
                     inputMode="decimal" enterKeyHint="next"
                     aria-label={mode === 'position' ? 'Bid Awal beli baru' : 'Bid Awal'}
                     aria-invalid={!!validateBid(bids[0]).error}
+                    aria-describedby="pyscal-hint-bid-awal"
                     onChange={e => setBidAt(0, +e.target.value)}
                     data-kbdnav="setup" onKeyDown={handleSetupEnter} />
-                  <FieldHint status={validateBid(bids[0])} />
+                  <FieldHint id="pyscal-hint-bid-awal" status={validateBid(bids[0])} />
                 </div>
                 <div>
                   <div className="il il-wrap">Lot
@@ -1921,9 +1937,10 @@ export default function PYSCAL() {
                     inputMode="numeric" enterKeyHint="next"
                     aria-label="Lot dasar"
                     aria-invalid={!!validateLot(baseLot).error}
+                    aria-describedby="pyscal-hint-base-lot"
                     onChange={e => setBaseLot(+e.target.value)}
                     data-kbdnav="setup" onKeyDown={handleSetupEnter} />
-                  <FieldHint status={validateLot(baseLot)} />
+                  <FieldHint id="pyscal-hint-base-lot" status={validateLot(baseLot)} />
                 </div>
                 <div>
                   <div className="il il-wrap">Target Tick
@@ -1932,9 +1949,10 @@ export default function PYSCAL() {
                     inputMode="numeric" enterKeyHint="next"
                     aria-label="Target tick"
                     aria-invalid={!!validateTargetTicks(targetTicks).error}
+                    aria-describedby="pyscal-hint-target-ticks"
                     onChange={e => setTargetTicks(+e.target.value)}
                     data-kbdnav="setup" onKeyDown={handleSetupEnter} />
-                  <FieldHint status={validateTargetTicks(targetTicks)} />
+                  <FieldHint id="pyscal-hint-target-ticks" status={validateTargetTicks(targetTicks)} />
                 </div>
                 <div>
                   <div className="il il-wrap">Min Profit %
@@ -1943,9 +1961,10 @@ export default function PYSCAL() {
                     inputMode="decimal" enterKeyHint="done"
                     aria-label="Minimum profit persen"
                     aria-invalid={!!validateTargetProfit(targetProfit).error}
+                    aria-describedby="pyscal-hint-target-profit"
                     onChange={e => setTargetProfit(+e.target.value)}
                     data-kbdnav="setup" onKeyDown={handleSetupEnter} />
-                  <FieldHint status={validateTargetProfit(targetProfit)} />
+                  <FieldHint id="pyscal-hint-target-profit" status={validateTargetProfit(targetProfit)} />
                 </div>
               </div>
             </div>
@@ -2263,6 +2282,7 @@ function ResultsTable({ results, bidRiseWarnings, targetProfit, totalLot, totalC
                         value={r.bid}
                         onChange={v => setBidAt(li, v)}
                         label={`Bid papan ${r.layer}`}
+                        warning={isWarn ? `Bid papan ${r.layer} tidak lebih rendah dari papan sebelumnya, bukan averaging down.` : ''}
                         gridRow={li}
                         gridCol="bid"
                       />
@@ -2352,6 +2372,7 @@ function ResultsTable({ results, bidRiseWarnings, targetProfit, totalLot, totalC
                         value={r.bid}
                         onChange={v => setBidAt(li, v)}
                         label={`Bid papan ${r.layer}`}
+                        warning={isWarn ? `Bid papan ${r.layer} tidak lebih rendah dari papan sebelumnya, bukan averaging down.` : ''}
                         gridRow={li}
                         gridCol="bid"
                       />
