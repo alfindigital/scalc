@@ -347,7 +347,7 @@ const CSS = `
   padding:6px 8px;width:80px;text-align:right;outline:none;transition:all .15s;-moz-appearance:textfield}
 .lot-edit::-webkit-outer-spin-button,.lot-edit::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 .lot-edit:focus{border-color:var(--brand-h);background:var(--brand-d)}
-.lot-edit:focus,.lot-edit:focus-visible,.lot-edit-m:focus,.lot-edit-m:focus-visible{outline:2px solid var(--brand)!important;outline-offset:2px!important}
+.lot-edit:focus,.lot-edit:focus-visible,.lot-edit-m:focus,.lot-edit-m:focus-visible{outline-style:solid!important;outline-width:2px!important;outline-color:var(--brand)!important;outline-offset:2px!important}
 .lot-edit-m{border-color:var(--brand)!important}
 
 /* table */
@@ -382,7 +382,7 @@ tbody td:last-child{padding:14px 8px;width:1%}
 .bid-edit::-webkit-outer-spin-button,.bid-edit::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 .bid-edit:hover{border-color:var(--border)}
 .bid-edit:focus{border-color:var(--brand);background:var(--inp-bg)}
-.bid-edit:focus,.bid-edit:focus-visible{outline:2px solid var(--brand)!important;outline-offset:2px!important}
+.bid-edit:focus,.bid-edit:focus-visible{outline-style:solid!important;outline-width:2px!important;outline-color:var(--brand)!important;outline-offset:2px!important}
 .bid-edit-w{color:var(--text-m)!important;opacity:.8}
 
 /* bid step buttons - show on hover/focus */
@@ -426,8 +426,8 @@ tbody td:last-child{padding:14px 8px;width:1%}
 .row-x{background:transparent;border:none;color:var(--text-d);cursor:pointer;padding:4px;
   display:flex;align-items:center;margin-left:auto;transition:color .15s}
 .row-x:hover{color:var(--red)}
-.row-x:focus,.row-x:focus-visible{outline:2px solid var(--brand)!important;outline-offset:2px!important;color:var(--red);border-radius:4px}
-.m-remove:focus,.m-remove:focus-visible{outline:2px solid var(--brand)!important;outline-offset:2px!important;border-radius:6px}
+.row-x:focus,.row-x:focus-visible{outline-style:solid!important;outline-width:2px!important;outline-color:var(--brand)!important;outline-offset:2px!important;color:var(--red);border-radius:4px}
+.m-remove:focus,.m-remove:focus-visible{outline-style:solid!important;outline-width:2px!important;outline-color:var(--brand)!important;outline-offset:2px!important;border-radius:6px}
 
 .total-row td{border-top:1px solid var(--border-strong)!important;border-bottom:none!important;
   font-weight:700!important;color:var(--text)!important;padding-top:16px!important;font-size:14px!important;
