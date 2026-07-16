@@ -344,9 +344,10 @@ const CSS = `
 /* lot-edit inputs (custom lot mode) */
 .lot-edit{background:var(--inp-bg);border:1px solid var(--brand);color:var(--text);
   font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;letter-spacing:-0.3px;
-  padding:6px 8px;width:80px;text-align:right;outline:none;transition:all .15s;-moz-appearance:textfield}
+  padding:6px 8px;width:80px;text-align:right;outline:none;transition:border-color .15s,background-color .15s;-moz-appearance:textfield}
 .lot-edit::-webkit-outer-spin-button,.lot-edit::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 .lot-edit:focus{border-color:var(--brand-h);background:var(--brand-d)}
+.lot-edit:focus,.lot-edit:focus-visible,.lot-edit-m:focus,.lot-edit-m:focus-visible{outline-style:solid!important;outline-width:2px!important;outline-color:var(--brand)!important;outline-offset:2px!important}
 .lot-edit-m{border-color:var(--brand)!important}
 
 /* table */
@@ -376,11 +377,12 @@ tbody td:last-child{padding:14px 8px;width:1%}
 .c-bid{color:var(--text)!important;font-weight:700!important}
 .bid-edit{background:transparent;border:1px solid transparent;color:var(--text);
   font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;letter-spacing:-0.3px;
-  padding:6px 8px;width:80px;text-align:right;outline:none;transition:all .15s;
+  padding:6px 8px;width:80px;text-align:right;outline:none;transition:border-color .15s,background-color .15s;
   -moz-appearance:textfield}
 .bid-edit::-webkit-outer-spin-button,.bid-edit::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 .bid-edit:hover{border-color:var(--border)}
 .bid-edit:focus{border-color:var(--brand);background:var(--inp-bg)}
+.bid-edit:focus,.bid-edit:focus-visible{outline-style:solid!important;outline-width:2px!important;outline-color:var(--brand)!important;outline-offset:2px!important}
 .bid-edit-w{color:var(--text-m)!important;opacity:.8}
 
 /* bid step buttons - show on hover/focus */
@@ -424,6 +426,8 @@ tbody td:last-child{padding:14px 8px;width:1%}
 .row-x{background:transparent;border:none;color:var(--text-d);cursor:pointer;padding:4px;
   display:flex;align-items:center;margin-left:auto;transition:color .15s}
 .row-x:hover{color:var(--red)}
+.row-x:focus,.row-x:focus-visible{outline-style:solid!important;outline-width:2px!important;outline-color:var(--brand)!important;outline-offset:2px!important;color:var(--red);border-radius:4px}
+.m-remove:focus,.m-remove:focus-visible{outline-style:solid!important;outline-width:2px!important;outline-color:var(--brand)!important;outline-offset:2px!important;border-radius:6px}
 
 .total-row td{border-top:1px solid var(--border-strong)!important;border-bottom:none!important;
   font-weight:700!important;color:var(--text)!important;padding-top:16px!important;font-size:14px!important;
@@ -1788,10 +1792,20 @@ export default function PYSCAL() {
 
             {/* Mode toggle */}
             <div className="mode-toggle">
-              <button className={mode === 'entry' ? 'active' : ''} onClick={() => setMode('entry')}>
+              <button
+                className={mode === 'entry' ? 'active' : ''}
+                onClick={() => setMode('entry')}
+                aria-pressed={mode === 'entry'}
+                aria-label="Mode entry (New)"
+              >
                 New
               </button>
-              <button className={mode === 'position' ? 'active' : ''} onClick={() => setMode('position')}>
+              <button
+                className={mode === 'position' ? 'active' : ''}
+                onClick={() => setMode('position')}
+                aria-pressed={mode === 'position'}
+                aria-label="Mode existing position"
+              >
                 Existing
               </button>
             </div>
@@ -2279,7 +2293,12 @@ function ResultsTable({ results, bidRiseWarnings, targetProfit, totalLot, totalC
                   </td>
                   <td>
                     {!r.isExisting && li > 0 && (
-                      <button className="row-x" onClick={() => removePapan(li)}><XIcon /></button>
+                      <button
+                        className="row-x"
+                        onClick={() => removePapan(li)}
+                        aria-label={`Hapus papan ${r.layer}`}
+                        title={`Hapus papan ${r.layer}`}
+                      ><XIcon /></button>
                     )}
                   </td>
                 </tr>
@@ -2313,7 +2332,14 @@ function ResultsTable({ results, bidRiseWarnings, targetProfit, totalLot, totalC
                 className={`mk ${r.isExisting ? 'mk-existing' : (isUnder ? 'mk-under' : '')}`}
                 style={{ animationDelay: `${i * 60}ms` }}
               >
-                {!r.isExisting && li > 0 && <button className="m-remove" onClick={() => removePapan(li)}><XIcon /></button>}
+                {!r.isExisting && li > 0 && (
+                  <button
+                    className="m-remove"
+                    onClick={() => removePapan(li)}
+                    aria-label={`Hapus papan ${r.layer}`}
+                    title={`Hapus papan ${r.layer}`}
+                  ><XIcon /></button>
+                )}
                 <div className="mh">
                   <div className="mhi">
                     <label>Bid</label>
