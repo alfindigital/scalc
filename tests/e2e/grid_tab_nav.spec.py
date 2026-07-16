@@ -55,7 +55,7 @@ async def audit(page, theme):
     seen = {"bid": set(), "lot": set(), "row-x": set()}
     ring_missing = []
     for _ in range(120):
-        await page.keyboard.press("Tab")
+        await page.keyboard.press("Tab"); await page.wait_for_timeout(200)
         info = await page.evaluate(SNAP)
         if not info:
             continue
