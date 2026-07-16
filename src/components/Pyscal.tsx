@@ -2330,7 +2330,14 @@ function ResultsTable({ results, bidRiseWarnings, targetProfit, totalLot, totalC
                 className={`mk ${r.isExisting ? 'mk-existing' : (isUnder ? 'mk-under' : '')}`}
                 style={{ animationDelay: `${i * 60}ms` }}
               >
-                {!r.isExisting && li > 0 && <button className="m-remove" onClick={() => removePapan(li)}><XIcon /></button>}
+                {!r.isExisting && li > 0 && (
+                  <button
+                    className="m-remove"
+                    onClick={() => removePapan(li)}
+                    aria-label={`Hapus papan ${r.layer}`}
+                    title={`Hapus papan ${r.layer}`}
+                  ><XIcon /></button>
+                )}
                 <div className="mh">
                   <div className="mhi">
                     <label>Bid</label>
