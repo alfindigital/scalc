@@ -2291,7 +2291,12 @@ function ResultsTable({ results, bidRiseWarnings, targetProfit, totalLot, totalC
                   </td>
                   <td>
                     {!r.isExisting && li > 0 && (
-                      <button className="row-x" onClick={() => removePapan(li)}><XIcon /></button>
+                      <button
+                        className="row-x"
+                        onClick={() => removePapan(li)}
+                        aria-label={`Hapus papan ${r.layer}`}
+                        title={`Hapus papan ${r.layer}`}
+                      ><XIcon /></button>
                     )}
                   </td>
                 </tr>
