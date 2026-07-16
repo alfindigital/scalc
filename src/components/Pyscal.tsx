@@ -381,6 +381,7 @@ tbody td:last-child{padding:14px 8px;width:1%}
 .bid-edit::-webkit-outer-spin-button,.bid-edit::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 .bid-edit:hover{border-color:var(--border)}
 .bid-edit:focus{border-color:var(--brand);background:var(--inp-bg)}
+.bid-edit:focus,.bid-edit:focus-visible{outline:2px solid var(--brand)!important;outline-offset:2px!important}
 .bid-edit-w{color:var(--text-m)!important;opacity:.8}
 
 /* bid step buttons - show on hover/focus */
