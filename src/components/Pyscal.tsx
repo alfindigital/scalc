@@ -2282,6 +2282,7 @@ function ResultsTable({ results, bidRiseWarnings, targetProfit, totalLot, totalC
                         value={r.bid}
                         onChange={v => setBidAt(li, v)}
                         label={`Bid papan ${r.layer}`}
+                        warning={isWarn ? `Bid papan ${r.layer} tidak lebih rendah dari papan sebelumnya, bukan averaging down.` : ''}
                         gridRow={li}
                         gridCol="bid"
                       />
