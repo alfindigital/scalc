@@ -377,7 +377,7 @@ tbody td:last-child{padding:14px 8px;width:1%}
 .c-bid{color:var(--text)!important;font-weight:700!important}
 .bid-edit{background:transparent;border:1px solid transparent;color:var(--text);
   font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;letter-spacing:-0.3px;
-  padding:6px 8px;width:80px;text-align:right;outline:none;transition:all .15s;
+  padding:6px 8px;width:80px;text-align:right;outline:none;transition:border-color .15s,background-color .15s;
   -moz-appearance:textfield}
 .bid-edit::-webkit-outer-spin-button,.bid-edit::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 .bid-edit:hover{border-color:var(--border)}
