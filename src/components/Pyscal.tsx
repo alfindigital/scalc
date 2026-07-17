@@ -2322,6 +2322,7 @@ function ResultsTable({ results, bidRiseWarnings, targetProfit, totalLot, totalC
               const li = layerIndex(r, i);
               const isWarn = !r.isExisting && bidRiseWarnings.includes(li + 1);
               const isUnder = !r.isExisting && r.pct < targetProfit - 0.001;
+              const bidErr = !r.isExisting ? validateBid(Number(r.bid)).error : '';
               return (
                 <tr key={i} className={r.isExisting ? "row-existing" : (isUnder ? "row-under" : "")} style={{ animationDelay: `${i * 50}ms` }}>
                   <td>{r.layer}</td>
@@ -2330,10 +2331,11 @@ function ResultsTable({ results, bidRiseWarnings, targetProfit, totalLot, totalC
                       <span className="c-bid-static">{r.bid}</span>
                     ) : (
                       <BidStepInput
-                        className={`bid-edit ${isWarn ? 'bid-edit-w' : ''}`}
+                        className={`bid-edit ${isWarn ? 'bid-edit-w' : ''} ${bidErr ? 'bid-edit-e' : ''}`}
                         value={r.bid}
                         onChange={v => setBidAt(li, v)}
                         label={`Bid papan ${r.layer}`}
+                        error={bidErr || ''}
                         warning={isWarn ? `Bid papan ${r.layer} tidak lebih rendah dari papan sebelumnya, bukan averaging down.` : ''}
                         gridRow={li}
                         gridCol="bid"
@@ -2342,15 +2344,15 @@ function ResultsTable({ results, bidRiseWarnings, targetProfit, totalLot, totalC
                   </td>
                   <td className="c-lot">
                     {customLot && !r.isExisting ? (
-                      <input type="number" className="lot-edit"
-                        value={r.lot} min={1} step={100}
-                        inputMode="numeric" enterKeyHint="done"
-                        onChange={e => setLotAt(li, +e.target.value)}
-                        onFocus={e => e.target.select()}
-                        data-grid-row={li}
-                        data-grid-col="lot"
+                      <LotInput
+                        className="lot-edit"
+                        value={r.lot}
+                        onChange={v => setLotAt(li, v)}
+                        label={`Lot papan ${r.layer}`}
+                        gridRow={li}
+                        gridCol="lot"
                         onKeyDown={e => handleGridNavKey(e, li, 'lot')}
-                        aria-label={`Lot papan ${r.layer}`} />
+                      />
                     ) : n(r.lot)}
                   </td>
                   <td className="c-avg">{r.avg.toFixed(2)}</td>
