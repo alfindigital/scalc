@@ -43,6 +43,16 @@ SCOPES = [
     ("footer",     ".afd-foot"),
 ]
 
+# Extra scopes exercised in a dedicated pass with state pre-primed:
+#   - onboarding: first-run hint region (needs pyscal_onboarded cleared)
+#   - results-grid: hitung dulu supaya tabel hasil (grid) muncul
+#   - fullpage: seluruh <html> — menangkap overlay/modal/dialog apapun
+EXTRA_SCOPES = [
+    ("onboarding", ".onboarding"),
+    ("results-grid", ".rc"),
+    ("fullpage", "html"),
+]
+
 results = []
 def rec(name, ok, detail=""):
     print(f"[{'PASS' if ok else 'FAIL'}] {name}" + (f" — {detail}" if detail else ""))
@@ -110,6 +120,19 @@ async def main():
 
         for theme in ("light", "dark"):
             for label, sel in SCOPES:
+                await audit(page, theme, label, sel)
+
+        # Pass 2: prime onboarding + results grid, then re-audit those scopes
+        # plus the entire page (catches overlays/dialogs).
+        await page.evaluate("() => { try { localStorage.removeItem('pyscal_onboarded'); } catch {} }")
+        await page.reload(wait_until="domcontentloaded")
+        await page.wait_for_selector(".afd-foot")
+        await page.wait_for_selector(".onboarding", timeout=5000)
+        # Force results table to render by ensuring at least one papan exists.
+        await page.wait_for_selector(".rc", timeout=5000)
+        await page.add_script_tag(content=AXE)
+        for theme in ("light", "dark"):
+            for label, sel in EXTRA_SCOPES:
                 await audit(page, theme, label, sel)
 
         # Also verify each social link + gear button + a calculator control
