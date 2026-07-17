@@ -2343,6 +2343,7 @@ function ResultsTable({ results, bidRiseWarnings, targetProfit, totalLot, totalC
           {results.map((r, i) => {
             const li = layerIndex(r, i);
             const isUnder = !r.isExisting && r.pct < targetProfit - 0.001;
+            const isWarn = !r.isExisting && bidRiseWarnings.includes(li + 1);
             const canSwipe = !r.isExisting && li > 0;
             return (
               <SwipeableCard
