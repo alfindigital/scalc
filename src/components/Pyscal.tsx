@@ -2398,6 +2398,7 @@ function ResultsTable({ results, bidRiseWarnings, targetProfit, totalLot, totalC
             const li = layerIndex(r, i);
             const isUnder = !r.isExisting && r.pct < targetProfit - 0.001;
             const isWarn = !r.isExisting && bidRiseWarnings.includes(li + 1);
+            const bidErr = !r.isExisting ? validateBid(Number(r.bid)).error : '';
             const canSwipe = !r.isExisting && li > 0;
             return (
               <SwipeableCard
@@ -2427,6 +2428,7 @@ function ResultsTable({ results, bidRiseWarnings, targetProfit, totalLot, totalC
                         value={r.bid}
                         onChange={v => setBidAt(li, v)}
                         label={`Bid papan ${r.layer}`}
+                        error={bidErr || ''}
                         warning={isWarn ? `Bid papan ${r.layer} tidak lebih rendah dari papan sebelumnya, bukan averaging down.` : ''}
                         gridRow={li}
                         gridCol="bid"
@@ -2436,13 +2438,15 @@ function ResultsTable({ results, bidRiseWarnings, targetProfit, totalLot, totalC
                   <div className="mhi">
                     <label>Lot</label>
                     {customLot && !r.isExisting ? (
-                      <input type="number" className="mhi-inp lot-edit-m" value={r.lot} min={1} step={100}
-                        inputMode="numeric" enterKeyHint="done"
-                        onChange={e => setLotAt(li, +e.target.value)}
-                        onFocus={e => e.target.select()}
-                        data-grid-row={li}
-                        data-grid-col="lot"
-                        onKeyDown={e => handleGridNavKey(e, li, 'lot')} />
+                      <LotInput
+                        className="mhi-inp lot-edit-m"
+                        value={r.lot}
+                        onChange={v => setLotAt(li, v)}
+                        label={`Lot papan ${r.layer}`}
+                        gridRow={li}
+                        gridCol="lot"
+                        onKeyDown={e => handleGridNavKey(e, li, 'lot')}
+                      />
                     ) : <span>{n(r.lot)}</span>}
                   </div>
                   <div className="mhi"><label>Sell</label><span>{r.sell}</span></div>
