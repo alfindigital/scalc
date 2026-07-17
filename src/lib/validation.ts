@@ -8,18 +8,28 @@ export interface FieldStatus {
 
 const ok: FieldStatus = {};
 
-/** Bid awal & bid layer berikutnya: harga IDX umum 1–50.000, hard >0. */
+/** Bid awal & bid layer berikutnya: harga IDX umum 1–50.000, integer > 0. */
 export function validateBid(value: number): FieldStatus {
-  if (!Number.isFinite(value) || value <= 0) return { error: "Harga bid harus > 0" };
+  if (value === null || value === undefined || Number.isNaN(value)) {
+    return { error: "Bid wajib diisi angka" };
+  }
+  if (!Number.isFinite(value)) return { error: "Bid harus berupa angka" };
+  if (value <= 0) return { error: "Harga bid harus > 0" };
+  if (!Number.isInteger(value)) return { error: "Bid harus bilangan bulat (tanpa koma/desimal)" };
+  if (value > 50000) return { error: "Harga di atas 50.000 di luar range IDX" };
   if (value < 50) return { warning: "Harga di bawah 50 jarang ada di IDX" };
-  if (value > 50000) return { warning: "Harga di atas 50.000 di luar range IDX umum" };
   return ok;
 }
 
-/** Lot dasar: integer ≥ 1. */
+/** Lot dasar: integer ≥ 1. Non-integer = format error (lot di IDX selalu bulat). */
 export function validateLot(value: number): FieldStatus {
-  if (!Number.isFinite(value) || value < 1) return { error: "Lot minimal 1" };
-  if (!Number.isInteger(value)) return { warning: "Lot biasanya bilangan bulat" };
+  if (value === null || value === undefined || Number.isNaN(value)) {
+    return { error: "Lot wajib diisi angka" };
+  }
+  if (!Number.isFinite(value)) return { error: "Lot harus berupa angka" };
+  if (value < 1) return { error: "Lot minimal 1" };
+  if (!Number.isInteger(value)) return { error: "Lot harus bilangan bulat (satuan lot, tanpa desimal)" };
+  if (value > 1_000_000) return { warning: "Lot > 1.000.000 tidak realistis untuk retail" };
   return ok;
 }
 

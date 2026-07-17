@@ -880,7 +880,7 @@ function handleSetupEnter(e) {
   }
 }
 
-function BidStepInput({ value, onChange, onFocus, disabled, className = '', variant = 'desktop', label, warning, gridRow, gridCol, ...rest }) {
+function BidStepInput({ value, onChange, onFocus, disabled, className = '', variant = 'desktop', label, warning, error, gridRow, gridCol, ...rest }) {
   const inputRef = useRef(null);
   const reactId = useId();
   const inputId = rest.id || `bid-input-${reactId}`;
@@ -938,8 +938,8 @@ function BidStepInput({ value, onChange, onFocus, disabled, className = '', vari
         value={value}
         min={1}
         disabled={disabled}
-        aria-invalid={!!warning || undefined}
-        aria-describedby={warning ? hintId : undefined}
+        aria-invalid={error ? true : undefined}
+        aria-describedby={(error || warning) ? hintId : undefined}
         data-grid-row={gridRow}
         data-grid-col={gridCol}
         onChange={e => onChange(+e.target.value)}
@@ -948,12 +948,64 @@ function BidStepInput({ value, onChange, onFocus, disabled, className = '', vari
         onKeyDown={handleKeyDown}
         {...restNoId}
       />
-      {warning ? (
-        <span id={hintId} role="alert" aria-live="polite" className="pyscal-sr-only">
-          {warning}
+      {(error || warning) ? (
+        <span
+          id={hintId}
+          role="alert"
+          aria-live={error ? "assertive" : "polite"}
+          className="pyscal-sr-only"
+        >
+          {error || warning}
         </span>
       ) : null}
     </div>
+  );
+}
+
+/**
+ * LotInput — number input untuk kolom lot (per-papan atau lot dasar) dengan
+ * validasi format ketat. Menampilkan pesan error/warning ke screen reader via
+ * aria-describedby → <span role="alert">, dan menandai aria-invalid saat error.
+ */
+function LotInput({ value, onChange, className = '', label, gridRow, gridCol, onKeyDown, ...rest }) {
+  const reactId = useId();
+  const inputId = rest.id || `lot-input-${reactId}`;
+  const hintId = `${inputId}-hint`;
+  const status = validateLot(Number(value));
+  const message = status.error || status.warning || '';
+  const restNoId = { ...rest }; delete restNoId.id;
+  return (
+    <>
+      <input
+        id={inputId}
+        type="number"
+        className={className}
+        value={value}
+        min={1}
+        step={100}
+        inputMode="numeric"
+        enterKeyHint="done"
+        aria-label={label}
+        aria-invalid={status.error ? true : undefined}
+        aria-describedby={message ? hintId : undefined}
+        data-grid-row={gridRow}
+        data-grid-col={gridCol}
+        onChange={e => onChange(+e.target.value)}
+        onFocus={e => e.target.select()}
+        onKeyDown={onKeyDown}
+        {...restNoId}
+      />
+      {message ? (
+        <span
+          id={hintId}
+          role="alert"
+          aria-live={status.error ? "assertive" : "polite"}
+          className="pyscal-sr-only"
+        >
+          {message}
+        </span>
+      ) : null}
+    </>
   );
 }
 
@@ -2270,6 +2322,7 @@ function ResultsTable({ results, bidRiseWarnings, targetProfit, totalLot, totalC
               const li = layerIndex(r, i);
               const isWarn = !r.isExisting && bidRiseWarnings.includes(li + 1);
               const isUnder = !r.isExisting && r.pct < targetProfit - 0.001;
+              const bidErr = !r.isExisting ? validateBid(Number(r.bid)).error : '';
               return (
                 <tr key={i} className={r.isExisting ? "row-existing" : (isUnder ? "row-under" : "")} style={{ animationDelay: `${i * 50}ms` }}>
                   <td>{r.layer}</td>
@@ -2278,10 +2331,11 @@ function ResultsTable({ results, bidRiseWarnings, targetProfit, totalLot, totalC
                       <span className="c-bid-static">{r.bid}</span>
                     ) : (
                       <BidStepInput
-                        className={`bid-edit ${isWarn ? 'bid-edit-w' : ''}`}
+                        className={`bid-edit ${isWarn ? 'bid-edit-w' : ''} ${bidErr ? 'bid-edit-e' : ''}`}
                         value={r.bid}
                         onChange={v => setBidAt(li, v)}
                         label={`Bid papan ${r.layer}`}
+                        error={bidErr || ''}
                         warning={isWarn ? `Bid papan ${r.layer} tidak lebih rendah dari papan sebelumnya, bukan averaging down.` : ''}
                         gridRow={li}
                         gridCol="bid"
@@ -2290,15 +2344,15 @@ function ResultsTable({ results, bidRiseWarnings, targetProfit, totalLot, totalC
                   </td>
                   <td className="c-lot">
                     {customLot && !r.isExisting ? (
-                      <input type="number" className="lot-edit"
-                        value={r.lot} min={1} step={100}
-                        inputMode="numeric" enterKeyHint="done"
-                        onChange={e => setLotAt(li, +e.target.value)}
-                        onFocus={e => e.target.select()}
-                        data-grid-row={li}
-                        data-grid-col="lot"
+                      <LotInput
+                        className="lot-edit"
+                        value={r.lot}
+                        onChange={v => setLotAt(li, v)}
+                        label={`Lot papan ${r.layer}`}
+                        gridRow={li}
+                        gridCol="lot"
                         onKeyDown={e => handleGridNavKey(e, li, 'lot')}
-                        aria-label={`Lot papan ${r.layer}`} />
+                      />
                     ) : n(r.lot)}
                   </td>
                   <td className="c-avg">{r.avg.toFixed(2)}</td>
@@ -2344,6 +2398,7 @@ function ResultsTable({ results, bidRiseWarnings, targetProfit, totalLot, totalC
             const li = layerIndex(r, i);
             const isUnder = !r.isExisting && r.pct < targetProfit - 0.001;
             const isWarn = !r.isExisting && bidRiseWarnings.includes(li + 1);
+            const bidErr = !r.isExisting ? validateBid(Number(r.bid)).error : '';
             const canSwipe = !r.isExisting && li > 0;
             return (
               <SwipeableCard
@@ -2373,6 +2428,7 @@ function ResultsTable({ results, bidRiseWarnings, targetProfit, totalLot, totalC
                         value={r.bid}
                         onChange={v => setBidAt(li, v)}
                         label={`Bid papan ${r.layer}`}
+                        error={bidErr || ''}
                         warning={isWarn ? `Bid papan ${r.layer} tidak lebih rendah dari papan sebelumnya, bukan averaging down.` : ''}
                         gridRow={li}
                         gridCol="bid"
@@ -2382,13 +2438,15 @@ function ResultsTable({ results, bidRiseWarnings, targetProfit, totalLot, totalC
                   <div className="mhi">
                     <label>Lot</label>
                     {customLot && !r.isExisting ? (
-                      <input type="number" className="mhi-inp lot-edit-m" value={r.lot} min={1} step={100}
-                        inputMode="numeric" enterKeyHint="done"
-                        onChange={e => setLotAt(li, +e.target.value)}
-                        onFocus={e => e.target.select()}
-                        data-grid-row={li}
-                        data-grid-col="lot"
-                        onKeyDown={e => handleGridNavKey(e, li, 'lot')} />
+                      <LotInput
+                        className="mhi-inp lot-edit-m"
+                        value={r.lot}
+                        onChange={v => setLotAt(li, v)}
+                        label={`Lot papan ${r.layer}`}
+                        gridRow={li}
+                        gridCol="lot"
+                        onKeyDown={e => handleGridNavKey(e, li, 'lot')}
+                      />
                     ) : <span>{n(r.lot)}</span>}
                   </div>
                   <div className="mhi"><label>Sell</label><span>{r.sell}</span></div>
