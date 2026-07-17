@@ -790,6 +790,59 @@ function FieldHint({ status, id }) {
     </div>
   );
 }
+
+/**
+ * Cari input pertama yang menandai dirinya invalid (aria-invalid=true) di
+ * dalam DOM, scroll ke tengah viewport, lalu fokus. Fallback ke elemen yang
+ * di-`describe` oleh #pyscal-hint-* dengan .field-hint.error saat aria-invalid
+ * tidak dipasang di elemen input (mis. FieldHint sibling).
+ * Return true kalau ada elemen invalid yang di-fokus, false kalau semua bersih.
+ */
+function focusFirstInvalidInput(): boolean {
+  if (typeof document === 'undefined') return false;
+  // 1) Prefer eksplisit aria-invalid="true" di input aktif (visible + enabled).
+  const invalids = Array.from(
+    document.querySelectorAll<HTMLElement>('[aria-invalid="true"]')
+  ).filter((el) => {
+    if ((el as HTMLInputElement).disabled) return false;
+    const rect = el.getBoundingClientRect();
+    if (rect.width === 0 && rect.height === 0) return false; // hidden
+    return true;
+  });
+  let target: HTMLElement | undefined = invalids[0];
+  // 2) Fallback: cari FieldHint .field-hint.error yang visible, resolve ke
+  //    input via aria-describedby lookup.
+  if (!target) {
+    const hints = Array.from(
+      document.querySelectorAll<HTMLElement>('.field-hint.error')
+    ).filter((el) => {
+      const r = el.getBoundingClientRect();
+      return r.width > 0 && r.height > 0;
+    });
+    for (const hint of hints) {
+      const id = hint.id;
+      if (!id) continue;
+      const owner = document.querySelector<HTMLElement>(
+        `[aria-describedby~="${CSS.escape(id)}"]`
+      );
+      if (owner) { target = owner; break; }
+    }
+  }
+  if (!target) return false;
+  try {
+    target.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  } catch {
+    target.scrollIntoView();
+  }
+  // Focus setelah scroll agar SR pindah reading cursor ke error tsb.
+  requestAnimationFrame(() => {
+    try { target!.focus({ preventScroll: true }); } catch { target!.focus(); }
+    if ((target as HTMLInputElement).select) {
+      try { (target as HTMLInputElement).select(); } catch {}
+    }
+  });
+  return true;
+}
 function ToastContainer({ toasts, onRemove }) {
   return (
     <div className="toast-container" role="region" aria-label="Notifikasi" aria-live="polite">
@@ -1688,6 +1741,12 @@ export default function PYSCAL() {
   // Save trade - 1 click, no modal
   const saveTrade = useCallback(() => {
     if (!data || !data.results.length) return;
+    // Blokir simpan kalau masih ada field invalid; scroll + fokus ke error pertama
+    // agar user keyboard/SR tahu letak persisnya.
+    if (focusFirstInvalidInput()) {
+      showToast('Ada input yang belum valid. Fokus dipindah ke input bermasalah.', 'error');
+      return;
+    }
     const trade = {
       id: 'tr_' + Date.now(),
       timestamp: Date.now(),
