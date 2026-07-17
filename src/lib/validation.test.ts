@@ -5,16 +5,20 @@ import {
 } from "./validation";
 
 describe("validation", () => {
-  it("bid: error <= 0, warn out of IDX range", () => {
+  it("bid: error <=0, non-integer, > IDX cap; warn <50", () => {
+    expect(validateBid(NaN).error).toBeTruthy();
     expect(validateBid(0).error).toBeTruthy();
     expect(validateBid(-1).error).toBeTruthy();
+    expect(validateBid(1.5).error).toBeTruthy();
+    expect(validateBid(60000).error).toBeTruthy();
     expect(validateBid(25).warning).toBeTruthy();
-    expect(validateBid(60000).warning).toBeTruthy();
     expect(validateBid(1000)).toEqual({});
   });
-  it("lot: integer ≥ 1", () => {
+  it("lot: integer ≥ 1, non-integer is error", () => {
+    expect(validateLot(NaN).error).toBeTruthy();
     expect(validateLot(0).error).toBeTruthy();
-    expect(validateLot(1.5).warning).toBeTruthy();
+    expect(validateLot(1.5).error).toBeTruthy();
+    expect(validateLot(2_000_000).warning).toBeTruthy();
     expect(validateLot(100)).toEqual({});
   });
   it("targetTicks: 1–20, warn >10", () => {
