@@ -1688,6 +1688,12 @@ export default function PYSCAL() {
   // Save trade - 1 click, no modal
   const saveTrade = useCallback(() => {
     if (!data || !data.results.length) return;
+    // Blokir simpan kalau masih ada field invalid; scroll + fokus ke error pertama
+    // agar user keyboard/SR tahu letak persisnya.
+    if (focusFirstInvalidInput()) {
+      showToast('Ada input yang belum valid. Fokus dipindah ke input bermasalah.', 'error');
+      return;
+    }
     const trade = {
       id: 'tr_' + Date.now(),
       timestamp: Date.now(),
