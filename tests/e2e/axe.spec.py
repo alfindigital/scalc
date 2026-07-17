@@ -49,7 +49,7 @@ SCOPES = [
 #   - fullpage: seluruh <html> — menangkap overlay/modal/dialog apapun
 EXTRA_SCOPES = [
     ("onboarding", ".onboarding"),
-    ("results-grid", ".rc"),
+    ("results-grid", ".dt"),
     ("fullpage", "html"),
 ]
 
@@ -129,7 +129,7 @@ async def main():
         await page.wait_for_selector(".afd-foot")
         await page.wait_for_selector(".onboarding", timeout=5000)
         # Force results table to render by ensuring at least one papan exists.
-        await page.wait_for_selector(".rc", timeout=5000)
+        await page.wait_for_selector(".dt", timeout=5000)
         await page.add_script_tag(content=AXE)
         for theme in ("light", "dark"):
             for label, sel in EXTRA_SCOPES:
