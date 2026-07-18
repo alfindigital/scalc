@@ -81,11 +81,26 @@ const CSS = `
 /* sr-only, becomes visible when focused (for skip link) */
 .pyscal-sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 .pyscal-sr-only:focus,.pyscal-sr-only:focus-visible{position:fixed;top:8px;left:8px;width:auto;height:auto;clip:auto;clip-path:none;padding:8px 14px;background:var(--brand);color:var(--brand-text);font-weight:700;z-index:9999}
-/* validation field state */
-.if[aria-invalid="true"]{border-color:var(--red)!important;outline-color:var(--red)}
-.field-hint{font-size:11px;margin-top:4px;line-height:1.35;font-family:'Funnel Sans',sans-serif}
-.field-hint.error{color:var(--red)}
-.field-hint.warning{color:var(--brand);opacity:.85}
+/* validation field state — clear red border + tint + inner glow.
+   Focus ring stays brand-colored with a larger offset so keyboard focus
+   remains contrasted against the red error border in both themes. */
+.if[aria-invalid="true"]{
+  border-color:var(--red)!important;border-width:2px!important;
+  background:var(--red-d)!important;
+  box-shadow:inset 0 0 0 1px var(--red), 0 0 0 3px var(--red-d);
+}
+.if[aria-invalid="true"]:focus-visible,
+.if[aria-invalid="true"]:focus{
+  outline:2px solid var(--brand)!important;outline-offset:3px!important;
+  border-color:var(--red)!important;
+}
+.field-hint{font-size:11px;margin-top:6px;line-height:1.35;font-family:'Funnel Sans',sans-serif;
+  display:flex;align-items:flex-start;gap:6px;padding:4px 8px;border-radius:3px;
+  border-left:3px solid transparent;background:transparent}
+.field-hint.error{color:var(--red);font-weight:600;
+  border-left-color:var(--red);background:var(--red-d)}
+.field-hint.warning{color:var(--brand);opacity:.9;
+  border-left-color:var(--brand);background:var(--brand-d)}
 /* (?) help icon next to label */
 .il-wrap{display:flex;align-items:center;gap:6px}
 .il-help{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border:1px solid var(--border);background:transparent;color:var(--text-m);font-size:10px;font-weight:700;cursor:help;border-radius:50%;line-height:1;padding:0}
@@ -384,6 +399,14 @@ tbody td:last-child{padding:14px 8px;width:1%}
 .bid-edit:focus{border-color:var(--brand);background:var(--inp-bg)}
 .bid-edit:focus,.bid-edit:focus-visible{outline-style:solid!important;outline-width:2px!important;outline-color:var(--brand)!important;outline-offset:2px!important}
 .bid-edit-w{color:var(--text-m)!important;opacity:.8}
+/* grid inputs — clear error state, distinct from focus ring */
+.bid-edit[aria-invalid="true"],.lot-edit[aria-invalid="true"]{
+  border-color:var(--red)!important;background:var(--red-d)!important;
+  color:var(--red)!important;box-shadow:inset 0 0 0 1px var(--red)}
+.bid-edit[aria-invalid="true"]:focus,.bid-edit[aria-invalid="true"]:focus-visible,
+.lot-edit[aria-invalid="true"]:focus,.lot-edit[aria-invalid="true"]:focus-visible{
+  outline:2px solid var(--brand)!important;outline-offset:3px!important;
+  border-color:var(--red)!important}
 
 /* bid step buttons - show on hover/focus */
 .bid-step-wrap{display:inline-flex;align-items:center;position:relative}
