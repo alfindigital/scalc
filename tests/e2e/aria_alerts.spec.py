@@ -63,7 +63,10 @@ async def audit(browser, vp_name, viewport):
     await page.wait_for_selector("#main")
 
     # --- Scenario A: format error on Bid Awal (non-integer) ---
-    bid_awal = page.get_by_label(re.compile(r"^Bid Awal", re.I)).first
+    # On both viewports the desktop table and the mobile card are both
+    # in the DOM; only one is visible. Filter to the visible one so we
+    # exercise the surface the user actually sees.
+    bid_awal = page.locator('input.if[aria-label^="Bid Awal"]:visible').first
     await bid_awal.click()
     await bid_awal.fill("1.5")
     await page.wait_for_timeout(150)
@@ -79,8 +82,8 @@ async def audit(browser, vp_name, viewport):
     await page.get_by_role("button", name=re.compile(r"^Tambah papan$", re.I)).click()
     await page.wait_for_timeout(200)
     # locate row-2 bid input (label "Bid papan 2")
-    bid2 = page.get_by_label(re.compile(r"^Bid papan 2$", re.I)).first
-    await bid2.wait_for(state="attached", timeout=3000)
+    bid2 = page.locator('input[data-grid-col="bid"][data-grid-row="1"]:visible').first
+    await bid2.wait_for(state="visible", timeout=5000)
     # force it to be >= papan 1 (1000) so bidRiseWarnings triggers
     await bid2.fill("1200")
     await page.wait_for_timeout(200)
