@@ -399,6 +399,14 @@ tbody td:last-child{padding:14px 8px;width:1%}
 .bid-edit:focus{border-color:var(--brand);background:var(--inp-bg)}
 .bid-edit:focus,.bid-edit:focus-visible{outline-style:solid!important;outline-width:2px!important;outline-color:var(--brand)!important;outline-offset:2px!important}
 .bid-edit-w{color:var(--text-m)!important;opacity:.8}
+/* grid inputs — clear error state, distinct from focus ring */
+.bid-edit[aria-invalid="true"],.lot-edit[aria-invalid="true"]{
+  border-color:var(--red)!important;background:var(--red-d)!important;
+  color:var(--red)!important;box-shadow:inset 0 0 0 1px var(--red)}
+.bid-edit[aria-invalid="true"]:focus,.bid-edit[aria-invalid="true"]:focus-visible,
+.lot-edit[aria-invalid="true"]:focus,.lot-edit[aria-invalid="true"]:focus-visible{
+  outline:2px solid var(--brand)!important;outline-offset:3px!important;
+  border-color:var(--red)!important}
 
 /* bid step buttons - show on hover/focus */
 .bid-step-wrap{display:inline-flex;align-items:center;position:relative}
