@@ -608,7 +608,7 @@ tbody td:last-child{padding:14px 8px;width:1%}
 .hd-mini-table div:last-child{border-bottom:none}
 
 @media(max-width:700px){
-  .pyscal-inner{padding:20px 12px 48px}
+  .pyscal-inner{padding:20px 12px 20px}
   .dt{display:none}
   .mc{display:flex;flex-direction:column;gap:10px}
   .ig{grid-template-columns:1fr 1fr;gap:12px}
