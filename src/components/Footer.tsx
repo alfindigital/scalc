@@ -1,6 +1,3 @@
-import { useState, useEffect, useRef } from "react";
-import { subscribeMotion, computeEffective, getMotionSetting } from "@/lib/motion";
-
 const SOCIALS = [
   {
     href: "https://t.me/lotmetrik",
@@ -29,45 +26,8 @@ const SOCIALS = [
 ];
 
 export default function Footer() {
-  const [active, setActive] = useState(0);
-  const [paused, setPaused] = useState(false);
-  const glowRef = useRef<HTMLDivElement>(null);
-  const [reducedMotion, setReducedMotion] = useState(false);
-
-  useEffect(() => {
-    // Effective reduced-motion = OS pref OR manual override in Settings.
-    // Subscribing here means the toggle takes effect immediately: the
-    // rotator interval and glow randomizer stop the moment the user picks
-    // "Kurangi" without a reload.
-    setReducedMotion(computeEffective(getMotionSetting()) === "reduce");
-    return subscribeMotion((eff) => setReducedMotion(eff === "reduce"));
-  }, []);
-
-  useEffect(() => {
-    if (reducedMotion) return;
-    const id = setInterval(() => {
-      if (!paused) setActive((i) => (i + 1) % SOCIALS.length);
-    }, 2300);
-    return () => clearInterval(id);
-  }, [paused, reducedMotion]);
-
-  useEffect(() => {
-    if (reducedMotion) return;
-    const glow = glowRef.current;
-    if (!glow) return;
-    let timeout: ReturnType<typeof setTimeout>;
-    const move = () => {
-      glow.style.left = Math.random() * 120 - 30 + "%";
-      glow.style.top = Math.random() * 60 - 30 + "%";
-      timeout = setTimeout(move, 4000 + Math.random() * 4000);
-    };
-    move();
-    return () => clearTimeout(timeout);
-  }, [reducedMotion]);
-
   return (
     <footer className="afd-foot">
-      <div className="afd-glow" ref={glowRef} />
       <span className="afd-cr">
         &copy; 2026{" "}
         <a
@@ -78,33 +38,21 @@ export default function Footer() {
         >
           lotmetrik
         </a>
-        <span className="afd-caret" />
       </span>
-      <nav
-        className="afd-rot"
-        aria-label="Ikuti kami di media sosial"
-        onMouseEnter={() => setPaused(true)}
-        onMouseLeave={() => setPaused(false)}
-        onFocus={() => setPaused(true)}
-        onBlur={() => setPaused(false)}
-      >
-        {SOCIALS.map((s, idx) => (
+      <nav className="afd-social" aria-label="Sosial media lotmetrik">
+        {SOCIALS.map((s) => (
           <a
             key={s.label}
-            className={`afd-item${idx === active ? " active" : ""}`}
+            className="afd-sicon"
             href={s.href}
             target="_blank"
             rel="noopener noreferrer"
-            aria-label={`${s.label} ${s.handle} (buka di tab baru)`}
-            aria-current={idx === active ? "true" : undefined}
-            onFocus={() => setActive(idx)}
+            aria-label={`${s.label} @lotmetrik (buka di tab baru)`}
+            title={`${s.label} @lotmetrik`}
           >
-            <span className="afd-ico" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="currentColor" focusable="false" aria-hidden="true">
-                <path d={s.path} />
-              </svg>
-            </span>
-            <b aria-hidden="true">{s.handle}</b>
+            <svg viewBox="0 0 24 24" fill="currentColor" focusable="false" aria-hidden="true">
+              <path d={s.path} />
+            </svg>
           </a>
         ))}
       </nav>
