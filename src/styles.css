@@ -184,6 +184,30 @@
 }
 
 /* ==================== FOOTER ==================== */
+/* Inline field-help tooltip (question mark next to label) */
+.fld-help {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  margin-left: 4px;
+  border-radius: 50%;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--muted-foreground);
+  background: color-mix(in srgb, var(--muted-foreground) 15%, transparent);
+  cursor: help;
+  user-select: none;
+  vertical-align: middle;
+}
+.fld-help:hover, .fld-help:focus-visible {
+  color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 18%, transparent);
+  outline: none;
+}
+
 .afd-foot {
   background: var(--card);
   border-top: 1px solid var(--border);
