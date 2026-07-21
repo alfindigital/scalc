@@ -298,50 +298,9 @@ html[data-pyscal-theme="dark"] .afd-sicon:focus-visible { outline-color: #FFFFFF
   .afd-sicon svg { width: 18px; height: 18px; }
 }
 
-/* Reduced-motion: honor the OS media query AND the manual override in
- * Settings. The effective state is written to
- * `html[data-pyscal-motion-effective]` before hydration, so toggling the
- * setting takes effect immediately with no reload. */
-html[data-pyscal-motion-effective="reduce"] {
-  .afd-glow,
-  .afd-caret {
-    animation: none !important;
-    transition: none !important;
-  }
-  .afd-glow { display: none; }
-  .afd-caret { opacity: 1; }
-
-  .afd-rot {
-    height: auto;
-    min-width: 0;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 10px;
-  }
-  .afd-item {
-    position: static;
-    opacity: 1 !important;
-    transform: none !important;
-    pointer-events: auto !important;
-    transition: none !important;
-  }
-  .afd-ico,
-  .afd-item {
-    transition: none !important;
-  }
-  .afd-rot:hover .afd-item.active .afd-ico::after,
-  .afd-item.active .afd-ico::after {
-    animation: none !important;
-    content: none !important;
-  }
-  .afd-rot:hover .afd-item .afd-ico {
-    background: color-mix(in srgb, var(--primary) 11%, transparent);
-    color: var(--primary);
-  }
-}
-html[data-pyscal-motion-effective="reduce"][data-pyscal-theme="dark"] .afd-rot:hover .afd-item .afd-ico {
-    background: rgba(255, 255, 255, 0.11);
-    color: #FFFFFF;
+/* Reduced-motion: honor the OS media query AND the manual override.
+ * Footer is now static — no rotator/glow to disable. Keep a stub in case
+ * other components add motion later. */
+html[data-pyscal-motion-effective="reduce"] .afd-sicon {
+  transition: none !important;
 }
