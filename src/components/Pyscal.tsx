@@ -169,9 +169,9 @@ const CSS = `
   .offline-banner .dot{animation:none}
   .pyscal *,.pyscal *::before,.pyscal *::after{animation-duration:.001ms!important;transition-duration:.001ms!important}
 }
-.pyscal-inner{min-height:100vh;padding:24px 16px 24px}
+.pyscal-inner{padding:16px 16px 8px}
 .ctn{max-width:880px;margin:0 auto}
-.ctn > .card:last-child{margin-bottom:8px}
+.ctn > .card:last-child{margin-bottom:0}
 
 /* header */
 .hdr{display:flex;align-items:center;gap:12px;margin-bottom:20px;position:relative}
@@ -608,7 +608,7 @@ tbody td:last-child{padding:14px 8px;width:1%}
 .hd-mini-table div:last-child{border-bottom:none}
 
 @media(max-width:700px){
-  .pyscal-inner{padding:20px 12px 20px}
+  .pyscal-inner{padding:14px 12px 6px}
   .dt{display:none}
   .mc{display:flex;flex-direction:column;gap:10px}
   .ig{grid-template-columns:1fr 1fr;gap:12px}
@@ -691,7 +691,7 @@ tbody td:last-child{padding:14px 8px;width:1%}
 }
 
 @media(max-width:420px){
-  .pyscal-inner{padding:16px 10px 16px}
+  .pyscal-inner{padding:12px 10px 4px}
   .card{padding:14px}
   .hdr{gap:10px}
   .logo{width:36px;height:36px}
