@@ -169,8 +169,9 @@ const CSS = `
   .offline-banner .dot{animation:none}
   .pyscal *,.pyscal *::before,.pyscal *::after{animation-duration:.001ms!important;transition-duration:.001ms!important}
 }
-.pyscal-inner{min-height:100vh;padding:24px 16px 56px}
+.pyscal-inner{min-height:100vh;padding:24px 16px 24px}
 .ctn{max-width:880px;margin:0 auto}
+.ctn > .card:last-child{margin-bottom:8px}
 
 /* header */
 .hdr{display:flex;align-items:center;gap:12px;margin-bottom:20px;position:relative}
