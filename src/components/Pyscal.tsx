@@ -691,7 +691,7 @@ tbody td:last-child{padding:14px 8px;width:1%}
 }
 
 @media(max-width:420px){
-  .pyscal-inner{padding:16px 10px 40px}
+  .pyscal-inner{padding:16px 10px 16px}
   .card{padding:14px}
   .hdr{gap:10px}
   .logo{width:36px;height:36px}
