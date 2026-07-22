@@ -1917,7 +1917,6 @@ export default function PYSCAL() {
                     exportAll, importAll,
                     shortcuts, setShortcuts: persistShortcuts,
                     recordingShortcut, setRecordingShortcut,
-                    motion, setMotion: changeMotion,
                   }} />
                 )}
               </div>
