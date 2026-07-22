@@ -4,7 +4,7 @@ import { useState, useMemo, useCallback, useEffect, useRef, useId } from "react"
 import { Pin } from "lucide-react";
 import logoUrl from "@/assets/logo-pyscal.webp";
 import { getTickSize, ceilTick, computeRows } from "@/lib/compute";
-import { n, nDec, nShort, terbilang, fmtPct, fmtPL, fmtTime } from "@/lib/format";
+import { n, nDec, nShort, fmtPct, fmtPL, fmtTime } from "@/lib/format";
 import {
   validateBid, validateLot, validateTargetTicks, validateTargetProfit,
   validateExistingAvg, validateExistingLot,
@@ -239,8 +239,6 @@ const CSS = `
   font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;padding:10px 12px;outline:none;transition:border-color .15s}
 .sp-input:focus{border-color:var(--brand)}
 .sp-label{font-size:10px;font-weight:600;color:var(--text-m);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px}
-.terbilang{font-family:'Funnel Sans',sans-serif;font-size:12px;color:var(--text-m);margin-top:6px;line-height:1.4}
-.terbilang strong{color:var(--brand);font-weight:700}
 
 .theme-pill{display:flex;gap:4px;background:var(--inp-bg);padding:3px;border:1px solid var(--border)}
 .theme-pill button{flex:1;background:transparent;border:none;padding:7px 10px;cursor:pointer;
@@ -2254,9 +2252,6 @@ function SettingsPanel({
           placeholder="Kosongkan jika tidak dibutuhkan"
           inputMode="numeric" enterKeyHint="done"
           onChange={e => setBalance(+e.target.value || 0)} />
-        {balance > 0 && (
-          <div className="terbilang"><strong>{terbilang(balance)}</strong> rupiah</div>
-        )}
       </div>
 
       <div className="sp-section">
