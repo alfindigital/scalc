@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { useRef } from "react";
-import { terbilang } from "@/lib/format";
+
 import { DEFAULT_SHORTCUTS, shortcutToString } from "@/lib/storage";
 import { SunIcon, MoonIcon, XIcon, KeyboardIcon } from "./icons";
 import { InstallAppRow } from "./internals";
@@ -34,9 +34,6 @@ export function SettingsPanel({
           placeholder="Kosongkan jika tidak dibutuhkan"
           inputMode="numeric" enterKeyHint="done"
           onChange={e => setBalance(+e.target.value || 0)} />
-        {balance > 0 && (
-          <div className="terbilang"><strong>{terbilang(balance)}</strong> rupiah</div>
-        )}
       </div>
 
       <div className="sp-section">
