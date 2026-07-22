@@ -169,7 +169,7 @@ const CSS = `
   .offline-banner .dot{animation:none}
   .pyscal *,.pyscal *::before,.pyscal *::after{animation-duration:.001ms!important;transition-duration:.001ms!important}
 }
-.pyscal-inner{min-height:100vh;padding:24px 16px 56px}
+.pyscal-inner{min-height:0;padding:24px 16px 16px}
 .ctn{max-width:880px;margin:0 auto}
 
 /* header */
