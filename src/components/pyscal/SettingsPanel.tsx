@@ -29,36 +29,6 @@ export function SettingsPanel({
       </div>
 
       <div className="sp-section">
-        <div className="sp-title">Animasi</div>
-        <div className="theme-pill" role="radiogroup" aria-label="Reduced motion">
-          <button
-            className={motion === 'auto' ? 'active' : ''}
-            role="radio"
-            aria-checked={motion === 'auto'}
-            data-motion="auto"
-            onClick={() => setMotion('auto')}
-          >Auto</button>
-          <button
-            className={motion === 'normal' ? 'active' : ''}
-            role="radio"
-            aria-checked={motion === 'normal'}
-            data-motion="normal"
-            onClick={() => setMotion('normal')}
-          >Normal</button>
-          <button
-            className={motion === 'reduce' ? 'active' : ''}
-            role="radio"
-            aria-checked={motion === 'reduce'}
-            data-motion="reduce"
-            onClick={() => setMotion('reduce')}
-          >Kurangi</button>
-        </div>
-        <div className="sp-empty" style={{ marginTop: 6 }}>
-          Auto ikut pengaturan OS. Kurangi mematikan rotator sosial &amp; animasi UI segera.
-        </div>
-      </div>
-
-      <div className="sp-section">
         <div className="sp-title">Trading Balance</div>
         <input className="sp-input" type="number" value={balance || ''} min={0}
           placeholder="Kosongkan jika tidak dibutuhkan"
