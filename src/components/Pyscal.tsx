@@ -2338,7 +2338,7 @@ function SettingsPanel({
           <div className="sp-empty">Belum ada preset</div>
         )}
         <div className="sp-preset-save">
-          <input placeholder="BRIS" value={presetName} maxLength={6}
+          <input placeholder="Scalping" value={presetName} maxLength={8}
             onChange={e => setPresetName(e.target.value.toUpperCase())}
             onKeyDown={e => { if (e.key === 'Enter') savePreset(); }} />
           <button onClick={savePreset} disabled={!presetName.trim()}>Simpan</button>
