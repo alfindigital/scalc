@@ -13,9 +13,6 @@ import {
   isInstallAvailable, isStandalone, subscribeInstallPrompt, triggerInstall, detectPlatform,
 } from "@/lib/pwa";
 import {
-  getMotionSetting, setMotionSetting, subscribeMotion, computeEffective,
-} from "@/lib/motion";
-import {
   DEFAULT_SHORTCUTS,
   DEFAULT_STATE,
   loadShortcutsVersioned,
