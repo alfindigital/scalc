@@ -11,7 +11,6 @@ export function SettingsPanel({
   exportPresets, importPresets,
   exportAll, importAll,
   shortcuts, setShortcuts, recordingShortcut, setRecordingShortcut,
-  motion, setMotion,
 }) {
   const fileInputRef = useRef(null);
   const fullBackupInputRef = useRef(null);
