@@ -247,13 +247,14 @@ const CSS = `
 .theme-pill button.active{background:var(--brand);color:var(--brand-text)}
 
 .sp-presets{display:flex;flex-direction:column;gap:6px;margin-bottom:10px;max-height:180px;overflow-y:auto}
-.sp-preset-item{display:flex;align-items:stretch;border:1px solid var(--border);background:var(--inp-bg)}
+.sp-preset-item{display:flex;align-items:stretch;border:1px solid var(--border);background:var(--inp-bg);border-radius:6px;overflow:hidden}
 .sp-preset-load{flex:1;background:none;border:none;color:var(--text);text-align:left;
   font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;padding:8px 12px;cursor:pointer;transition:background .15s}
 .sp-preset-load:hover{background:var(--surface-hover)}
-.sp-preset-x{background:none;border:none;border-left:1px solid var(--border);color:var(--text-d);
-  cursor:pointer;padding:0 10px;display:flex;align-items:center;transition:all .15s}
-.sp-preset-x:hover{background:var(--red);color:#fff;border-color:var(--red)}
+.sp-preset-x{background:none;border:none;border-left:1px solid var(--border);color:var(--text-m);
+  cursor:pointer;padding:0 12px;min-width:40px;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.sp-preset-x:hover,.sp-preset-x:focus-visible{background:var(--red);color:#fff;border-color:var(--red)}
+.sp-preset-x svg{width:14px;height:14px}
 .sp-preset-save{display:flex;border:1px solid var(--border)}
 .sp-preset-save input{flex:1;background:var(--inp-bg);border:none;outline:none;
   font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:var(--text);padding:10px 12px;min-width:0}
