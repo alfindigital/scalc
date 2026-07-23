@@ -2287,7 +2287,7 @@ function SettingsPanel({
         </div>
       </div>
 
-      <div className="sp-section">
+      <div className="sp-section" ref={presetSectionRef}>
         <div className="sp-title">Preset</div>
         {presets.length > 0 ? (
           <div className="sp-presets">
