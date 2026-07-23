@@ -2279,8 +2279,8 @@ function SettingsPanel({
           <div className="sp-presets">
             {presets.map(p => (
               <div key={p.name} className="sp-preset-item">
-                <button className="sp-preset-load" onClick={() => loadPreset(p)}>{p.name}</button>
-                <button className="sp-preset-x" onClick={() => deletePreset(p.name)}><XIcon /></button>
+                <button className="sp-preset-load" onClick={() => loadPreset(p)} title={`Muat preset ${p.name}`}>{p.name}</button>
+                <button className="sp-preset-x" onClick={() => deletePreset(p.name)} aria-label={`Hapus preset ${p.name}`} title="Hapus preset" type="button"><XIcon /></button>
               </div>
             ))}
           </div>
