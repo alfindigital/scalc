@@ -66,6 +66,7 @@ const InfoIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="non
 const KeyboardIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><line x1="6" y1="10" x2="6" y2="10"/><line x1="10" y1="10" x2="10" y2="10"/><line x1="14" y1="10" x2="14" y2="10"/><line x1="18" y1="10" x2="18" y2="10"/><line x1="6" y1="14" x2="18" y2="14"/></svg>;
 const LockIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>;
 const UnlockIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>;
+const PresetIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>;
 
 /* ==================== STYLES ==================== */
 const CSS = `
@@ -1201,6 +1202,7 @@ export default function PYSCAL() {
   const [customLots, setCustomLots] = useState(initial.customLots || []); // array matching bids, lot per papan
 
   const [showSettings, setShowSettings] = useState(false);
+  const [settingsOpenSource, setSettingsOpenSource] = useState(null);
   const [showHistory, setShowHistory] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
   const [viewingTradeId, setViewingTradeId] = useState(null);
@@ -1901,7 +1903,7 @@ export default function PYSCAL() {
                   <HistoryIcon />
                 </button>
                 <button className={`gear-btn ${showSettings ? 'active' : ''}`}
-                  onClick={() => setShowSettings(v => !v)}
+                  onClick={() => { setSettingsOpenSource(null); setShowSettings(v => !v); }}
                   aria-label="Buka Settings"
                   aria-expanded={showSettings}
                 >
@@ -1916,6 +1918,7 @@ export default function PYSCAL() {
                     exportAll, importAll,
                     shortcuts, setShortcuts: persistShortcuts,
                     recordingShortcut, setRecordingShortcut,
+                    openSource: settingsOpenSource,
                   }} />
                 )}
               </div>
@@ -2163,6 +2166,10 @@ export default function PYSCAL() {
                       onClick={copyResults} aria-label="Copy hasil">
                       {copyState === 'copied' ? <CheckIcon /> : <CopyIcon />}
                     </button>
+                    <button className="ibtn" onClick={() => { setSettingsOpenSource('presets'); setShowSettings(true); }}
+                      aria-label="Buka Preset">
+                      <PresetIcon />
+                    </button>
                     {bids.length > 1 && (
                       <button className="ibtn danger" onClick={resetPapan} aria-label="Reset semua papan">
                         <RefreshIcon />
@@ -2230,9 +2237,16 @@ function SettingsPanel({
   exportPresets, importPresets,
   exportAll, importAll,
   shortcuts, setShortcuts, recordingShortcut, setRecordingShortcut,
+  openSource,
 }) {
   const fileInputRef = useRef(null);
   const fullBackupInputRef = useRef(null);
+  const presetSectionRef = useRef(null);
+  useEffect(() => {
+    if (openSource === 'presets' && presetSectionRef.current) {
+      presetSectionRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [openSource]);
   return (
     <div className="settings-panel">
       <div className="sp-section">
@@ -2273,7 +2287,7 @@ function SettingsPanel({
         </div>
       </div>
 
-      <div className="sp-section">
+      <div className="sp-section" ref={presetSectionRef}>
         <div className="sp-title">Preset</div>
         {presets.length > 0 ? (
           <div className="sp-presets">
