@@ -727,13 +727,17 @@ tbody td:last-child{padding:14px 8px;width:1%}
   text-transform:uppercase;margin-bottom:6px}
 .onb-title{font-size:16px;font-weight:800;color:var(--text-d);margin-bottom:6px}
 .onb-body{font-size:13px;line-height:1.5;color:var(--text-m);margin-bottom:12px}
-.onb-dots{display:flex;gap:6px;justify-content:center;margin-bottom:12px}
-.onb-dot{width:6px;height:6px;border-radius:50%;background:var(--border)}
-.onb-dot.active{background:var(--brand);width:18px;border-radius:3px}
+.onb-dots{display:flex;gap:8px;justify-content:center;margin-bottom:12px;align-items:center}
+.onb-dot{width:10px;height:10px;padding:0;border-radius:50%;background:var(--border);
+  border:none;cursor:pointer;transition:background .15s,width .15s}
+.onb-dot.active{background:var(--brand);width:22px;border-radius:5px}
+.onb-dot:focus-visible{outline:2px solid var(--brand);outline-offset:3px}
 .onb-actions{display:flex;gap:8px;justify-content:space-between;align-items:center}
 .onb-skip{background:transparent;border:none;color:var(--text-m);font-size:13px;
   padding:10px 12px;min-height:44px;cursor:pointer;border-radius:8px}
 .onb-skip:hover{color:var(--text-d)}
+.onb-skip:disabled{opacity:.4;cursor:not-allowed}
+.onb-skip:disabled:hover{color:var(--text-m)}
 .onb-next{background:var(--brand);color:#fff;border:none;font-size:13px;font-weight:700;
   padding:10px 18px;min-height:44px;border-radius:10px;cursor:pointer;flex:1;max-width:180px}
 .onb-next:hover{filter:brightness(1.05)}
