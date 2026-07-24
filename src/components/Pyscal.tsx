@@ -1909,6 +1909,7 @@ export default function PYSCAL() {
       <style>{CSS}</style>
       <div className="pyscal" data-theme={theme}>
         <OfflineBanner />
+        <OnboardingTour />
         <div className="pyscal-inner">
           <div className="ctn">
 
