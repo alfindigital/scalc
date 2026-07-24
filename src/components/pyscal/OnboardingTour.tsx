@@ -141,6 +141,15 @@ export function OnboardingTour() {
         <div className="pyscal-sr-only" aria-live="polite" aria-atomic="true">
           {stepLabel}: {s.title}
         </div>
+        <div className="onb-progress" aria-hidden="true">
+          <span className="onb-count">{step + 1} / {STEPS.length}</span>
+          <span className="onb-bar">
+            <span
+              className="onb-bar-fill"
+              style={{ width: `${((step + 1) / STEPS.length) * 100}%` }}
+            />
+          </span>
+        </div>
         <div className="onb-title" id="onb-title">{s.title}</div>
         <div className="onb-body" id="onb-body">{s.body}</div>
         <div
