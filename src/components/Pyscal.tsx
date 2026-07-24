@@ -3,6 +3,7 @@ const escHtml = (s) => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;'
 import { useState, useMemo, useCallback, useEffect, useRef, useId } from "react";
 import { Pin } from "lucide-react";
 import logoUrl from "@/assets/logo-pyscal.webp";
+import { OnboardingTour } from "@/components/pyscal/OnboardingTour";
 import { getTickSize, ceilTick, computeRows } from "@/lib/compute";
 import { n, nDec, nShort, fmtPct, fmtPL, fmtTime } from "@/lib/format";
 import {
@@ -715,6 +716,28 @@ tbody td:last-child{padding:14px 8px;width:1%}
 
 @keyframes rs{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
 @keyframes si{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+
+.onb-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;
+  display:flex;align-items:flex-end;justify-content:center;padding:16px;
+  animation:si .2s ease}
+.onb-card{background:var(--surface);color:var(--text-d);border:1px solid var(--border);
+  border-radius:14px;padding:16px 16px 14px;width:100%;max-width:420px;
+  box-shadow:0 20px 60px rgba(0,0,0,.35);animation:rs .25s ease}
+.onb-hint{font-size:11px;color:var(--brand);font-weight:700;letter-spacing:.3px;
+  text-transform:uppercase;margin-bottom:6px}
+.onb-title{font-size:16px;font-weight:800;color:var(--text-d);margin-bottom:6px}
+.onb-body{font-size:13px;line-height:1.5;color:var(--text-m);margin-bottom:12px}
+.onb-dots{display:flex;gap:6px;justify-content:center;margin-bottom:12px}
+.onb-dot{width:6px;height:6px;border-radius:50%;background:var(--border)}
+.onb-dot.active{background:var(--brand);width:18px;border-radius:3px}
+.onb-actions{display:flex;gap:8px;justify-content:space-between;align-items:center}
+.onb-skip{background:transparent;border:none;color:var(--text-m);font-size:13px;
+  padding:10px 12px;min-height:44px;cursor:pointer;border-radius:8px}
+.onb-skip:hover{color:var(--text-d)}
+.onb-next{background:var(--brand);color:#fff;border:none;font-size:13px;font-weight:700;
+  padding:10px 18px;min-height:44px;border-radius:10px;cursor:pointer;flex:1;max-width:180px}
+.onb-next:hover{filter:brightness(1.05)}
+.onb-skip:focus-visible,.onb-next:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
 `;
 
 /* ==================== TOAST COMPONENT ==================== */
@@ -1886,6 +1909,7 @@ export default function PYSCAL() {
       <style>{CSS}</style>
       <div className="pyscal" data-theme={theme}>
         <OfflineBanner />
+        <OnboardingTour />
         <div className="pyscal-inner">
           <div className="ctn">
 
