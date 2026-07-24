@@ -718,6 +718,9 @@ tbody td:last-child{padding:14px 8px;width:1%}
 @keyframes si{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
 
 .onb-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;
+  animation:onb-fade .22s ease-out both}
+@keyframes onb-fade{from{opacity:0}to{opacity:1}}
+@keyframes onb-rise{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:none}}
   display:flex;align-items:flex-end;justify-content:center;padding:16px;
   animation:si .2s ease}
 .onb-card{background:var(--surface);color:var(--text-d);border:1px solid var(--border);
@@ -727,12 +730,25 @@ tbody td:last-child{padding:14px 8px;width:1%}
   text-transform:uppercase;margin-bottom:6px}
 .onb-title{font-size:16px;font-weight:800;color:var(--text-d);margin-bottom:6px}
 .onb-body{font-size:13px;line-height:1.5;color:var(--text-m);margin-bottom:12px}
+.onb-progress{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.onb-count{font-size:11px;font-weight:700;color:var(--text-m);
+  font-variant-numeric:tabular-nums;letter-spacing:.4px;min-width:34px}
+.onb-bar{position:relative;flex:1;height:4px;background:var(--border);
+  border-radius:999px;overflow:hidden}
+.onb-bar-fill{display:block;height:100%;background:var(--brand);border-radius:999px;
+  transition:width .35s cubic-bezier(.22,.61,.36,1)}
 .onb-dots{display:flex;gap:8px;justify-content:center;margin-bottom:12px;align-items:center}
 .onb-dot{width:10px;height:10px;padding:0;border-radius:50%;background:var(--border);
   border:none;cursor:pointer;transition:background .15s,width .15s}
 .onb-dot.active{background:var(--brand);width:22px;border-radius:5px}
 .onb-dot:focus-visible{outline:2px solid var(--brand);outline-offset:3px}
 .onb-actions{display:flex;gap:8px;justify-content:space-between;align-items:center}
+@media (prefers-reduced-motion: reduce){
+  .onb-overlay{animation:none}
+  .onb-card{animation:none}
+  .onb-bar-fill{transition:none}
+  .onb-dot{transition:none}
+}
 .onb-skip{background:transparent;border:none;color:var(--text-m);font-size:13px;
   padding:10px 12px;min-height:44px;cursor:pointer;border-radius:8px}
 .onb-skip:hover{color:var(--text-d)}
