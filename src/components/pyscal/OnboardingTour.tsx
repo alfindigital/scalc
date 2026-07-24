@@ -138,7 +138,7 @@ export function OnboardingTour() {
         onClick={(e) => e.stopPropagation()}
       >
         <div className="onb-hint" aria-hidden="true">{s.hint}</div>
-        <div className="sr-only" aria-live="polite" aria-atomic="true">
+        <div className="pyscal-sr-only" aria-live="polite" aria-atomic="true">
           {stepLabel}: {s.title}
         </div>
         <div className="onb-title" id="onb-title">{s.title}</div>
