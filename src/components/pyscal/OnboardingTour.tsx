@@ -55,6 +55,17 @@ export function OnboardingTour() {
     return () => clearTimeout(t);
   }, []);
 
+  // Allow manual restart from Settings via a global event.
+  useEffect(() => {
+    const handler = () => {
+      try { localStorage.removeItem(STORAGE_KEY); } catch {}
+      setStep(0);
+      setOpen(true);
+    };
+    window.addEventListener("pyscal:restart-onboarding", handler);
+    return () => window.removeEventListener("pyscal:restart-onboarding", handler);
+  }, []);
+
   const finish = () => {
     try {
       localStorage.setItem(STORAGE_KEY, "1");
