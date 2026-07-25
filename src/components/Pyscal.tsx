@@ -2384,6 +2384,17 @@ function SettingsPanel({
       </div>
 
       <div className="sp-section">
+        <div className="sp-title">Bantuan</div>
+        <button
+          className="sp-ie-btn"
+          type="button"
+          onClick={() => window.dispatchEvent(new Event('pyscal:restart-onboarding'))}
+        >
+          Ulangi onboarding
+        </button>
+      </div>
+
+      <div className="sp-section">
         <div className="sp-title"><KeyboardIcon /> Shortcut</div>
         <div className="kbd-list">
           {Object.entries(shortcuts).map(([key, s]) => (
