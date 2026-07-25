@@ -184,9 +184,17 @@ export function OnboardingTour() {
         <div className="pyscal-sr-only" aria-live="polite" aria-atomic="true">
           {stepLabel}: {s.title}
         </div>
-        <div className="onb-progress" aria-hidden="true">
-          <span className="onb-count">{step + 1} / {STEPS.length}</span>
-          <span className="onb-bar">
+        <div
+          className="onb-progress"
+          role="progressbar"
+          aria-valuemin={1}
+          aria-valuemax={STEPS.length}
+          aria-valuenow={step + 1}
+          aria-valuetext={`Langkah ${step + 1} dari ${STEPS.length}`}
+          aria-label="Progres onboarding"
+        >
+          <span className="onb-count" aria-hidden="true">{step + 1} / {STEPS.length}</span>
+          <span className="onb-bar" aria-hidden="true">
             <span
               className="onb-bar-fill"
               style={{ width: `${((step + 1) / STEPS.length) * 100}%` }}
@@ -206,6 +214,7 @@ export function OnboardingTour() {
               type="button"
               role="tab"
               aria-selected={i === step}
+              aria-current={i === step ? "step" : undefined}
               aria-label={`Langkah ${i + 1} dari ${STEPS.length}: ${st.title}`}
               tabIndex={i === step ? 0 : -1}
               className={`onb-dot ${i === step ? "active" : ""}`}
