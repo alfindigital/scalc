@@ -37,6 +37,10 @@ export function OnboardingTour() {
   const dialogRef = useRef<HTMLDivElement | null>(null);
   const nextBtnRef = useRef<HTMLButtonElement | null>(null);
   const previouslyFocused = useRef<HTMLElement | null>(null);
+  const touchStartX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
+  const touchStartT = useRef<number>(0);
+  const [swipeDx, setSwipeDx] = useState(0);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -123,6 +127,33 @@ export function OnboardingTour() {
   const isFirst = step === 0;
   const stepLabel = `Langkah ${step + 1} dari ${STEPS.length}`;
 
+  const onTouchStart = (e: React.TouchEvent) => {
+    const t = e.touches[0];
+    touchStartX.current = t.clientX;
+    touchStartY.current = t.clientY;
+    touchStartT.current = Date.now();
+    setSwipeDx(0);
+  };
+  const onTouchMove = (e: React.TouchEvent) => {
+    if (touchStartX.current == null || touchStartY.current == null) return;
+    const t = e.touches[0];
+    const dx = t.clientX - touchStartX.current;
+    const dy = t.clientY - touchStartY.current;
+    if (Math.abs(dx) > Math.abs(dy)) setSwipeDx(dx);
+  };
+  const onTouchEnd = () => {
+    const dx = swipeDx;
+    const dt = Date.now() - touchStartT.current;
+    touchStartX.current = null;
+    touchStartY.current = null;
+    setSwipeDx(0);
+    const threshold = 50;
+    if (Math.abs(dx) < threshold && dt > 500) return;
+    if (Math.abs(dx) < threshold) return;
+    if (dx < 0) setStep((v) => Math.min(v + 1, STEPS.length - 1));
+    else setStep((v) => Math.max(v - 1, 0));
+  };
+
   return (
     <div
       className="onb-overlay"
@@ -136,6 +167,10 @@ export function OnboardingTour() {
         aria-labelledby="onb-title"
         aria-describedby="onb-body"
         onClick={(e) => e.stopPropagation()}
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+        style={swipeDx !== 0 ? { transform: `translateX(${swipeDx}px)`, transition: "none" } : undefined}
       >
         <button
           type="button"
