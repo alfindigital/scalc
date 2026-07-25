@@ -716,13 +716,12 @@ tbody td:last-child{padding:14px 8px;width:1%}
 
 @keyframes rs{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
 @keyframes si{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
-
-.onb-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;
-  animation:onb-fade .22s ease-out both}
 @keyframes onb-fade{from{opacity:0}to{opacity:1}}
 @keyframes onb-rise{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:none}}
+
+.onb-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;
   display:flex;align-items:flex-end;justify-content:center;padding:16px;
-  animation:si .2s ease}
+  animation:onb-fade .22s ease-out both}
 .onb-card{position:relative;background:var(--surface);color:var(--text-d);border:1px solid var(--border);
   border-radius:14px;padding:64px 16px 14px;width:100%;max-width:420px;
   box-shadow:0 20px 60px rgba(0,0,0,.35);animation:rs .25s ease}
