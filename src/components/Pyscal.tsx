@@ -724,9 +724,9 @@ tbody td:last-child{padding:14px 8px;width:1%}
   display:flex;align-items:flex-end;justify-content:center;padding:16px;
   animation:si .2s ease}
 .onb-card{position:relative;background:var(--surface);color:var(--text-d);border:1px solid var(--border);
-  border-radius:14px;padding:34px 16px 14px;width:100%;max-width:420px;
+  border-radius:14px;padding:64px 16px 14px;width:100%;max-width:420px;
   box-shadow:0 20px 60px rgba(0,0,0,.35);animation:rs .25s ease}
-.onb-close{position:absolute;top:8px;right:8px;background:transparent;border:none;
+.onb-close{position:absolute;top:8px;right:8px;z-index:2;background:transparent;border:none;
   color:var(--text-m);font-size:12px;font-weight:600;padding:8px 12px;min-height:44px;
   min-width:44px;border-radius:8px;cursor:pointer;line-height:1}
 .onb-close:hover{color:var(--text-d);background:var(--surface-hover)}
