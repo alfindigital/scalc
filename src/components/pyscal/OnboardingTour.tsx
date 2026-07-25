@@ -137,6 +137,14 @@ export function OnboardingTour() {
         aria-describedby="onb-body"
         onClick={(e) => e.stopPropagation()}
       >
+        <button
+          type="button"
+          className="onb-close"
+          onClick={finish}
+          aria-label="Lewati onboarding"
+        >
+          Lewati
+        </button>
         <div className="onb-hint" aria-hidden="true">{s.hint}</div>
         <div className="pyscal-sr-only" aria-live="polite" aria-atomic="true">
           {stepLabel}: {s.title}
@@ -177,7 +185,7 @@ export function OnboardingTour() {
             type="button"
             aria-label="Lewati onboarding"
           >
-            Skip
+            Lewati
           </button>
           <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
             <button
