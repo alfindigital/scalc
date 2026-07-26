@@ -6,6 +6,7 @@ import logoUrl from "@/assets/logo-pyscal.webp";
 import { OnboardingTour } from "@/components/pyscal/OnboardingTour";
 import { getTickSize, ceilTick, computeRows } from "@/lib/compute";
 import { n, nDec, nShort, fmtPct, fmtPL, fmtTime } from "@/lib/format";
+import { haptic } from "@/lib/haptics";
 import {
   validateBid, validateLot, validateTargetTicks, validateTargetProfit,
   validateExistingAvg, validateExistingLot,
@@ -344,6 +345,11 @@ const CSS = `
 .ibtn.primary:hover{background:var(--brand-h);border-color:var(--brand-h)}
 .ibtn.danger:hover{border-color:var(--red);color:var(--red);background:var(--red-d)}
 .ibtn.success{color:var(--green);border-color:var(--green)}
+.ibtn.saving{opacity:.75;cursor:progress}
+.ibtn .ibtn-spin{width:14px;height:14px;border-radius:50%;border:2px solid currentColor;
+  border-top-color:transparent;animation:ibtnSpin .7s linear infinite;display:inline-block}
+@keyframes ibtnSpin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.ibtn .ibtn-spin{animation:none;border-top-color:currentColor;opacity:.6}}
 .ibtn-active-amber{background:var(--brand)!important;color:var(--brand-text)!important;border-color:var(--brand)!important}
 .ibtn-active-amber:hover{background:var(--brand-h)!important;border-color:var(--brand-h)!important}
 
@@ -694,7 +700,7 @@ tbody td:last-child{padding:14px 8px;width:1%}
   .logo{width:36px;height:36px}
   .brand h1{font-size:18px}
   .brand span{font-size:10px}
-  .ibtn{width:32px;height:32px}
+  .ibtn{width:44px;height:44px}
   .ig{gap:10px}
   .if{font-size:16px;padding:12px}
   .mode-toggle button{font-size:12px;padding:11px 8px}
@@ -1768,6 +1774,7 @@ export default function PYSCAL() {
 
   // Copy
   const [copyState, setCopyState] = useState('idle');
+  const [saveTradeState, setSaveTradeState] = useState('idle'); // idle | saving | saved
   const copyResults = useCallback(() => {
     if (!data || !data.results.length) return;
     const lines = [];
@@ -1798,18 +1805,22 @@ export default function PYSCAL() {
       navigator.clipboard.writeText(text).catch(fallback);
     } else fallback();
     setCopyState('copied');
+    haptic('success');
     setTimeout(() => setCopyState('idle'), 1500);
   }, [data, bids, baseLot, targetTicks, targetProfit, totalBuyLot, totalBuyCost, balance, mode, existingAvg, existingLot]);
 
   // Save trade - 1 click, no modal
   const saveTrade = useCallback(() => {
     if (!data || !data.results.length) return;
+    if (saveTradeState === 'saving') return;
     // Blokir simpan kalau masih ada field invalid; scroll + fokus ke error pertama
     // agar user keyboard/SR tahu letak persisnya.
     if (focusFirstInvalidInput()) {
+      haptic('error');
       showToast('Ada input yang belum valid. Fokus dipindah ke input bermasalah.', 'error');
       return;
     }
+    setSaveTradeState('saving');
     const trade = {
       id: 'tr_' + Date.now(),
       timestamp: Date.now(),
@@ -1827,8 +1838,11 @@ export default function PYSCAL() {
     };
     const next = [trade, ...history].slice(0, 500);
     persistHistory(next);
+    haptic('success');
+    setSaveTradeState('saved');
+    setTimeout(() => setSaveTradeState('idle'), 1400);
     showToast(`Avg <strong>${escHtml(trade.planned.avgFinal.toFixed(2))}</strong> tersimpan di History`);
-  }, [data, bids, baseLot, targetTicks, targetProfit, feeBuy, feeSell, balance, mode, existingAvg, existingLot, customLot, customLots, totalBuyLot, totalBuyCost, history, showToast]);
+  }, [data, bids, baseLot, targetTicks, targetProfit, feeBuy, feeSell, balance, mode, existingAvg, existingLot, customLot, customLots, totalBuyLot, totalBuyCost, history, showToast, saveTradeState]);
 
   // Recall a saved trade back into the calculator state (undo-able).
   const recallTrade = useCallback((t) => {
@@ -2208,25 +2222,35 @@ export default function PYSCAL() {
                   </div>
                   <div className="papan-actions">
                     <button className={`ibtn ${customLot ? 'ibtn-active-amber' : ''}`}
-                      onClick={toggleCustomLot}
+                      onClick={() => { haptic('light'); toggleCustomLot(); }}
                       aria-label={customLot ? 'Matikan Custom Lot' : 'Aktifkan Custom Lot'}
                       aria-pressed={customLot}
 >
                       {customLot ? <UnlockIcon /> : <LockIcon />}
                     </button>
-                    <button className="ibtn" onClick={saveTrade} aria-label="Simpan ke History">
-                      <BookmarkIcon />
+                    <button
+                      className={`ibtn ${saveTradeState === 'saved' ? 'success' : ''} ${saveTradeState === 'saving' ? 'saving' : ''}`}
+                      onClick={saveTrade}
+                      disabled={saveTradeState === 'saving'}
+                      aria-label="Simpan ke History"
+                      aria-busy={saveTradeState === 'saving'}
+                    >
+                      {saveTradeState === 'saving'
+                        ? <span className="ibtn-spin" aria-hidden="true" />
+                        : saveTradeState === 'saved'
+                          ? <CheckIcon />
+                          : <BookmarkIcon />}
                     </button>
                     <button className={`ibtn ${copyState === 'copied' ? 'success' : ''}`}
                       onClick={copyResults} aria-label="Copy hasil">
                       {copyState === 'copied' ? <CheckIcon /> : <CopyIcon />}
                     </button>
                     {bids.length > 1 && (
-                      <button className="ibtn danger" onClick={resetPapan} aria-label="Reset semua papan">
+                      <button className="ibtn danger" onClick={() => { haptic('warning'); resetPapan(); }} aria-label="Reset semua papan">
                         <RefreshIcon />
                       </button>
                     )}
-                    <button className="ibtn primary" onClick={addPapan} aria-label="Tambah papan">
+                    <button className="ibtn primary" onClick={() => { haptic('light'); addPapan(); }} aria-label="Tambah papan">
                       <PlusIcon />
                     </button>
                   </div>
