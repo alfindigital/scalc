@@ -6,6 +6,7 @@ import logoUrl from "@/assets/logo-pyscal.webp";
 import { OnboardingTour } from "@/components/pyscal/OnboardingTour";
 import { getTickSize, ceilTick, computeRows } from "@/lib/compute";
 import { n, nDec, nShort, fmtPct, fmtPL, fmtTime } from "@/lib/format";
+import { haptic } from "@/lib/haptics";
 import {
   validateBid, validateLot, validateTargetTicks, validateTargetProfit,
   validateExistingAvg, validateExistingLot,
@@ -344,6 +345,11 @@ const CSS = `
 .ibtn.primary:hover{background:var(--brand-h);border-color:var(--brand-h)}
 .ibtn.danger:hover{border-color:var(--red);color:var(--red);background:var(--red-d)}
 .ibtn.success{color:var(--green);border-color:var(--green)}
+.ibtn.saving{opacity:.75;cursor:progress}
+.ibtn .ibtn-spin{width:14px;height:14px;border-radius:50%;border:2px solid currentColor;
+  border-top-color:transparent;animation:ibtnSpin .7s linear infinite;display:inline-block}
+@keyframes ibtnSpin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.ibtn .ibtn-spin{animation:none;border-top-color:currentColor;opacity:.6}}
 .ibtn-active-amber{background:var(--brand)!important;color:var(--brand-text)!important;border-color:var(--brand)!important}
 .ibtn-active-amber:hover{background:var(--brand-h)!important;border-color:var(--brand-h)!important}
 
