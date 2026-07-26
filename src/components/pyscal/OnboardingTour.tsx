@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 
 const STORAGE_KEY = "pyscal_onboarded_v1";
 
@@ -41,6 +41,8 @@ export function OnboardingTour() {
   const touchStartY = useRef<number | null>(null);
   const touchStartT = useRef<number>(0);
   const [swipeDx, setSwipeDx] = useState(0);
+  const [dontShowAgain, setDontShowAgain] = useState(false);
+  const checkboxId = useId();
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -68,7 +70,7 @@ export function OnboardingTour() {
 
   const finish = () => {
     try {
-      localStorage.setItem(STORAGE_KEY, "1");
+      localStorage.setItem(STORAGE_KEY, dontShowAgain ? "dismissed" : "1");
     } catch {}
     setOpen(false);
   };
