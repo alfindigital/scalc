@@ -700,7 +700,7 @@ tbody td:last-child{padding:14px 8px;width:1%}
   .logo{width:36px;height:36px}
   .brand h1{font-size:18px}
   .brand span{font-size:10px}
-  .ibtn{width:40px;height:40px}
+  .ibtn{width:44px;height:44px}
   .ig{gap:10px}
   .if{font-size:16px;padding:12px}
   .mode-toggle button{font-size:12px;padding:11px 8px}
