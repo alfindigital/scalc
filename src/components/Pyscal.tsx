@@ -2222,25 +2222,35 @@ export default function PYSCAL() {
                   </div>
                   <div className="papan-actions">
                     <button className={`ibtn ${customLot ? 'ibtn-active-amber' : ''}`}
-                      onClick={toggleCustomLot}
+                      onClick={() => { haptic('light'); toggleCustomLot(); }}
                       aria-label={customLot ? 'Matikan Custom Lot' : 'Aktifkan Custom Lot'}
                       aria-pressed={customLot}
 >
                       {customLot ? <UnlockIcon /> : <LockIcon />}
                     </button>
-                    <button className="ibtn" onClick={saveTrade} aria-label="Simpan ke History">
-                      <BookmarkIcon />
+                    <button
+                      className={`ibtn ${saveTradeState === 'saved' ? 'success' : ''} ${saveTradeState === 'saving' ? 'saving' : ''}`}
+                      onClick={saveTrade}
+                      disabled={saveTradeState === 'saving'}
+                      aria-label="Simpan ke History"
+                      aria-busy={saveTradeState === 'saving'}
+                    >
+                      {saveTradeState === 'saving'
+                        ? <span className="ibtn-spin" aria-hidden="true" />
+                        : saveTradeState === 'saved'
+                          ? <CheckIcon />
+                          : <BookmarkIcon />}
                     </button>
                     <button className={`ibtn ${copyState === 'copied' ? 'success' : ''}`}
                       onClick={copyResults} aria-label="Copy hasil">
                       {copyState === 'copied' ? <CheckIcon /> : <CopyIcon />}
                     </button>
                     {bids.length > 1 && (
-                      <button className="ibtn danger" onClick={resetPapan} aria-label="Reset semua papan">
+                      <button className="ibtn danger" onClick={() => { haptic('warning'); resetPapan(); }} aria-label="Reset semua papan">
                         <RefreshIcon />
                       </button>
                     )}
-                    <button className="ibtn primary" onClick={addPapan} aria-label="Tambah papan">
+                    <button className="ibtn primary" onClick={() => { haptic('light'); addPapan(); }} aria-label="Tambah papan">
                       <PlusIcon />
                     </button>
                   </div>
