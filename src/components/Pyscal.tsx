@@ -734,6 +734,12 @@ tbody td:last-child{padding:14px 8px;width:1%}
   text-transform:uppercase;margin-bottom:6px}
 .onb-title{font-size:16px;font-weight:800;color:var(--text-d);margin-bottom:6px}
 .onb-body{font-size:13px;line-height:1.5;color:var(--text-m);margin-bottom:12px}
+.onb-dont-show{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-m);
+  margin-bottom:10px;cursor:pointer;min-height:44px}
+.onb-dont-show input{width:18px;height:18px;accent-color:var(--brand);cursor:pointer;
+  min-width:18px;min-height:18px}
+.onb-dont-show span{line-height:1.3}
+.onb-dont-show:focus-within{outline:2px solid var(--brand);outline-offset:2px;border-radius:6px}
 .onb-progress{display:flex;align-items:center;gap:10px;margin-bottom:10px}
 .onb-count{font-size:11px;font-weight:700;color:var(--text-m);
   font-variant-numeric:tabular-nums;letter-spacing:.4px;min-width:34px}
