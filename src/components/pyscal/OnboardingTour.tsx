@@ -216,6 +216,16 @@ export function OnboardingTour() {
         </div>
         <div className="onb-title" id="onb-title">{s.title}</div>
         <div className="onb-body" id="onb-body">{s.body}</div>
+        <label className="onb-dont-show" htmlFor={checkboxId}>
+          <input
+            id={checkboxId}
+            type="checkbox"
+            checked={dontShowAgain}
+            onChange={(e) => setDontShowAgain(e.target.checked)}
+            aria-label="Jangan tampilkan onboarding lagi"
+          />
+          <span>Jangan tampilkan lagi</span>
+        </label>
         <div
           className="onb-dots"
           role="tablist"
