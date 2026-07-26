@@ -1774,6 +1774,7 @@ export default function PYSCAL() {
 
   // Copy
   const [copyState, setCopyState] = useState('idle');
+  const [saveTradeState, setSaveTradeState] = useState('idle'); // idle | saving | saved
   const copyResults = useCallback(() => {
     if (!data || !data.results.length) return;
     const lines = [];
@@ -1804,18 +1805,22 @@ export default function PYSCAL() {
       navigator.clipboard.writeText(text).catch(fallback);
     } else fallback();
     setCopyState('copied');
+    haptic('success');
     setTimeout(() => setCopyState('idle'), 1500);
   }, [data, bids, baseLot, targetTicks, targetProfit, totalBuyLot, totalBuyCost, balance, mode, existingAvg, existingLot]);
 
   // Save trade - 1 click, no modal
   const saveTrade = useCallback(() => {
     if (!data || !data.results.length) return;
+    if (saveTradeState === 'saving') return;
     // Blokir simpan kalau masih ada field invalid; scroll + fokus ke error pertama
     // agar user keyboard/SR tahu letak persisnya.
     if (focusFirstInvalidInput()) {
+      haptic('error');
       showToast('Ada input yang belum valid. Fokus dipindah ke input bermasalah.', 'error');
       return;
     }
+    setSaveTradeState('saving');
     const trade = {
       id: 'tr_' + Date.now(),
       timestamp: Date.now(),
@@ -1833,8 +1838,11 @@ export default function PYSCAL() {
     };
     const next = [trade, ...history].slice(0, 500);
     persistHistory(next);
+    haptic('success');
+    setSaveTradeState('saved');
+    setTimeout(() => setSaveTradeState('idle'), 1400);
     showToast(`Avg <strong>${escHtml(trade.planned.avgFinal.toFixed(2))}</strong> tersimpan di History`);
-  }, [data, bids, baseLot, targetTicks, targetProfit, feeBuy, feeSell, balance, mode, existingAvg, existingLot, customLot, customLots, totalBuyLot, totalBuyCost, history, showToast]);
+  }, [data, bids, baseLot, targetTicks, targetProfit, feeBuy, feeSell, balance, mode, existingAvg, existingLot, customLot, customLots, totalBuyLot, totalBuyCost, history, showToast, saveTradeState]);
 
   // Recall a saved trade back into the calculator state (undo-able).
   const recallTrade = useCallback((t) => {
