@@ -75,9 +75,23 @@ const CSS = `
 @import url('https://fonts.googleapis.com/css2?family=Funnel+Display:wght@500;600;700;800&family=Funnel+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 
-/* a11y: visible focus ring on keyboard nav */
-.pyscal :focus-visible{outline:2px solid var(--brand);outline-offset:2px}
-.pyscal button:focus-visible,.pyscal input:focus-visible,.pyscal a:focus-visible,.pyscal [tabindex]:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+/* a11y: unified high-contrast focus ring on keyboard nav.
+   Combines a solid brand outline with a soft halo (box-shadow) so the
+   indicator stays visible against any background in both light & dark. */
+.pyscal :focus-visible{
+  outline:2px solid var(--brand);outline-offset:2px;
+  box-shadow:0 0 0 4px var(--brand-d);
+  border-radius:4px;
+}
+.pyscal button:focus-visible,
+.pyscal input:focus-visible,
+.pyscal a:focus-visible,
+.pyscal select:focus-visible,
+.pyscal textarea:focus-visible,
+.pyscal [tabindex]:not([tabindex="-1"]):focus-visible{
+  outline:2px solid var(--brand);outline-offset:2px;
+  box-shadow:0 0 0 4px var(--brand-d);
+}
 /* sr-only, becomes visible when focused (for skip link) */
 .pyscal-sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 .pyscal-sr-only:focus,.pyscal-sr-only:focus-visible{position:fixed;top:8px;left:8px;width:auto;height:auto;clip:auto;clip-path:none;padding:8px 14px;background:var(--brand);color:var(--brand-text);font-weight:700;z-index:9999}
@@ -2083,7 +2097,7 @@ export default function PYSCAL() {
                 <div className="ig-2">
                   <div>
                     <div className="il il-wrap">Avg Existing (inc fee)
-                      <span className="fld-help" tabIndex={0} role="img"
+                      <span className="fld-help" tabIndex={0} role="button"
                         aria-label="Harga rata-rata posisi existing, sudah termasuk fee. Dipakai untuk hitung blended average."
                         title="Harga rata-rata posisi existing (inc fee). Dipakai untuk blended average dengan pembelian baru.">?</span>
                     </div>
@@ -2098,7 +2112,7 @@ export default function PYSCAL() {
                   </div>
                   <div>
                     <div className="il il-wrap">Lot Existing
-                      <span className="fld-help" tabIndex={0} role="img"
+                      <span className="fld-help" tabIndex={0} role="button"
                         aria-label="Jumlah lot posisi existing yang sudah kamu punya."
                         title="Jumlah lot posisi existing yang sudah kamu punya (1 lot = 100 lembar).">?</span>
                     </div>
@@ -2116,7 +2130,7 @@ export default function PYSCAL() {
               <div className="ig">
                 <div>
                   <div className="il il-wrap">{mode === 'position' ? 'Bid Awal (beli baru)' : 'Bid Awal'}
-                    <span className="fld-help" tabIndex={0} role="img"
+                    <span className="fld-help" tabIndex={0} role="button"
                       aria-label="Harga limit order pertama. Sistem akan turunkan otomatis untuk averaging-down berikutnya."
                       title="Harga limit order pertama. Bid berikutnya akan diturunkan untuk averaging-down.">?</span>
                   </div>
@@ -2131,7 +2145,7 @@ export default function PYSCAL() {
                 </div>
                 <div>
                   <div className="il il-wrap">Lot
-                    <span className="fld-help" tabIndex={0} role="img"
+                    <span className="fld-help" tabIndex={0} role="button"
                       aria-label="Jumlah lot dasar per papan. Lot berikutnya di-scale menurut aturan pyramid."
                       title="Jumlah lot dasar per papan (1 lot = 100 lembar).">?</span>
                   </div>
@@ -2146,7 +2160,7 @@ export default function PYSCAL() {
                 </div>
                 <div>
                   <div className="il il-wrap">Target Tick
-                    <span className="fld-help" tabIndex={0} role="img"
+                    <span className="fld-help" tabIndex={0} role="button"
                       aria-label="Jumlah tick di atas average price sebagai target jual."
                       title="Berapa tick di atas average price sebagai target jual. > 10 sudah tergolong agresif.">?</span>
                   </div>
@@ -2161,7 +2175,7 @@ export default function PYSCAL() {
                 </div>
                 <div>
                   <div className="il il-wrap">Min Profit %
-                    <span className="fld-help" tabIndex={0} role="img"
+                    <span className="fld-help" tabIndex={0} role="button"
                       aria-label="Persentase profit minimum yang harus tercapai setelah dikurangi fee buy dan sell."
                       title="Target profit minimum setelah dikurangi fee buy + sell.">?</span>
                   </div>
