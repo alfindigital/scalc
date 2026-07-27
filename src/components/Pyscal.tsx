@@ -75,9 +75,23 @@ const CSS = `
 @import url('https://fonts.googleapis.com/css2?family=Funnel+Display:wght@500;600;700;800&family=Funnel+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 
-/* a11y: visible focus ring on keyboard nav */
-.pyscal :focus-visible{outline:2px solid var(--brand);outline-offset:2px}
-.pyscal button:focus-visible,.pyscal input:focus-visible,.pyscal a:focus-visible,.pyscal [tabindex]:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+/* a11y: unified high-contrast focus ring on keyboard nav.
+   Combines a solid brand outline with a soft halo (box-shadow) so the
+   indicator stays visible against any background in both light & dark. */
+.pyscal :focus-visible{
+  outline:2px solid var(--brand);outline-offset:2px;
+  box-shadow:0 0 0 4px var(--brand-d);
+  border-radius:4px;
+}
+.pyscal button:focus-visible,
+.pyscal input:focus-visible,
+.pyscal a:focus-visible,
+.pyscal select:focus-visible,
+.pyscal textarea:focus-visible,
+.pyscal [tabindex]:not([tabindex="-1"]):focus-visible{
+  outline:2px solid var(--brand);outline-offset:2px;
+  box-shadow:0 0 0 4px var(--brand-d);
+}
 /* sr-only, becomes visible when focused (for skip link) */
 .pyscal-sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 .pyscal-sr-only:focus,.pyscal-sr-only:focus-visible{position:fixed;top:8px;left:8px;width:auto;height:auto;clip:auto;clip-path:none;padding:8px 14px;background:var(--brand);color:var(--brand-text);font-weight:700;z-index:9999}
