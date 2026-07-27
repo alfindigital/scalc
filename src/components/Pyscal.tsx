@@ -2097,7 +2097,7 @@ export default function PYSCAL() {
                 <div className="ig-2">
                   <div>
                     <div className="il il-wrap">Avg Existing (inc fee)
-                      <span className="fld-help" tabIndex={0} role="img"
+                      <span className="fld-help" tabIndex={0} role="button"
                         aria-label="Harga rata-rata posisi existing, sudah termasuk fee. Dipakai untuk hitung blended average."
                         title="Harga rata-rata posisi existing (inc fee). Dipakai untuk blended average dengan pembelian baru.">?</span>
                     </div>
@@ -2112,7 +2112,7 @@ export default function PYSCAL() {
                   </div>
                   <div>
                     <div className="il il-wrap">Lot Existing
-                      <span className="fld-help" tabIndex={0} role="img"
+                      <span className="fld-help" tabIndex={0} role="button"
                         aria-label="Jumlah lot posisi existing yang sudah kamu punya."
                         title="Jumlah lot posisi existing yang sudah kamu punya (1 lot = 100 lembar).">?</span>
                     </div>
@@ -2130,7 +2130,7 @@ export default function PYSCAL() {
               <div className="ig">
                 <div>
                   <div className="il il-wrap">{mode === 'position' ? 'Bid Awal (beli baru)' : 'Bid Awal'}
-                    <span className="fld-help" tabIndex={0} role="img"
+                    <span className="fld-help" tabIndex={0} role="button"
                       aria-label="Harga limit order pertama. Sistem akan turunkan otomatis untuk averaging-down berikutnya."
                       title="Harga limit order pertama. Bid berikutnya akan diturunkan untuk averaging-down.">?</span>
                   </div>
@@ -2145,7 +2145,7 @@ export default function PYSCAL() {
                 </div>
                 <div>
                   <div className="il il-wrap">Lot
-                    <span className="fld-help" tabIndex={0} role="img"
+                    <span className="fld-help" tabIndex={0} role="button"
                       aria-label="Jumlah lot dasar per papan. Lot berikutnya di-scale menurut aturan pyramid."
                       title="Jumlah lot dasar per papan (1 lot = 100 lembar).">?</span>
                   </div>
@@ -2160,7 +2160,7 @@ export default function PYSCAL() {
                 </div>
                 <div>
                   <div className="il il-wrap">Target Tick
-                    <span className="fld-help" tabIndex={0} role="img"
+                    <span className="fld-help" tabIndex={0} role="button"
                       aria-label="Jumlah tick di atas average price sebagai target jual."
                       title="Berapa tick di atas average price sebagai target jual. > 10 sudah tergolong agresif.">?</span>
                   </div>
@@ -2175,7 +2175,7 @@ export default function PYSCAL() {
                 </div>
                 <div>
                   <div className="il il-wrap">Min Profit %
-                    <span className="fld-help" tabIndex={0} role="img"
+                    <span className="fld-help" tabIndex={0} role="button"
                       aria-label="Persentase profit minimum yang harus tercapai setelah dikurangi fee buy dan sell."
                       title="Target profit minimum setelah dikurangi fee buy + sell.">?</span>
                   </div>
