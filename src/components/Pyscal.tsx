@@ -1880,10 +1880,31 @@ export default function PYSCAL() {
   }, [bids, baseLot, targetTicks, targetProfit, applySnapshot, showToast]);
 
   const deleteTrade = (id) => {
-    const t = history.find(x => x.id === id);
-    persistHistory(history.filter(t => t.id !== id));
+    const idx = history.findIndex(x => x.id === id);
+    if (idx < 0) return;
+    const removed = history[idx];
+    const next = history.slice(0, idx).concat(history.slice(idx + 1));
+    persistHistory(next);
     if (viewingTradeId === id) setViewingTradeId(null);
-    if (t) showToast(`Trade ${fmtTime(t.timestamp)} dihapus`);
+    const label = removed?.note ? removed.note : `Avg ${removed?.planned?.avgFinal?.toFixed?.(2) ?? '-'}`;
+    showToast(`Trade <strong>${escHtml(label)}</strong> dihapus`, 'success', {
+      timeout: 5000,
+      action: {
+        label: 'Undo',
+        handler: () => {
+          // Restore at original position, capped at 500.
+          setHistory(prev => {
+            if (prev.some(x => x.id === removed.id)) return prev;
+            const restored = prev.slice();
+            restored.splice(Math.min(idx, restored.length), 0, removed);
+            const capped = restored.slice(0, 500);
+            saveHistory(capped);
+            return capped;
+          });
+          showToast('Trade dipulihkan', 'success', { timeout: 1800 });
+        },
+      },
+    });
   };
 
   const renameTrade = (id, note) => {
