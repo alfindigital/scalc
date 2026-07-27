@@ -1466,6 +1466,21 @@ export default function PYSCAL() {
     saveHistory(next);
   };
 
+  // Cross-tab sync: another tab may add/delete/rename history entries.
+  // Reload from storage on the `storage` event so both tabs stay consistent.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const onStorage = (e) => {
+      if (e.key !== 'pyscal_history') return;
+      try {
+        const next = loadHistory();
+        setHistory(next);
+      } catch { /* noop */ }
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, []);
+
   // ==================== FULL BACKUP / RESTORE ====================
   // Export all data: state + presets + history + shortcuts + theme
   const exportAll = useCallback(() => {
