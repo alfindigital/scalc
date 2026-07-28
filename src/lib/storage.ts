@@ -293,10 +293,12 @@ function repairTrade(t: unknown): Record<string, unknown> | null {
 
   const id = typeof obj.id === "string" && obj.id ? obj.id : null;
   const timestamp = typeof obj.timestamp === "number" && isFinite(obj.timestamp) ? obj.timestamp : null;
-  const bids = Array.isArray(obj.bids) ? obj.bids.filter((b) => typeof b === "number" && isFinite(b)) : null;
+  const bids = Array.isArray(obj.bids)
+    ? obj.bids.filter((b) => typeof b === "number" && isFinite(b))
+    : [];
   const planned = obj.planned && typeof obj.planned === "object" ? (obj.planned as Record<string, unknown>) : null;
 
-  if (!id || timestamp == null || !bids || bids.length === 0 || !planned) return null;
+  if (!id || timestamp == null || !planned) return null;
 
   const numOr = (v: unknown, d: number) => (typeof v === "number" && isFinite(v) ? v : d);
   const safePlanned = {
