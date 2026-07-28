@@ -1322,7 +1322,17 @@ export default function PYSCAL() {
       }
     };
     window.addEventListener('pyscal:storage-error', onStorageErr);
-    return () => window.removeEventListener('pyscal:storage-error', onStorageErr);
+    const onRepaired = (e) => {
+      const dropped = e?.detail?.dropped || 0;
+      if (dropped > 0) {
+        showToast(`History dipulihkan otomatis: ${dropped} entri rusak dilewati.`, 'warning', { timeout: 5000 });
+      }
+    };
+    window.addEventListener('pyscal:storage-repaired', onRepaired);
+    return () => {
+      window.removeEventListener('pyscal:storage-error', onStorageErr);
+      window.removeEventListener('pyscal:storage-repaired', onRepaired);
+    };
   }, [showToast]);
 
   // Flashing preset (load feedback)
