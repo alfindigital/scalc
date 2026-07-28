@@ -1,5 +1,6 @@
 // @ts-nocheck
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import { Pin } from "lucide-react";
 import { n, nShort, fmtPL, fmtTime } from "@/lib/format";
 import { XIcon } from "./icons";
@@ -76,6 +77,18 @@ export function HistoryModal({ history, viewingId, setViewingId, onClose, onDele
     setRenamingId(null); setRenameDraft('');
   };
 
+  // Virtualisasi daftar history — tetap mulus meski mendekati batas 500 entri.
+  const parentRef = useRef(null);
+  const rowVirtualizer = useVirtualizer({
+    count: filtered.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 78,
+    overscan: 6,
+    getItemKey: (i) => filtered[i]?.id ?? i,
+  });
+  const virtualItems = rowVirtualizer.getVirtualItems();
+  const totalSize = rowVirtualizer.getTotalSize();
+
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal" onClick={e => e.stopPropagation()}
@@ -115,11 +128,19 @@ export function HistoryModal({ history, viewingId, setViewingId, onClose, onDele
               {filtered.length === 0 ? (
                 <div className="history-empty">Tidak ada trade cocok "{query}"</div>
               ) : (
-                <div className="history-list">
-                  {filtered.map(t => {
+                <div className="history-list" ref={parentRef} role="list"
+                  aria-label={`Daftar history, ${filtered.length} trade`}>
+                <div style={{ height: totalSize, position: 'relative', width: '100%' }}>
+                  {virtualItems.map(v => {
+                    const t = filtered[v.index];
+                    if (!t) return null;
                     const isRenaming = renamingId === t.id;
                     return (
-                      <div key={t.id} className={`history-item${t.pinned ? ' pinned' : ''}`}
+                      <div key={v.key} data-index={v.index}
+                        ref={rowVirtualizer.measureElement} role="listitem"
+                        style={{ position: 'absolute', top: 0, left: 0, width: '100%',
+                          transform: `translateY(${v.start}px)`, paddingBottom: 8 }}>
+                      <div className={`history-item${t.pinned ? ' pinned' : ''}`}
                         onClick={() => { if (!isRenaming) setViewingId(t.id); }}>
                         <div className="history-info">
                           <div className="history-avg" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -159,8 +180,10 @@ export function HistoryModal({ history, viewingId, setViewingId, onClose, onDele
                           </button>
                         </div>
                       </div>
+                      </div>
                     );
                   })}
+                </div>
                 </div>
               )}
             </>

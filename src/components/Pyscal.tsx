@@ -682,7 +682,7 @@ tbody td:last-child{padding:14px 8px;width:1%}
   .modal-body{padding:16px;overflow-y:auto;flex:1;min-height:0}
   .modal-close{padding:10px;min-width:44px;min-height:44px;justify-content:center}
   .hd-grid{grid-template-columns:1fr}
-  .history-list{max-height:none}
+  .history-list{max-height:70vh}
   .history-item{padding:16px;min-height:44px}
   .history-del{padding:10px;min-width:44px;min-height:44px;justify-content:center}
 }
