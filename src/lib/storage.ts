@@ -258,16 +258,70 @@ function migratePresets(data: unknown, _from: number): unknown[] {
 
 function migrateHistory(data: unknown, _from: number): unknown[] {
   if (!Array.isArray(data)) return [];
-  // v1 → v2: pastikan setiap entry punya `pinned` & `note` opsional ter-normalisasi.
-  return data.map((t) => {
-    if (!t || typeof t !== "object") return t;
-    const obj = t as Record<string, unknown>;
-    return {
-      ...obj,
-      pinned: typeof obj.pinned === "boolean" ? obj.pinned : false,
-      note: typeof obj.note === "string" ? obj.note : "",
-    };
-  });
+  // v1 → v2: pastikan setiap entry punya `pinned` & `note` opsional ter-normalisasi,
+  // dan drop entry yang bentuknya tidak bisa diselamatkan.
+  const repaired: unknown[] = [];
+  let dropped = 0;
+  for (const t of data) {
+    const r = repairTrade(t);
+    if (r) repaired.push(r);
+    else dropped++;
+  }
+  if (dropped > 0 && typeof window !== "undefined") {
+    try {
+      window.dispatchEvent(
+        new CustomEvent("pyscal:storage-repaired", {
+          detail: { key: "pyscal_history", dropped, kept: repaired.length },
+        }),
+      );
+    } catch {
+      /* noop */
+    }
+  }
+  return repaired;
+}
+
+/**
+ * Validasi + auto-repair satu entry history.
+ * - Field wajib (id, timestamp, bids[], planned{avgFinal,totalLot,totalCost,sellFinal,plFinal})
+ *   harus ada & bertipe benar; kalau tidak, entry di-drop (return null).
+ * - Field opsional (pinned, note, mode, existing*, targetTicks, targetProfit) diisi default aman.
+ */
+function repairTrade(t: unknown): Record<string, unknown> | null {
+  if (!t || typeof t !== "object") return null;
+  const obj = t as Record<string, unknown>;
+
+  const id = typeof obj.id === "string" && obj.id ? obj.id : null;
+  const timestamp = typeof obj.timestamp === "number" && isFinite(obj.timestamp) ? obj.timestamp : null;
+  const bids = Array.isArray(obj.bids) ? obj.bids.filter((b) => typeof b === "number" && isFinite(b)) : null;
+  const planned = obj.planned && typeof obj.planned === "object" ? (obj.planned as Record<string, unknown>) : null;
+
+  if (!id || timestamp == null || !bids || bids.length === 0 || !planned) return null;
+
+  const numOr = (v: unknown, d: number) => (typeof v === "number" && isFinite(v) ? v : d);
+  const safePlanned = {
+    totalLot: numOr(planned.totalLot, 0),
+    totalCost: numOr(planned.totalCost, 0),
+    avgFinal: numOr(planned.avgFinal, 0),
+    sellFinal: numOr(planned.sellFinal, 0),
+    plFinal: numOr(planned.plFinal, 0),
+    ...planned,
+  };
+
+  return {
+    ...obj,
+    id,
+    timestamp,
+    bids,
+    planned: safePlanned,
+    mode: obj.mode === "position" ? "position" : "entry",
+    existingAvg: numOr(obj.existingAvg, 0),
+    existingLot: numOr(obj.existingLot, 0),
+    targetTicks: numOr(obj.targetTicks, 1),
+    targetProfit: numOr(obj.targetProfit, 0),
+    pinned: typeof obj.pinned === "boolean" ? obj.pinned : false,
+    note: typeof obj.note === "string" ? obj.note : "",
+  };
 }
 
 /* --- Resource-spesifik load/save (dipakai komponen) --- */
