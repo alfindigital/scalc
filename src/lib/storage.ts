@@ -361,7 +361,32 @@ export function savePresets<T = unknown>(presets: T[]): void {
 
 export function loadHistory<T = unknown>(): T[] {
   if (typeof window === "undefined") return [];
-  return loadVersioned("pyscal_history", SCHEMA_VERSION.history, [], migrateHistory) as T[];
+  const loaded = loadVersioned("pyscal_history", SCHEMA_VERSION.history, [], migrateHistory) as unknown[];
+  // Selalu validasi ulang meski versi sudah terbaru — data bisa rusak akibat edit manual,
+  // sync antar-tab, atau bug lama. Auto-repair + rewrite kalau ada yang di-drop/diubah.
+  const repaired: unknown[] = [];
+  let dropped = 0;
+  for (const t of loaded) {
+    const r = repairTrade(t);
+    if (r) repaired.push(r);
+    else dropped++;
+  }
+  const changed = dropped > 0 || repaired.some((r, i) => r !== loaded[i]);
+  if (changed) {
+    saveVersioned("pyscal_history", SCHEMA_VERSION.history, repaired);
+    if (dropped > 0) {
+      try {
+        window.dispatchEvent(
+          new CustomEvent("pyscal:storage-repaired", {
+            detail: { key: "pyscal_history", dropped, kept: repaired.length },
+          }),
+        );
+      } catch {
+        /* noop */
+      }
+    }
+  }
+  return repaired as T[];
 }
 
 export function saveHistory<T = unknown>(history: T[]): void {
