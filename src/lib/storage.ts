@@ -170,17 +170,59 @@ function wrap<T>(version: number, data: T): Wrapped<T> {
   return { version, data };
 }
 
-function safeWrite(key: string, value: unknown): void {
-  if (typeof window === "undefined") return;
+// ================================================================
+// Debounced + atomic writer.
+// - Debounce: banyak `save*` beruntun di-coalesce jadi satu write per key.
+// - Atomic: tulis dulu ke `<key>__next` lalu commit ke `<key>` lalu hapus tmp;
+//   loader mem-fallback ke `__next` bila primary corrupt/hilang.
+// - Flush otomatis pada visibilitychange=hidden / pagehide / beforeunload
+//   supaya tidak ada data yang tertinggal saat tab ditutup.
+// ================================================================
+
+const WRITE_DEBOUNCE_MS = 120;
+const pendingWrites = new Map<
+  string,
+  { value: unknown; timer: ReturnType<typeof setTimeout> | null }
+>();
+let flushHooksInstalled = false;
+
+function installFlushHooks(): void {
+  if (flushHooksInstalled || typeof window === "undefined") return;
+  flushHooksInstalled = true;
+  const flush = () => flushPendingWrites();
   try {
-    localStorage.setItem(key, JSON.stringify(value));
+    window.addEventListener("pagehide", flush);
+    window.addEventListener("beforeunload", flush);
+    if (typeof document !== "undefined") {
+      document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "hidden") flush();
+      });
+    }
+  } catch {
+    /* noop */
+  }
+}
+
+function commitWrite(key: string, value: unknown): void {
+  if (typeof window === "undefined") return;
+  const tmpKey = `${key}__next`;
+  try {
+    const payload = JSON.stringify(value);
+    // Two-phase: tulis tmp dulu → commit primary → bersihkan tmp.
+    // Jika crash di antara langkah 2 & 3, primary sudah valid.
+    // Jika crash di antara 1 & 2, loader akan fallback ke __next.
+    localStorage.setItem(tmpKey, payload);
+    localStorage.setItem(key, payload);
+    try {
+      localStorage.removeItem(tmpKey);
+    } catch {
+      /* noop */
+    }
   } catch (err) {
-    // Signal quota/privacy errors so the UI can surface a toast.
     try {
       const name = (err as { name?: string })?.name || "";
       const isQuota =
-        name === "QuotaExceededError" ||
-        name === "NS_ERROR_DOM_QUOTA_REACHED";
+        name === "QuotaExceededError" || name === "NS_ERROR_DOM_QUOTA_REACHED";
       window.dispatchEvent(
         new CustomEvent("pyscal:storage-error", {
           detail: { key, kind: isQuota ? "quota" : "unavailable" },
@@ -192,12 +234,58 @@ function safeWrite(key: string, value: unknown): void {
   }
 }
 
+function flushKey(key: string): void {
+  const entry = pendingWrites.get(key);
+  if (!entry) return;
+  if (entry.timer) clearTimeout(entry.timer);
+  pendingWrites.delete(key);
+  commitWrite(key, entry.value);
+}
+
+export function flushPendingWrites(): void {
+  for (const key of Array.from(pendingWrites.keys())) flushKey(key);
+}
+
+function safeWrite(key: string, value: unknown): void {
+  if (typeof window === "undefined") return;
+  installFlushHooks();
+  const existing = pendingWrites.get(key);
+  if (existing?.timer) clearTimeout(existing.timer);
+  const timer = setTimeout(() => flushKey(key), WRITE_DEBOUNCE_MS);
+  pendingWrites.set(key, { value, timer });
+}
+
+/** Tulis sinkron tanpa debounce — dipakai loader saat rewrap/migrasi silent. */
+function safeWriteImmediate(key: string, value: unknown): void {
+  if (typeof window === "undefined") return;
+  // Drop pending yang sudah stale untuk key ini.
+  const existing = pendingWrites.get(key);
+  if (existing?.timer) clearTimeout(existing.timer);
+  pendingWrites.delete(key);
+  commitWrite(key, value);
+}
+
 function safeReadJSON(key: string): unknown {
   if (typeof window === "undefined") return null;
   try {
     const raw = localStorage.getItem(key);
-    if (!raw) return null;
-    return JSON.parse(raw);
+    if (raw) return JSON.parse(raw);
+  } catch {
+    /* jatuh ke fallback __next */
+  }
+  // Atomic-write fallback: primary hilang/corrupt → coba tmp yang belum sempat commit.
+  try {
+    const tmp = localStorage.getItem(`${key}__next`);
+    if (!tmp) return null;
+    const parsed = JSON.parse(tmp);
+    // Promote tmp jadi primary supaya kondisi stabil untuk load berikutnya.
+    try {
+      localStorage.setItem(key, tmp);
+      localStorage.removeItem(`${key}__next`);
+    } catch {
+      /* noop */
+    }
+    return parsed;
   } catch {
     return null;
   }
@@ -224,10 +312,10 @@ export function loadVersioned<T>(
     if (data == null) return defaultValue;
     const migrated = fromVersion === targetVersion ? (data as T) : migrate(data, fromVersion);
     if (fromVersion !== targetVersion) {
-      safeWrite(key, wrap(targetVersion, migrated));
+      safeWriteImmediate(key, wrap(targetVersion, migrated));
     } else if (!isWrapped(raw)) {
       // sama versi tapi belum ter-wrap — wrap diam-diam.
-      safeWrite(key, wrap(targetVersion, migrated));
+      safeWriteImmediate(key, wrap(targetVersion, migrated));
     }
     return migrated;
   } catch {
@@ -375,7 +463,8 @@ export function loadHistory<T = unknown>(): T[] {
   }
   const changed = dropped > 0 || repaired.some((r, i) => r !== loaded[i]);
   if (changed) {
-    saveVersioned("pyscal_history", SCHEMA_VERSION.history, repaired);
+    // Repair harus segera persist — jangan sampai window hilang sebelum debounce fire.
+    safeWriteImmediate("pyscal_history", wrap(SCHEMA_VERSION.history, repaired));
     if (dropped > 0) {
       try {
         window.dispatchEvent(
