@@ -397,9 +397,9 @@ describe("data corruption resilience", () => {
   it("shortcuts wrapped berisi data non-object → default", () => {
     localStorage.setItem(
       "pyscal_shortcuts",
-      JSON.stringify({ version: SCHEMA_VERSION.shortcuts, data: 42 }),
+      JSON.stringify({ version: 1, data: 42 }),
     );
-    // migrator akan menerima 42 dan kembalikan DEFAULT_SHORTCUTS
+    // versi berbeda → migrator dipanggil; menerima 42 dan kembalikan DEFAULT.
     const s = loadShortcutsVersioned();
     expect(s).toEqual(DEFAULT_SHORTCUTS);
   });
