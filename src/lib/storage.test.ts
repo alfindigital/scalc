@@ -15,6 +15,7 @@ import {
   SCHEMA_VERSION,
 } from "./storage";
 import { loadPresets, savePresets, saveShortcuts } from "./storage";
+import { flushPendingWrites } from "./storage";
 
 // Minimal localStorage shim untuk env "node".
 class MemStorage {
@@ -122,6 +123,7 @@ describe("schema versioning", () => {
 
   it("saveState menulis dalam format { version, data }", () => {
     saveState({ ...DEFAULT_STATE, balance: 5_000_000 });
+    flushPendingWrites();
     const raw = JSON.parse(localStorage.getItem("pyscal_state") as string);
     expect(raw.version).toBe(SCHEMA_VERSION.state);
     expect(raw.data.balance).toBe(5_000_000);
@@ -148,6 +150,7 @@ describe("schema versioning", () => {
 
   it("loadHistory mempertahankan pinned/note yang sudah ada di v2", () => {
     saveHistory([{ id: "tr_2", timestamp: 2, planned: { avgFinal: 200 }, pinned: true, note: "BBRI" }]);
+    flushPendingWrites();
     const h = loadHistory<{ pinned: boolean; note: string }>();
     expect(h[0].pinned).toBe(true);
     expect(h[0].note).toBe("BBRI");
@@ -249,15 +252,18 @@ describe("delete + undo flow (persistence contract)", () => {
       { id: "c", timestamp: 3, planned: { avgFinal: 3 }, pinned: false, note: "" },
     ];
     saveHistory(entries);
+    flushPendingWrites();
 
     // delete "b"
     const removed = entries.find((e) => e.id === "b")!;
     const afterDelete = entries.filter((e) => e.id !== "b");
     saveHistory(afterDelete);
+    flushPendingWrites();
     expect(loadHistory()).toHaveLength(2);
 
     // undo (re-insert)
     saveHistory([...afterDelete, removed]);
+    flushPendingWrites();
     const restored = loadHistory<{ id: string; pinned: boolean; note: string }>();
     expect(restored.map((e) => e.id).sort()).toEqual(["a", "b", "c"]);
     const b = restored.find((e) => e.id === "b")!;
@@ -275,6 +281,7 @@ describe("cross-tab sync (storage event payload)", () => {
     saveHistory([
       { id: "x", timestamp: 1, planned: { avgFinal: 5 }, pinned: false, note: "" },
     ]);
+    flushPendingWrites();
     // tab B menimpa storage secara mentah (mirip event.newValue)
     const newPayload = {
       version: SCHEMA_VERSION.history,
@@ -323,6 +330,7 @@ describe("quota / private mode / storage unavailable", () => {
     });
     withQuotaStorage(() => {
       saveState({ ...DEFAULT_STATE, baseLot: 999 });
+      flushPendingWrites();
     });
     expect(events.length).toBe(1);
     expect(events[0].key).toBe("pyscal_state");
@@ -345,6 +353,7 @@ describe("quota / private mode / storage unavailable", () => {
     };
     try {
       saveHistory([{ id: "z", timestamp: 1, planned: { avgFinal: 0 } }]);
+      flushPendingWrites();
     } finally {
       (globalThis as any).localStorage = orig;
     }
@@ -356,6 +365,7 @@ describe("quota / private mode / storage unavailable", () => {
     withQuotaStorage(() => {
       expect(() => savePresets([{ name: "X" }])).not.toThrow();
       expect(() => saveShortcuts(DEFAULT_SHORTCUTS)).not.toThrow();
+      flushPendingWrites();
     });
   });
 });
