@@ -14,6 +14,7 @@ import {
   loadShortcutsVersioned,
   SCHEMA_VERSION,
 } from "./storage";
+import { loadPresets, savePresets, saveShortcuts } from "./storage";
 
 // Minimal localStorage shim untuk env "node".
 class MemStorage {
