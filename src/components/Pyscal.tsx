@@ -2014,6 +2014,7 @@ export default function PYSCAL() {
       <div className="pyscal" data-theme={theme}>
         <OfflineBanner />
         <OnboardingTour />
+        <TelegramPopup />
         <div className="pyscal-inner">
           <div className="ctn">
 
