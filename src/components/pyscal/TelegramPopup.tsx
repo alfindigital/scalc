@@ -55,8 +55,14 @@ export function TelegramPopup() {
     } catch {
       return;
     }
-    const t = setTimeout(() => setOpen(true), 1200);
-    return () => clearTimeout(t);
+    // Jangan tumpuk dengan onboarding tour: tunggu sampai overlay-nya tertutup.
+    const iv = window.setInterval(() => {
+      if (!document.querySelector(".onb-overlay")) {
+        window.clearInterval(iv);
+        setOpen(true);
+      }
+    }, 600);
+    return () => window.clearInterval(iv);
   }, []);
 
   const close = () => {
