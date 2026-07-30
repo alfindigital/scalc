@@ -4,6 +4,7 @@ import { useState, useMemo, useCallback, useEffect, useRef, useId } from "react"
 import { Pin } from "lucide-react";
 import logoUrl from "@/assets/logo-pyscal.webp";
 import { OnboardingTour } from "@/components/pyscal/OnboardingTour";
+import { TelegramPopup } from "@/components/pyscal/TelegramPopup";
 import { getTickSize, ceilTick, computeRows } from "@/lib/compute";
 import { n, nDec, nShort, fmtPct, fmtPL, fmtTime } from "@/lib/format";
 import { haptic } from "@/lib/haptics";
