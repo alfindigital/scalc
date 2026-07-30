@@ -153,7 +153,7 @@ const CSS = `
 }
 
 .pyscal{font-family:'Funnel Sans',system-ui,sans-serif;background:var(--bg);color:var(--text);
-  min-height:100vh;-webkit-font-smoothing:antialiased;transition:background .25s,color .25s;
+  min-height:0;-webkit-font-smoothing:antialiased;transition:background .25s,color .25s;
   -webkit-text-size-adjust:100%;text-size-adjust:100%;text-rendering:optimizeLegibility}
 .pyscal button,.pyscal a,.pyscal [role="button"]{touch-action:manipulation}
 /* mobile a11y: enforce 44x44 min tap target for interactive controls */
@@ -626,7 +626,7 @@ tbody td:last-child{padding:14px 8px;width:1%}
 .hd-mini-table div:last-child{border-bottom:none}
 
 @media(max-width:700px){
-  .pyscal-inner{padding:20px 12px 48px}
+  .pyscal-inner{padding:20px 12px 16px}
   .dt{display:none}
   .mc{display:flex;flex-direction:column;gap:10px}
   .ig{grid-template-columns:1fr 1fr;gap:12px}
@@ -709,7 +709,7 @@ tbody td:last-child{padding:14px 8px;width:1%}
 }
 
 @media(max-width:420px){
-  .pyscal-inner{padding:16px 10px 40px}
+  .pyscal-inner{padding:16px 10px 12px}
   .card{padding:14px}
   .hdr{gap:10px}
   .logo{width:36px;height:36px}
