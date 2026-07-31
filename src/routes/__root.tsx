@@ -99,14 +99,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         content:
           "Kalkulator pyramid averaging-down untuk trader IDX. Hitung bid berlapis, simpan history, jalankan offline.",
       },
-      { property: "og:image", content: "https://scalc.alfindigital.com/og-image.jpg" },
-      { property: "og:image:width", content: "1216" },
-      { property: "og:image:height", content: "640" },
-      {
-        property: "og:image:alt",
-        content: "PYSCAL — Pyramid Bid Calculator untuk trader saham IDX",
-      },
-      { name: "twitter:image", content: "https://scalc.alfindigital.com/og-image.jpg" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "google-site-verification", content: "J-Czc4w4Dto_XXTUZfW8lAMoT45CpTWqZ72Nt91yFbw" },
     ],
