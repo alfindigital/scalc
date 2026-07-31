@@ -124,7 +124,7 @@ export function bindInstallPrompt(): () => void {
   if (typeof window === "undefined") return () => {};
   const onPrompt = (e: Event) => {
     e.preventDefault();
-    deferredPrompt = e;
+    deferredPrompt = e as BeforeInstallPromptEvent;
     listeners.forEach((cb) => cb());
   };
   const onInstalled = () => {
