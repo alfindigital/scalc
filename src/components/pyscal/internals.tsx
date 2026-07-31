@@ -252,12 +252,14 @@ export function renderToastText(text) {
 
 export function focusGridCell(row, col) {
   if (row == null || col == null) return false;
-  const el = document.querySelector(`[data-grid-row="${row}"][data-grid-col="${col}"]`);
-  if (el && typeof (el as any).focus === "function") {
-    (el as any).focus();
-    if (typeof (el as any).select === "function") {
+  const el = document.querySelector(
+    `[data-grid-row="${row}"][data-grid-col="${col}"]`,
+  ) as (HTMLElement & { select?: () => void }) | null;
+  if (el && typeof el.focus === "function") {
+    el.focus();
+    if (typeof el.select === "function") {
       try {
-        (el as any).select();
+        el.select();
       } catch {
         /* noop */
       }
@@ -310,10 +312,11 @@ export function handleSetupEnter(e) {
   const next = e.shiftKey ? nodes[i - 1] : nodes[i + 1];
   if (next) {
     e.preventDefault();
-    (next as any).focus();
-    if (typeof (next as any).select === "function") {
+    const nextEl = next as HTMLElement & { select?: () => void };
+    nextEl.focus();
+    if (typeof nextEl.select === "function") {
       try {
-        (next as any).select();
+        nextEl.select();
       } catch {
         /* noop */
       }
