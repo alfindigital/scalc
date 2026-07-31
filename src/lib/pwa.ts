@@ -110,7 +110,12 @@ export interface InstallPromptHandle {
   prompt: () => Promise<"accepted" | "dismissed" | "unavailable">;
 }
 
-let deferredPrompt: any = null;
+interface BeforeInstallPromptEvent extends Event {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
+}
+
+let deferredPrompt: BeforeInstallPromptEvent | null = null;
 const listeners = new Set<() => void>();
 
 export function bindInstallPrompt(): () => void {
@@ -159,7 +164,7 @@ export function isStandalone(): boolean {
   return (
     window.matchMedia?.("(display-mode: standalone)").matches ||
     // iOS Safari
-    (window.navigator as any).standalone === true
+    (window.navigator as Navigator & { standalone?: boolean }).standalone === true
   );
 }
 
@@ -182,7 +187,7 @@ export function detectPlatform(): PlatformInfo {
   const isIPad =
     /iPad/.test(ua) ||
     // iPadOS 13+ reports as Mac; detect via touch points.
-    (navigator.platform === "MacIntel" && (navigator as any).maxTouchPoints > 1);
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
   const isIOS = /iPhone|iPod/.test(ua) || isIPad;
   const isAndroid = /Android/i.test(ua);
   const isSafari = /^((?!chrome|android|crios|fxios|edgios).)*safari/i.test(ua);

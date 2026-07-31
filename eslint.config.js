@@ -36,5 +36,14 @@ export default tseslint.config(
       "@typescript-eslint/no-unused-vars": "off",
     },
   },
+  {
+    // Legacy calculator UI predates strict typing; tracked for incremental cleanup.
+    files: ["src/components/Pyscal.tsx", "src/components/pyscal/**/*.tsx"],
+    rules: { "@typescript-eslint/ban-ts-comment": "off" },
+  },
+  {
+    files: ["**/*.test.ts", "**/*.test.tsx"],
+    rules: { "@typescript-eslint/no-explicit-any": "off" },
+  },
   eslintPluginPrettier,
 );
