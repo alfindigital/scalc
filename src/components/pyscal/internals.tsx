@@ -183,7 +183,9 @@ export function focusFirstInvalidInput(): boolean {
     if ((target as HTMLInputElement).select) {
       try {
         (target as HTMLInputElement).select();
-      } catch { /* noop */ }
+      } catch {
+        /* noop */
+      }
     }
   });
   return true;
@@ -256,7 +258,9 @@ export function focusGridCell(row, col) {
     if (typeof (el as any).select === "function") {
       try {
         (el as any).select();
-      } catch { /* noop */ }
+      } catch {
+        /* noop */
+      }
     }
     return true;
   }
@@ -310,7 +314,9 @@ export function handleSetupEnter(e) {
     if (typeof (next as any).select === "function") {
       try {
         (next as any).select();
-      } catch { /* noop */ }
+      } catch {
+        /* noop */
+      }
     }
   }
 }
@@ -339,7 +345,9 @@ export function BidStepInput({
     if (typeof navigator !== "undefined" && "vibrate" in navigator) {
       try {
         navigator.vibrate(10);
-      } catch { /* noop */ }
+      } catch {
+        /* noop */
+      }
     }
   };
 

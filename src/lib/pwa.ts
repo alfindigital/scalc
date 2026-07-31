@@ -54,7 +54,9 @@ export function setupPWA(): void {
       sessionStorage.setItem("__pyscal_e2e_sw", "1");
     }
     forceSW = sessionStorage.getItem("__pyscal_e2e_sw") === "1";
-  } catch { /* noop */ }
+  } catch {
+    /* noop */
+  }
   const isPreviewHost =
     host.includes("id-preview--") ||
     host.includes("lovableproject.com") ||

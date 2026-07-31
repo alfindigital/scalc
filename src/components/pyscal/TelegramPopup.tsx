@@ -68,7 +68,9 @@ export function TelegramPopup() {
   const close = () => {
     try {
       localStorage.setItem(STORAGE_KEY, "1");
-    } catch { /* noop */ }
+    } catch {
+      /* noop */
+    }
     setOpen(false);
   };
 

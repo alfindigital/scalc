@@ -30,7 +30,9 @@ function hapticsEnabled(): boolean {
       cachedEnabled = false;
       return false;
     }
-  } catch { /* noop */ }
+  } catch {
+    /* noop */
+  }
   cachedEnabled = true;
   return true;
 }
@@ -39,7 +41,9 @@ export function haptic(kind: HapticKind = "light"): void {
   if (!hapticsEnabled()) return;
   try {
     navigator.vibrate(PATTERNS[kind]);
-  } catch { /* noop */ }
+  } catch {
+    /* noop */
+  }
 }
 
 // Allow other code (e.g. reduced-motion toggle) to invalidate the cache.
