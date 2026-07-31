@@ -1,4 +1,3 @@
-// @ts-nocheck
 // Icon set extracted from Pyscal.tsx. Behavior identical — inline SVGs
 // small enough that lucide-react would only add weight.
 export const BoltIcon = () => (

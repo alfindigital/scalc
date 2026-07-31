@@ -1184,7 +1184,7 @@ function focusFirstInvalidInput(): boolean {
     if ((target as HTMLInputElement).select) {
       try {
         (target as HTMLInputElement).select();
-      } catch {}
+      } catch { /* noop */ }
     }
   });
   return true;
@@ -1261,7 +1261,7 @@ function focusGridCell(row, col) {
     if (typeof el.select === "function") {
       try {
         el.select();
-      } catch {}
+      } catch { /* noop */ }
     }
     return true;
   }
@@ -1315,7 +1315,7 @@ function handleSetupEnter(e) {
     if (typeof next.select === "function") {
       try {
         next.select();
-      } catch {}
+      } catch { /* noop */ }
     }
   }
 }
@@ -1345,7 +1345,7 @@ function BidStepInput({
     if (typeof navigator !== "undefined" && "vibrate" in navigator) {
       try {
         navigator.vibrate(10);
-      } catch {}
+      } catch { /* noop */ }
     }
   };
 
@@ -1589,10 +1589,10 @@ export default function PYSCAL() {
       if (attr === "dark" || attr === "light") return attr;
       const saved = localStorage.getItem("pyscal_theme");
       if (saved === "dark" || saved === "light") return saved;
-    } catch {}
+    } catch { /* noop */ }
     try {
       if (window.matchMedia?.("(prefers-color-scheme: dark)").matches) return "dark";
-    } catch {}
+    } catch { /* noop */ }
     return "light";
   });
   const initial = loadStateVersioned();
@@ -1627,7 +1627,7 @@ export default function PYSCAL() {
     setShowHint(false);
     try {
       localStorage.setItem("pyscal_onboarded", "1");
-    } catch {}
+    } catch { /* noop */ }
   }, []);
   const settingsRef = useRef(null);
   const bidAwalRef = useRef(null);
@@ -1721,7 +1721,7 @@ export default function PYSCAL() {
   useEffect(() => {
     try {
       localStorage.setItem("pyscal_theme", theme);
-    } catch {}
+    } catch { /* noop */ }
   }, [theme]);
 
   // Click outside settings
@@ -2358,7 +2358,7 @@ export default function PYSCAL() {
       ta.select();
       try {
         document.execCommand("copy");
-      } catch {}
+      } catch { /* noop */ }
       document.body.removeChild(ta);
     };
 

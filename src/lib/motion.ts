@@ -20,7 +20,7 @@ export function getMotionSetting(): MotionSetting {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved === "reduce" || saved === "normal" || saved === "auto") return saved;
-  } catch {}
+  } catch { /* noop */ }
   return "auto";
 }
 
@@ -45,7 +45,7 @@ function apply(setting: MotionSetting) {
 export function setMotionSetting(setting: MotionSetting) {
   try {
     localStorage.setItem(STORAGE_KEY, setting);
-  } catch {}
+  } catch { /* noop */ }
   apply(setting);
   if (typeof window !== "undefined") {
     window.dispatchEvent(new CustomEvent(EVENT, { detail: setting }));

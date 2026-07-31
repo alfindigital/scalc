@@ -62,7 +62,7 @@ export function OnboardingTour() {
     const handler = () => {
       try {
         localStorage.removeItem(STORAGE_KEY);
-      } catch {}
+      } catch { /* noop */ }
       setStep(0);
       setOpen(true);
     };
@@ -73,7 +73,7 @@ export function OnboardingTour() {
   const finish = () => {
     try {
       localStorage.setItem(STORAGE_KEY, dontShowAgain ? "dismissed" : "1");
-    } catch {}
+    } catch { /* noop */ }
     setOpen(false);
   };
 

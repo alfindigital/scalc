@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { useMemo, useRef, useState } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { Pin } from "lucide-react";

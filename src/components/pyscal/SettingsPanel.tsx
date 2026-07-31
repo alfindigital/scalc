@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { useRef } from "react";
 
 import { DEFAULT_SHORTCUTS, shortcutToString } from "@/lib/storage";

@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { n, nShort, fmtPL, fmtPct } from "@/lib/format";
 import { validateBid } from "@/lib/validation";
 import { XIcon } from "./icons";
