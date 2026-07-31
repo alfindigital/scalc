@@ -252,9 +252,9 @@ export function renderToastText(text) {
 
 export function focusGridCell(row, col) {
   if (row == null || col == null) return false;
-  const el = document.querySelector(
-    `[data-grid-row="${row}"][data-grid-col="${col}"]`,
-  ) as (HTMLElement & { select?: () => void }) | null;
+  const el = document.querySelector(`[data-grid-row="${row}"][data-grid-col="${col}"]`) as
+    | (HTMLElement & { select?: () => void })
+    | null;
   if (el && typeof el.focus === "function") {
     el.focus();
     if (typeof el.select === "function") {
