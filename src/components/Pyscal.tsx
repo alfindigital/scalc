@@ -1,5 +1,11 @@
 // @ts-nocheck
-const escHtml = (s) => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+const escHtml = (s) =>
+  String(s ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 import { useState, useMemo, useCallback, useEffect, useRef, useId } from "react";
 import { Pin } from "lucide-react";
 import logoUrl from "@/assets/logo-pyscal.webp";
@@ -9,11 +15,19 @@ import { getTickSize, ceilTick, computeRows } from "@/lib/compute";
 import { n, nDec, nShort, fmtPct, fmtPL, fmtTime } from "@/lib/format";
 import { haptic } from "@/lib/haptics";
 import {
-  validateBid, validateLot, validateTargetTicks, validateTargetProfit,
-  validateExistingAvg, validateExistingLot,
+  validateBid,
+  validateLot,
+  validateTargetTicks,
+  validateTargetProfit,
+  validateExistingAvg,
+  validateExistingLot,
 } from "@/lib/validation";
 import {
-  isInstallAvailable, isStandalone, subscribeInstallPrompt, triggerInstall, detectPlatform,
+  isInstallAvailable,
+  isStandalone,
+  subscribeInstallPrompt,
+  triggerInstall,
+  detectPlatform,
 } from "@/lib/pwa";
 import {
   DEFAULT_SHORTCUTS,
@@ -32,17 +46,15 @@ import {
 
 /* ==================== ICONS ==================== */
 function OfflineBanner() {
-  const [online, setOnline] = useState(
-    typeof navigator === 'undefined' ? true : navigator.onLine
-  );
+  const [online, setOnline] = useState(typeof navigator === "undefined" ? true : navigator.onLine);
   useEffect(() => {
     const on = () => setOnline(true);
     const off = () => setOnline(false);
-    window.addEventListener('online', on);
-    window.addEventListener('offline', off);
+    window.addEventListener("online", on);
+    window.addEventListener("offline", off);
     return () => {
-      window.removeEventListener('online', on);
-      window.removeEventListener('offline', off);
+      window.removeEventListener("online", on);
+      window.removeEventListener("offline", off);
     };
   }, []);
   if (online) return null;
@@ -54,22 +66,239 @@ function OfflineBanner() {
   );
 }
 
-const BoltIcon = () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>;
-const GearIcon = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>;
-const PlusIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>;
-const XIcon = () => <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>;
-const CopyIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>;
-const CheckIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>;
-const RefreshIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>;
-const SunIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>;
-const MoonIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>;
-const BookmarkIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>;
-const HistoryIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/><polyline points="12 7 12 12 16 14"/></svg>;
-const InfoIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>;
-const KeyboardIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><line x1="6" y1="10" x2="6" y2="10"/><line x1="10" y1="10" x2="10" y2="10"/><line x1="14" y1="10" x2="14" y2="10"/><line x1="18" y1="10" x2="18" y2="10"/><line x1="6" y1="14" x2="18" y2="14"/></svg>;
-const LockIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>;
-const UnlockIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>;
-
+const BoltIcon = () => (
+  <svg
+    width="18"
+    height="18"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+  </svg>
+);
+const GearIcon = () => (
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <circle cx="12" cy="12" r="3" />
+    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+  </svg>
+);
+const PlusIcon = () => (
+  <svg
+    width="14"
+    height="14"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2.5"
+    strokeLinecap="round"
+  >
+    <line x1="12" y1="5" x2="12" y2="19" />
+    <line x1="5" y1="12" x2="19" y2="12" />
+  </svg>
+);
+const XIcon = () => (
+  <svg
+    width="12"
+    height="12"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2.5"
+    strokeLinecap="round"
+  >
+    <line x1="18" y1="6" x2="6" y2="18" />
+    <line x1="6" y1="6" x2="18" y2="18" />
+  </svg>
+);
+const CopyIcon = () => (
+  <svg
+    width="14"
+    height="14"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+  </svg>
+);
+const CheckIcon = () => (
+  <svg
+    width="14"
+    height="14"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <polyline points="20 6 9 17 4 12" />
+  </svg>
+);
+const RefreshIcon = () => (
+  <svg
+    width="14"
+    height="14"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <polyline points="23 4 23 10 17 10" />
+    <polyline points="1 20 1 14 7 14" />
+    <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+  </svg>
+);
+const SunIcon = () => (
+  <svg
+    width="14"
+    height="14"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <circle cx="12" cy="12" r="5" />
+    <line x1="12" y1="1" x2="12" y2="3" />
+    <line x1="12" y1="21" x2="12" y2="23" />
+    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+    <line x1="1" y1="12" x2="3" y2="12" />
+    <line x1="21" y1="12" x2="23" y2="12" />
+    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+  </svg>
+);
+const MoonIcon = () => (
+  <svg
+    width="14"
+    height="14"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+  </svg>
+);
+const BookmarkIcon = () => (
+  <svg
+    width="14"
+    height="14"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+  </svg>
+);
+const HistoryIcon = () => (
+  <svg
+    width="14"
+    height="14"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <polyline points="1 4 1 10 7 10" />
+    <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
+    <polyline points="12 7 12 12 16 14" />
+  </svg>
+);
+const InfoIcon = () => (
+  <svg
+    width="14"
+    height="14"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <circle cx="12" cy="12" r="10" />
+    <line x1="12" y1="16" x2="12" y2="12" />
+    <line x1="12" y1="8" x2="12.01" y2="8" />
+  </svg>
+);
+const KeyboardIcon = () => (
+  <svg
+    width="14"
+    height="14"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <rect x="2" y="6" width="20" height="12" rx="2" />
+    <line x1="6" y1="10" x2="6" y2="10" />
+    <line x1="10" y1="10" x2="10" y2="10" />
+    <line x1="14" y1="10" x2="14" y2="10" />
+    <line x1="18" y1="10" x2="18" y2="10" />
+    <line x1="6" y1="14" x2="18" y2="14" />
+  </svg>
+);
+const LockIcon = () => (
+  <svg
+    width="14"
+    height="14"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+  </svg>
+);
+const UnlockIcon = () => (
+  <svg
+    width="14"
+    height="14"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+    <path d="M7 11V7a5 5 0 0 1 9.9-1" />
+  </svg>
+);
 
 /* ==================== STYLES ==================== */
 const CSS = `
@@ -807,8 +1036,8 @@ function InstallAppRow() {
   if (info.isInAppBrowser) {
     return (
       <div className="sp-empty">
-        Kamu sedang di in-app browser. Tap menu ⋯ → "Open in {info.platform === "ios" ? "Safari" : "Chrome"}",
-        lalu install dari sana.
+        Kamu sedang di in-app browser. Tap menu ⋯ → "Open in{" "}
+        {info.platform === "ios" ? "Safari" : "Chrome"}", lalu install dari sana.
       </div>
     );
   }
@@ -819,10 +1048,18 @@ function InstallAppRow() {
       <div className="sp-ios-install">
         <div className="sp-ios-title">Install di iOS (Safari)</div>
         <ol className="sp-ios-steps">
-          <li>Pastikan kamu buka di <b>Safari</b> (bukan Chrome/in-app).</li>
-          <li>Tap ikon <b>Share</b> <span className="sp-ios-ico">⬆︎</span> di bawah.</li>
-          <li>Scroll, pilih <b>Add to Home Screen</b> <span className="sp-ios-ico">＋</span>.</li>
-          <li>Tap <b>Add</b>. Icon PYSCAL muncul di home screen.</li>
+          <li>
+            Pastikan kamu buka di <b>Safari</b> (bukan Chrome/in-app).
+          </li>
+          <li>
+            Tap ikon <b>Share</b> <span className="sp-ios-ico">⬆︎</span> di bawah.
+          </li>
+          <li>
+            Scroll, pilih <b>Add to Home Screen</b> <span className="sp-ios-ico">＋</span>.
+          </li>
+          <li>
+            Tap <b>Add</b>. Icon PYSCAL muncul di home screen.
+          </li>
         </ol>
         {!info.isSafari && (
           <div className="sp-ios-warn">
@@ -839,12 +1076,19 @@ function InstallAppRow() {
       <div className="sp-ios-install">
         <div className="sp-ios-title">Install di Android</div>
         <ol className="sp-ios-steps">
-          <li>Pastikan buka di <b>Chrome</b> (bukan in-app browser).</li>
-          <li>Tap menu <b>⋮</b> di pojok kanan atas.</li>
-          <li>Pilih <b>Install app</b> atau <b>Add to Home screen</b>.</li>
+          <li>
+            Pastikan buka di <b>Chrome</b> (bukan in-app browser).
+          </li>
+          <li>
+            Tap menu <b>⋮</b> di pojok kanan atas.
+          </li>
+          <li>
+            Pilih <b>Install app</b> atau <b>Add to Home screen</b>.
+          </li>
         </ol>
         <div className="sp-ios-warn">
-          Tip: prompt otomatis kadang muncul setelah beberapa detik di halaman — coba scroll/interaksi sebentar.
+          Tip: prompt otomatis kadang muncul setelah beberapa detik di halaman — coba
+          scroll/interaksi sebentar.
         </div>
       </div>
     );
@@ -854,8 +1098,8 @@ function InstallAppRow() {
   if (info.platform === "desktop" && !available) {
     return (
       <div className="sp-empty">
-        Buka di Chrome/Edge/Brave, lalu klik ikon <b>Install</b> di pojok kanan address bar
-        (atau menu ⋮ → Install PYSCAL).
+        Buka di Chrome/Edge/Brave, lalu klik ikon <b>Install</b> di pojok kanan address bar (atau
+        menu ⋮ → Install PYSCAL).
       </div>
     );
   }
@@ -876,11 +1120,12 @@ function FieldHint({ status, id }) {
   return (
     <div
       id={id}
-      className={`field-hint ${isErr ? 'error' : 'warning'}`}
-      role={isErr ? 'alert' : 'status'}
-      aria-live={isErr ? 'assertive' : 'polite'}
+      className={`field-hint ${isErr ? "error" : "warning"}`}
+      role={isErr ? "alert" : "status"}
+      aria-live={isErr ? "assertive" : "polite"}
     >
-      {isErr ? '✕ ' : '⚠ '}{status.error || status.warning}
+      {isErr ? "✕ " : "⚠ "}
+      {status.error || status.warning}
     </div>
   );
 }
@@ -893,10 +1138,10 @@ function FieldHint({ status, id }) {
  * Return true kalau ada elemen invalid yang di-fokus, false kalau semua bersih.
  */
 function focusFirstInvalidInput(): boolean {
-  if (typeof document === 'undefined') return false;
+  if (typeof document === "undefined") return false;
   // 1) Prefer eksplisit aria-invalid="true" di input aktif (visible + enabled).
   const invalids = Array.from(
-    document.querySelectorAll<HTMLElement>('[aria-invalid="true"]')
+    document.querySelectorAll<HTMLElement>('[aria-invalid="true"]'),
   ).filter((el) => {
     if ((el as HTMLInputElement).disabled) return false;
     const rect = el.getBoundingClientRect();
@@ -907,32 +1152,39 @@ function focusFirstInvalidInput(): boolean {
   // 2) Fallback: cari FieldHint .field-hint.error yang visible, resolve ke
   //    input via aria-describedby lookup.
   if (!target) {
-    const hints = Array.from(
-      document.querySelectorAll<HTMLElement>('.field-hint.error')
-    ).filter((el) => {
-      const r = el.getBoundingClientRect();
-      return r.width > 0 && r.height > 0;
-    });
+    const hints = Array.from(document.querySelectorAll<HTMLElement>(".field-hint.error")).filter(
+      (el) => {
+        const r = el.getBoundingClientRect();
+        return r.width > 0 && r.height > 0;
+      },
+    );
     for (const hint of hints) {
       const id = hint.id;
       if (!id) continue;
-      const owner = document.querySelector<HTMLElement>(
-        `[aria-describedby~="${CSS.escape(id)}"]`
-      );
-      if (owner) { target = owner; break; }
+      const owner = document.querySelector<HTMLElement>(`[aria-describedby~="${CSS.escape(id)}"]`);
+      if (owner) {
+        target = owner;
+        break;
+      }
     }
   }
   if (!target) return false;
   try {
-    target.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    target.scrollIntoView({ block: "center", behavior: "smooth" });
   } catch {
     target.scrollIntoView();
   }
   // Focus setelah scroll agar SR pindah reading cursor ke error tsb.
   requestAnimationFrame(() => {
-    try { target!.focus({ preventScroll: true }); } catch { target!.focus(); }
+    try {
+      target!.focus({ preventScroll: true });
+    } catch {
+      target!.focus();
+    }
     if ((target as HTMLInputElement).select) {
-      try { (target as HTMLInputElement).select(); } catch {}
+      try {
+        (target as HTMLInputElement).select();
+      } catch {}
     }
   });
   return true;
@@ -940,18 +1192,29 @@ function focusFirstInvalidInput(): boolean {
 function ToastContainer({ toasts, onRemove }) {
   return (
     <div className="toast-container" role="region" aria-label="Notifikasi" aria-live="polite">
-      {toasts.map(t => (
-        <div key={t.id} className={`toast ${t.type ? 'toast-' + t.type : ''} ${t.leaving ? 'toast-out' : ''}`}
-          role={t.type === 'error' ? 'alert' : 'status'}
-          onAnimationEnd={() => { if (t.leaving) onRemove(t.id); }}>
+      {toasts.map((t) => (
+        <div
+          key={t.id}
+          className={`toast ${t.type ? "toast-" + t.type : ""} ${t.leaving ? "toast-out" : ""}`}
+          role={t.type === "error" ? "alert" : "status"}
+          onAnimationEnd={() => {
+            if (t.leaving) onRemove(t.id);
+          }}
+        >
           <span className="toast-icon">
-            {t.type === 'success' && <CheckIcon />}
-            {t.type === 'error' && '⚠'}
-            {!t.type && '•'}
+            {t.type === "success" && <CheckIcon />}
+            {t.type === "error" && "⚠"}
+            {!t.type && "•"}
           </span>
           <span className="toast-text">{renderToastText(t.text)}</span>
           {t.action && (
-            <button className="toast-action" onClick={() => { t.action.handler(); onRemove(t.id); }}>
+            <button
+              className="toast-action"
+              onClick={() => {
+                t.action.handler();
+                onRemove(t.id);
+              }}
+            >
               {t.action.label}
             </button>
           )}
@@ -968,11 +1231,17 @@ function renderToastText(text) {
   if (text == null) return null;
   const str = String(text);
   const decode = (s) =>
-    s.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
-     .replace(/&quot;/g, '"').replace(/&#39;/g, "'");
+    s
+      .replace(/&amp;/g, "&")
+      .replace(/&lt;/g, "<")
+      .replace(/&gt;/g, ">")
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'");
   const parts = [];
   const re = /<strong>([\s\S]*?)<\/strong>/g;
-  let last = 0, m, i = 0;
+  let last = 0,
+    m,
+    i = 0;
   while ((m = re.exec(str)) !== null) {
     if (m.index > last) parts.push(decode(str.slice(last, m.index)));
     parts.push(<strong key={i++}>{decode(m[1])}</strong>);
@@ -987,9 +1256,13 @@ function renderToastText(text) {
 function focusGridCell(row, col) {
   if (row == null || col == null) return false;
   const el = document.querySelector(`[data-grid-row="${row}"][data-grid-col="${col}"]`);
-  if (el && typeof el.focus === 'function') {
+  if (el && typeof el.focus === "function") {
     el.focus();
-    if (typeof el.select === 'function') { try { el.select(); } catch {} }
+    if (typeof el.select === "function") {
+      try {
+        el.select();
+      } catch {}
+    }
     return true;
   }
   return false;
@@ -997,25 +1270,41 @@ function focusGridCell(row, col) {
 function handleGridNavKey(e, row, col) {
   const r = Number(row);
   if (Number.isNaN(r) || !col) return false;
-  if (e.key === 'Enter') {
+  if (e.key === "Enter") {
     e.preventDefault();
     if (e.shiftKey) {
       if (!focusGridCell(r - 1, col)) focusGridCell(0, col);
     } else if (!focusGridCell(r + 1, col)) {
       // wrap to opposite column on same row when at end
-      focusGridCell(r, col === 'bid' ? 'lot' : 'bid');
+      focusGridCell(r, col === "bid" ? "lot" : "bid");
     }
     return true;
   }
-  if (e.altKey && e.key === 'ArrowDown') { e.preventDefault(); focusGridCell(r + 1, col); return true; }
-  if (e.altKey && e.key === 'ArrowUp') { e.preventDefault(); focusGridCell(r - 1, col); return true; }
-  if (e.altKey && e.key === 'ArrowRight') { e.preventDefault(); focusGridCell(r, col === 'bid' ? 'lot' : 'bid'); return true; }
-  if (e.altKey && e.key === 'ArrowLeft') { e.preventDefault(); focusGridCell(r, col === 'lot' ? 'bid' : 'lot'); return true; }
+  if (e.altKey && e.key === "ArrowDown") {
+    e.preventDefault();
+    focusGridCell(r + 1, col);
+    return true;
+  }
+  if (e.altKey && e.key === "ArrowUp") {
+    e.preventDefault();
+    focusGridCell(r - 1, col);
+    return true;
+  }
+  if (e.altKey && e.key === "ArrowRight") {
+    e.preventDefault();
+    focusGridCell(r, col === "bid" ? "lot" : "bid");
+    return true;
+  }
+  if (e.altKey && e.key === "ArrowLeft") {
+    e.preventDefault();
+    focusGridCell(r, col === "lot" ? "bid" : "lot");
+    return true;
+  }
   return false;
 }
 // Enter / Shift+Enter navigation across setup-panel inputs (data-kbdnav="setup")
 function handleSetupEnter(e) {
-  if (e.key !== 'Enter') return;
+  if (e.key !== "Enter") return;
   const nodes = Array.from(document.querySelectorAll('[data-kbdnav="setup"]'));
   const i = nodes.indexOf(e.currentTarget);
   if (i < 0) return;
@@ -1023,11 +1312,28 @@ function handleSetupEnter(e) {
   if (next) {
     e.preventDefault();
     next.focus();
-    if (typeof next.select === 'function') { try { next.select(); } catch {} }
+    if (typeof next.select === "function") {
+      try {
+        next.select();
+      } catch {}
+    }
   }
 }
 
-function BidStepInput({ value, onChange, onFocus, disabled, className = '', variant = 'desktop', label, warning, error, gridRow, gridCol, ...rest }) {
+function BidStepInput({
+  value,
+  onChange,
+  onFocus,
+  disabled,
+  className = "",
+  variant = "desktop",
+  label,
+  warning,
+  error,
+  gridRow,
+  gridCol,
+  ...rest
+}) {
   const inputRef = useRef(null);
   const reactId = useId();
   const inputId = rest.id || `bid-input-${reactId}`;
@@ -1036,8 +1342,10 @@ function BidStepInput({ value, onChange, onFocus, disabled, className = '', vari
 
   const haptic = () => {
     // Haptic feedback only for touch interaction (mobile devices)
-    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
-      try { navigator.vibrate(10); } catch {}
+    if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+      try {
+        navigator.vibrate(10);
+      } catch {}
     }
   };
 
@@ -1057,10 +1365,10 @@ function BidStepInput({ value, onChange, onFocus, disabled, className = '', vari
 
   const handleKeyDown = (e) => {
     if (handleGridNavKey(e, gridRow, gridCol)) return;
-    if (e.key === 'ArrowUp') {
+    if (e.key === "ArrowUp") {
       e.preventDefault();
       stepUp(false);
-    } else if (e.key === 'ArrowDown') {
+    } else if (e.key === "ArrowDown") {
       e.preventDefault();
       stepDown(false);
     }
@@ -1071,9 +1379,13 @@ function BidStepInput({ value, onChange, onFocus, disabled, className = '', vari
   delete restNoId.id;
 
   return (
-    <div className={`bid-step-wrap ${variant === 'mobile' ? 'bid-step-mobile' : ''} ${focused ? 'focused' : ''}`}>
+    <div
+      className={`bid-step-wrap ${variant === "mobile" ? "bid-step-mobile" : ""} ${focused ? "focused" : ""}`}
+    >
       {label ? (
-        <label htmlFor={inputId} className="pyscal-sr-only">{label}</label>
+        <label htmlFor={inputId} className="pyscal-sr-only">
+          {label}
+        </label>
       ) : null}
       <input
         ref={inputRef}
@@ -1086,16 +1398,20 @@ function BidStepInput({ value, onChange, onFocus, disabled, className = '', vari
         min={1}
         disabled={disabled}
         aria-invalid={error ? true : undefined}
-        aria-describedby={(error || warning) ? hintId : undefined}
+        aria-describedby={error || warning ? hintId : undefined}
         data-grid-row={gridRow}
         data-grid-col={gridCol}
-        onChange={e => onChange(+e.target.value)}
-        onFocus={e => { setFocused(true); e.target.select(); if (onFocus) onFocus(e); }}
+        onChange={(e) => onChange(+e.target.value)}
+        onFocus={(e) => {
+          setFocused(true);
+          e.target.select();
+          if (onFocus) onFocus(e);
+        }}
         onBlur={() => setFocused(false)}
         onKeyDown={handleKeyDown}
         {...restNoId}
       />
-      {(error || warning) ? (
+      {error || warning ? (
         <span
           id={hintId}
           role="alert"
@@ -1114,13 +1430,23 @@ function BidStepInput({ value, onChange, onFocus, disabled, className = '', vari
  * validasi format ketat. Menampilkan pesan error/warning ke screen reader via
  * aria-describedby → <span role="alert">, dan menandai aria-invalid saat error.
  */
-function LotInput({ value, onChange, className = '', label, gridRow, gridCol, onKeyDown, ...rest }) {
+function LotInput({
+  value,
+  onChange,
+  className = "",
+  label,
+  gridRow,
+  gridCol,
+  onKeyDown,
+  ...rest
+}) {
   const reactId = useId();
   const inputId = rest.id || `lot-input-${reactId}`;
   const hintId = `${inputId}-hint`;
   const status = validateLot(Number(value));
-  const message = status.error || status.warning || '';
-  const restNoId = { ...rest }; delete restNoId.id;
+  const message = status.error || status.warning || "";
+  const restNoId = { ...rest };
+  delete restNoId.id;
   return (
     <>
       <input
@@ -1137,8 +1463,8 @@ function LotInput({ value, onChange, className = '', label, gridRow, gridCol, on
         aria-describedby={message ? hintId : undefined}
         data-grid-row={gridRow}
         data-grid-col={gridCol}
-        onChange={e => onChange(+e.target.value)}
-        onFocus={e => e.target.select()}
+        onChange={(e) => onChange(+e.target.value)}
+        onFocus={(e) => e.target.select()}
         onKeyDown={onKeyDown}
         {...restNoId}
       />
@@ -1157,7 +1483,7 @@ function LotInput({ value, onChange, className = '', label, gridRow, gridCol, on
 }
 
 /* ==================== SWIPEABLE CARD ==================== */
-function SwipeableCard({ children, canSwipe, onDelete, className = '', style = {} }) {
+function SwipeableCard({ children, canSwipe, onDelete, className = "", style = {} }) {
   const [translate, setTranslate] = useState(0);
   const [swiping, setSwiping] = useState(false);
   const startXRef = useRef(0);
@@ -1191,10 +1517,10 @@ function SwipeableCard({ children, canSwipe, onDelete, className = '', style = {
     // Detect dominant axis on first significant movement (>8px)
     if (axisRef.current === null) {
       if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
-      axisRef.current = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
+      axisRef.current = Math.abs(dx) > Math.abs(dy) ? "x" : "y";
     }
 
-    if (axisRef.current === 'y') return; // user is scrolling vertically, don't intercept
+    if (axisRef.current === "y") return; // user is scrolling vertically, don't intercept
 
     // Horizontal swipe - only allow leftward (negative dx)
     e.preventDefault();
@@ -1203,15 +1529,24 @@ function SwipeableCard({ children, canSwipe, onDelete, className = '', style = {
   };
 
   const handleTouchEnd = () => {
-    if (!canSwipe || !swiping) { reset(); return; }
-    if (axisRef.current !== 'x') { reset(); return; }
+    if (!canSwipe || !swiping) {
+      reset();
+      return;
+    }
+    if (axisRef.current !== "x") {
+      reset();
+      return;
+    }
 
     const cardWidth = cardRef.current ? cardRef.current.offsetWidth : 300;
     const threshold = cardWidth * 0.5;
     if (Math.abs(translate) > threshold) {
       // Animate out then delete
       setTranslate(-cardWidth);
-      setTimeout(() => { onDelete(); reset(); }, 180);
+      setTimeout(() => {
+        onDelete();
+        reset();
+      }, 180);
     } else {
       reset();
     }
@@ -1229,8 +1564,8 @@ function SwipeableCard({ children, canSwipe, onDelete, className = '', style = {
         style={{
           ...style,
           transform: `translateX(${translate}px)`,
-          transition: swiping ? 'none' : 'transform 0.18s ease-out',
-          touchAction: canSwipe ? 'pan-y' : 'auto',
+          transition: swiping ? "none" : "transform 0.18s ease-out",
+          touchAction: canSwipe ? "pan-y" : "auto",
         }}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
@@ -1246,19 +1581,19 @@ function SwipeableCard({ children, canSwipe, onDelete, className = '', style = {
 /* ==================== MAIN COMPONENT ==================== */
 export default function PYSCAL() {
   const [theme, setTheme] = useState(() => {
-    if (typeof window === 'undefined') return 'light';
+    if (typeof window === "undefined") return "light";
     // Prefer the value the pre-hydration script already applied to <html>,
     // then fall back to localStorage, then to system preference.
     try {
       const attr = document.documentElement.dataset.pyscalTheme;
-      if (attr === 'dark' || attr === 'light') return attr;
-      const saved = localStorage.getItem('pyscal_theme');
-      if (saved === 'dark' || saved === 'light') return saved;
+      if (attr === "dark" || attr === "light") return attr;
+      const saved = localStorage.getItem("pyscal_theme");
+      if (saved === "dark" || saved === "light") return saved;
     } catch {}
     try {
-      if (window.matchMedia?.('(prefers-color-scheme: dark)').matches) return 'dark';
+      if (window.matchMedia?.("(prefers-color-scheme: dark)").matches) return "dark";
     } catch {}
-    return 'light';
+    return "light";
   });
   const initial = loadStateVersioned();
 
@@ -1281,12 +1616,18 @@ export default function PYSCAL() {
   const [showInfo, setShowInfo] = useState(false);
   const [viewingTradeId, setViewingTradeId] = useState(null);
   const [showHint, setShowHint] = useState(() => {
-    if (typeof window === 'undefined') return false;
-    try { return localStorage.getItem('pyscal_onboarded') !== '1'; } catch { return false; }
+    if (typeof window === "undefined") return false;
+    try {
+      return localStorage.getItem("pyscal_onboarded") !== "1";
+    } catch {
+      return false;
+    }
   });
   const dismissHint = useCallback(() => {
     setShowHint(false);
-    try { localStorage.setItem('pyscal_onboarded', '1'); } catch {}
+    try {
+      localStorage.setItem("pyscal_onboarded", "1");
+    } catch {}
   }, []);
   const settingsRef = useRef(null);
   const bidAwalRef = useRef(null);
@@ -1300,39 +1641,45 @@ export default function PYSCAL() {
   // Toast system
   const [toasts, setToasts] = useState([]);
   const toastIdRef = useRef(0);
-  const showToast = useCallback((text, type = 'success', opts = {}) => {
+  const showToast = useCallback((text, type = "success", opts = {}) => {
     const id = ++toastIdRef.current;
     const { action = null, timeout = 2500 } = opts;
-    setToasts(prev => [...prev, { id, text, type, leaving: false, action }]);
+    setToasts((prev) => [...prev, { id, text, type, leaving: false, action }]);
     setTimeout(() => {
-      setToasts(prev => prev.map(t => t.id === id ? { ...t, leaving: true } : t));
+      setToasts((prev) => prev.map((t) => (t.id === id ? { ...t, leaving: true } : t)));
     }, timeout);
   }, []);
   const removeToast = useCallback((id) => {
-    setToasts(prev => prev.filter(t => t.id !== id));
+    setToasts((prev) => prev.filter((t) => t.id !== id));
   }, []);
 
   // Surface storage errors dispatched from lib/storage.ts (quota / privacy mode).
   useEffect(() => {
     const onStorageErr = (e) => {
       const kind = e?.detail?.kind;
-      if (kind === 'quota') {
-        showToast('Storage browser penuh. Hapus history lama atau export backup.', 'error', { timeout: 5000 });
+      if (kind === "quota") {
+        showToast("Storage browser penuh. Hapus history lama atau export backup.", "error", {
+          timeout: 5000,
+        });
       } else {
-        showToast('Data tidak bisa disimpan (mode private / storage diblokir).', 'error', { timeout: 5000 });
+        showToast("Data tidak bisa disimpan (mode private / storage diblokir).", "error", {
+          timeout: 5000,
+        });
       }
     };
-    window.addEventListener('pyscal:storage-error', onStorageErr);
+    window.addEventListener("pyscal:storage-error", onStorageErr);
     const onRepaired = (e) => {
       const dropped = e?.detail?.dropped || 0;
       if (dropped > 0) {
-        showToast(`History dipulihkan otomatis: ${dropped} entri rusak dilewati.`, 'warning', { timeout: 5000 });
+        showToast(`History dipulihkan otomatis: ${dropped} entri rusak dilewati.`, "warning", {
+          timeout: 5000,
+        });
       }
     };
-    window.addEventListener('pyscal:storage-repaired', onRepaired);
+    window.addEventListener("pyscal:storage-repaired", onRepaired);
     return () => {
-      window.removeEventListener('pyscal:storage-error', onStorageErr);
-      window.removeEventListener('pyscal:storage-repaired', onRepaired);
+      window.removeEventListener("pyscal:storage-error", onStorageErr);
+      window.removeEventListener("pyscal:storage-repaired", onRepaired);
     };
   }, [showToast]);
 
@@ -1341,12 +1688,40 @@ export default function PYSCAL() {
 
   // Auto-save
   useEffect(() => {
-    const state = { baseLot, targetTicks, targetProfit, feeBuy, feeSell, bids, balance, mode, existingAvg, existingLot, customLot, customLots };
+    const state = {
+      baseLot,
+      targetTicks,
+      targetProfit,
+      feeBuy,
+      feeSell,
+      bids,
+      balance,
+      mode,
+      existingAvg,
+      existingLot,
+      customLot,
+      customLots,
+    };
     saveState(state);
-  }, [baseLot, targetTicks, targetProfit, feeBuy, feeSell, bids, balance, mode, existingAvg, existingLot, customLot, customLots]);
+  }, [
+    baseLot,
+    targetTicks,
+    targetProfit,
+    feeBuy,
+    feeSell,
+    bids,
+    balance,
+    mode,
+    existingAvg,
+    existingLot,
+    customLot,
+    customLots,
+  ]);
 
   useEffect(() => {
-    try { localStorage.setItem('pyscal_theme', theme); } catch {}
+    try {
+      localStorage.setItem("pyscal_theme", theme);
+    } catch {}
   }, [theme]);
 
   // Click outside settings
@@ -1355,8 +1730,8 @@ export default function PYSCAL() {
     const onClick = (e) => {
       if (settingsRef.current && !settingsRef.current.contains(e.target)) setShowSettings(false);
     };
-    document.addEventListener('mousedown', onClick);
-    return () => document.removeEventListener('mousedown', onClick);
+    document.addEventListener("mousedown", onClick);
+    return () => document.removeEventListener("mousedown", onClick);
   }, [showSettings]);
 
   // Presets
@@ -1374,12 +1749,22 @@ export default function PYSCAL() {
   const savePreset = () => {
     const name = presetName.trim().toUpperCase();
     if (!name) return;
-    const isUpdate = presets.some(p => p.name === name);
-    const preset = { name, baseLot, targetTicks, targetProfit, bids: [...bids], balance, mode, existingAvg, existingLot };
-    persistPresets([...presets.filter(p => p.name !== name), preset]);
+    const isUpdate = presets.some((p) => p.name === name);
+    const preset = {
+      name,
+      baseLot,
+      targetTicks,
+      targetProfit,
+      bids: [...bids],
+      balance,
+      mode,
+      existingAvg,
+      existingLot,
+    };
+    persistPresets([...presets.filter((p) => p.name !== name), preset]);
     setPresetName("");
     setActivePreset(name);
-    showToast(`Preset <strong>${escHtml(name)}</strong> ${isUpdate ? 'diupdate' : 'tersimpan'}`);
+    showToast(`Preset <strong>${escHtml(name)}</strong> ${isUpdate ? "diupdate" : "tersimpan"}`);
   };
 
   const loadPreset = (p) => {
@@ -1398,14 +1783,14 @@ export default function PYSCAL() {
   };
 
   const deletePreset = (name) => {
-    persistPresets(presets.filter(p => p.name !== name));
+    persistPresets(presets.filter((p) => p.name !== name));
     if (activePreset === name) setActivePreset(null);
     showToast(`Preset <strong>${escHtml(name)}</strong> dihapus`);
   };
 
   const exportPresets = useCallback(() => {
     if (presets.length === 0) {
-      showToast('Belum ada preset untuk di-export', 'error');
+      showToast("Belum ada preset untuk di-export", "error");
       return;
     }
     const payload = {
@@ -1414,10 +1799,10 @@ export default function PYSCAL() {
       presets: presets,
     };
     const json = JSON.stringify(payload, null, 2);
-    const blob = new Blob([json], { type: 'application/json' });
+    const blob = new Blob([json], { type: "application/json" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+    const a = document.createElement("a");
+    const date = new Date().toISOString().slice(0, 10).replace(/-/g, "");
     a.href = url;
     a.download = `pyscal-presets-${date}.json`;
     document.body.appendChild(a);
@@ -1427,38 +1812,48 @@ export default function PYSCAL() {
     showToast(`${presets.length} preset di-export`);
   }, [presets, showToast]);
 
-  const importPresets = useCallback((file) => {
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      try {
-        const payload = JSON.parse(e.target.result);
-        if (!payload.presets || !Array.isArray(payload.presets)) {
-          showToast('Format file invalid', 'error');
-          return;
+  const importPresets = useCallback(
+    (file) => {
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const payload = JSON.parse(e.target.result);
+          if (!payload.presets || !Array.isArray(payload.presets)) {
+            showToast("Format file invalid", "error");
+            return;
+          }
+          const valid = payload.presets.filter((p) => p.name && typeof p.name === "string");
+          if (valid.length === 0) {
+            showToast("Tidak ada preset valid dalam file", "error");
+            return;
+          }
+          const hasConflict = valid.some((p) =>
+            presets.some((existing) => existing.name === p.name),
+          );
+          if (hasConflict) {
+            if (
+              !confirm(
+                `Import ${valid.length} preset. Nama yang sama akan di-overwrite. Lanjutkan?`,
+              )
+            )
+              return;
+          }
+          // Merge: incoming overrides existing by name
+          const byName = new Map();
+          presets.forEach((p) => byName.set(p.name, p));
+          valid.forEach((p) => byName.set(p.name, p));
+          const merged = Array.from(byName.values());
+          persistPresets(merged);
+          showToast(`${valid.length} preset di-import`);
+        } catch (err) {
+          showToast("File tidak bisa dibaca (bukan JSON valid)", "error");
         }
-        const valid = payload.presets.filter(p => p.name && typeof p.name === 'string');
-        if (valid.length === 0) {
-          showToast('Tidak ada preset valid dalam file', 'error');
-          return;
-        }
-        const hasConflict = valid.some(p => presets.some(existing => existing.name === p.name));
-        if (hasConflict) {
-          if (!confirm(`Import ${valid.length} preset. Nama yang sama akan di-overwrite. Lanjutkan?`)) return;
-        }
-        // Merge: incoming overrides existing by name
-        const byName = new Map();
-        presets.forEach(p => byName.set(p.name, p));
-        valid.forEach(p => byName.set(p.name, p));
-        const merged = Array.from(byName.values());
-        persistPresets(merged);
-        showToast(`${valid.length} preset di-import`);
-      } catch (err) {
-        showToast('File tidak bisa dibaca (bukan JSON valid)', 'error');
-      }
-    };
-    reader.readAsText(file);
-  }, [presets, showToast]);
+      };
+      reader.readAsText(file);
+    },
+    [presets, showToast],
+  );
 
   // Shortcuts state
   const [shortcuts, setShortcuts] = useState(loadShortcutsVersioned);
@@ -1480,24 +1875,39 @@ export default function PYSCAL() {
   // Cross-tab sync: another tab may add/delete/rename history entries.
   // Reload from storage on the `storage` event so both tabs stay consistent.
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === "undefined") return;
     const onStorage = (e) => {
-      if (e.key !== 'pyscal_history') return;
+      if (e.key !== "pyscal_history") return;
       try {
         const next = loadHistory();
         setHistory(next);
-      } catch { /* noop */ }
+      } catch {
+        /* noop */
+      }
     };
-    window.addEventListener('storage', onStorage);
-    return () => window.removeEventListener('storage', onStorage);
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
   }, []);
 
   // ==================== FULL BACKUP / RESTORE ====================
   // Export all data: state + presets + history + shortcuts + theme
   const exportAll = useCallback(() => {
-    const state = { baseLot, targetTicks, targetProfit, feeBuy, feeSell, bids, balance, mode, existingAvg, existingLot, customLot, customLots };
+    const state = {
+      baseLot,
+      targetTicks,
+      targetProfit,
+      feeBuy,
+      feeSell,
+      bids,
+      balance,
+      mode,
+      existingAvg,
+      existingLot,
+      customLot,
+      customLots,
+    };
     const payload = {
-      app: 'pyscal',
+      app: "pyscal",
       schema: 1,
       exported_at: new Date().toISOString(),
       state,
@@ -1507,63 +1917,110 @@ export default function PYSCAL() {
       theme,
     };
     const json = JSON.stringify(payload, null, 2);
-    const blob = new Blob([json], { type: 'application/json' });
+    const blob = new Blob([json], { type: "application/json" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     const d = new Date();
-    const stamp = `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}-${String(d.getHours()).padStart(2,'0')}${String(d.getMinutes()).padStart(2,'0')}`;
+    const stamp = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}${String(d.getDate()).padStart(2, "0")}-${String(d.getHours()).padStart(2, "0")}${String(d.getMinutes()).padStart(2, "0")}`;
     a.href = url;
     a.download = `pyscal-backup-${stamp}.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    showToast('Backup lengkap di-export');
-  }, [baseLot, targetTicks, targetProfit, feeBuy, feeSell, bids, balance, mode, existingAvg, existingLot, customLot, customLots, presets, history, shortcuts, theme, showToast]);
+    showToast("Backup lengkap di-export");
+  }, [
+    baseLot,
+    targetTicks,
+    targetProfit,
+    feeBuy,
+    feeSell,
+    bids,
+    balance,
+    mode,
+    existingAvg,
+    existingLot,
+    customLot,
+    customLots,
+    presets,
+    history,
+    shortcuts,
+    theme,
+    showToast,
+  ]);
 
-  const importAll = useCallback((file) => {
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      try {
-        const payload = JSON.parse(e.target.result);
-        if (payload.app !== 'pyscal' || !payload.state) {
-          showToast('Bukan file backup PYSCAL', 'error');
-          return;
+  const importAll = useCallback(
+    (file) => {
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const payload = JSON.parse(e.target.result);
+          if (payload.app !== "pyscal" || !payload.state) {
+            showToast("Bukan file backup PYSCAL", "error");
+            return;
+          }
+          if (
+            !confirm(
+              "Restore akan MENGGANTI semua data saat ini (state, preset, history, shortcut). Lanjutkan?",
+            )
+          )
+            return;
+          const s = payload.state || {};
+          const merged = { ...DEFAULT_STATE, ...s };
+          setBaseLot(merged.baseLot);
+          setTargetTicks(merged.targetTicks);
+          setTargetProfit(merged.targetProfit);
+          setFeeBuy(merged.feeBuy);
+          setFeeSell(merged.feeSell);
+          setBids(Array.isArray(merged.bids) && merged.bids.length ? merged.bids : [100]);
+          setBalance(merged.balance || 0);
+          setMode(merged.mode || "entry");
+          setExistingAvg(merged.existingAvg || 0);
+          setExistingLot(merged.existingLot || 0);
+          setCustomLot(!!merged.customLot);
+          setCustomLots(Array.isArray(merged.customLots) ? merged.customLots : []);
+          if (Array.isArray(payload.presets)) persistPresets(payload.presets);
+          if (Array.isArray(payload.history)) persistHistory(payload.history);
+          if (payload.shortcuts && typeof payload.shortcuts === "object")
+            persistShortcuts({ ...DEFAULT_SHORTCUTS, ...payload.shortcuts });
+          if (payload.theme === "dark" || payload.theme === "light") setTheme(payload.theme);
+          showToast("Backup berhasil di-restore");
+        } catch {
+          showToast("File tidak bisa dibaca (bukan JSON valid)", "error");
         }
-        if (!confirm('Restore akan MENGGANTI semua data saat ini (state, preset, history, shortcut). Lanjutkan?')) return;
-        const s = payload.state || {};
-        const merged = { ...DEFAULT_STATE, ...s };
-        setBaseLot(merged.baseLot);
-        setTargetTicks(merged.targetTicks);
-        setTargetProfit(merged.targetProfit);
-        setFeeBuy(merged.feeBuy);
-        setFeeSell(merged.feeSell);
-        setBids(Array.isArray(merged.bids) && merged.bids.length ? merged.bids : [100]);
-        setBalance(merged.balance || 0);
-        setMode(merged.mode || 'entry');
-        setExistingAvg(merged.existingAvg || 0);
-        setExistingLot(merged.existingLot || 0);
-        setCustomLot(!!merged.customLot);
-        setCustomLots(Array.isArray(merged.customLots) ? merged.customLots : []);
-        if (Array.isArray(payload.presets)) persistPresets(payload.presets);
-        if (Array.isArray(payload.history)) persistHistory(payload.history);
-        if (payload.shortcuts && typeof payload.shortcuts === 'object') persistShortcuts({ ...DEFAULT_SHORTCUTS, ...payload.shortcuts });
-        if (payload.theme === 'dark' || payload.theme === 'light') setTheme(payload.theme);
-        showToast('Backup berhasil di-restore');
-      } catch {
-        showToast('File tidak bisa dibaca (bukan JSON valid)', 'error');
-      }
-    };
-    reader.readAsText(file);
-  }, [showToast]);
+      };
+      reader.readAsText(file);
+    },
+    [showToast],
+  );
 
   // ==================== UNDO / REDO ====================
   // Snapshot captures the undo-able state shape
-  const makeSnapshot = useCallback(() => ({
-    baseLot, targetTicks, targetProfit, bids: [...bids], mode, existingAvg, existingLot,
-    customLot, customLots: [...customLots],
-  }), [baseLot, targetTicks, targetProfit, bids, mode, existingAvg, existingLot, customLot, customLots]);
+  const makeSnapshot = useCallback(
+    () => ({
+      baseLot,
+      targetTicks,
+      targetProfit,
+      bids: [...bids],
+      mode,
+      existingAvg,
+      existingLot,
+      customLot,
+      customLots: [...customLots],
+    }),
+    [
+      baseLot,
+      targetTicks,
+      targetProfit,
+      bids,
+      mode,
+      existingAvg,
+      existingLot,
+      customLot,
+      customLots,
+    ],
+  );
 
   const applySnapshot = useCallback((snap) => {
     // Set lastSnapshotRef BEFORE state changes so the change-tracker effect
@@ -1581,25 +2038,28 @@ export default function PYSCAL() {
   }, []);
 
   // Push snapshot (with optional debounce for input edits)
-  const pushSnapshot = useCallback((debounce = false) => {
-    const snap = makeSnapshot();
-    // Dedupe: don't push if identical to last
-    const last = undoStackRef.current[undoStackRef.current.length - 1];
-    if (last && JSON.stringify(last) === JSON.stringify(snap)) return;
+  const pushSnapshot = useCallback(
+    (debounce = false) => {
+      const snap = makeSnapshot();
+      // Dedupe: don't push if identical to last
+      const last = undoStackRef.current[undoStackRef.current.length - 1];
+      if (last && JSON.stringify(last) === JSON.stringify(snap)) return;
 
-    if (debounce) {
-      if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
-      debounceTimerRef.current = setTimeout(() => {
+      if (debounce) {
+        if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+        debounceTimerRef.current = setTimeout(() => {
+          undoStackRef.current.push(snap);
+          if (undoStackRef.current.length > 50) undoStackRef.current.shift();
+          redoStackRef.current = [];
+        }, 800);
+      } else {
         undoStackRef.current.push(snap);
         if (undoStackRef.current.length > 50) undoStackRef.current.shift();
         redoStackRef.current = [];
-      }, 800);
-    } else {
-      undoStackRef.current.push(snap);
-      if (undoStackRef.current.length > 50) undoStackRef.current.shift();
-      redoStackRef.current = [];
-    }
-  }, [makeSnapshot]);
+      }
+    },
+    [makeSnapshot],
+  );
 
   // Initialize: push first snapshot on mount
   useEffect(() => {
@@ -1614,16 +2074,20 @@ export default function PYSCAL() {
   useEffect(() => {
     const current = makeSnapshot();
     const last = lastSnapshotRef.current;
-    if (!last) { lastSnapshotRef.current = current; return; }
+    if (!last) {
+      lastSnapshotRef.current = current;
+      return;
+    }
 
     // If applySnapshot just ran, lastSnapshotRef === current snapshot,
     // so dedupe in pushSnapshot will skip. No flag needed.
     if (JSON.stringify(last) === JSON.stringify(current)) return;
 
     // Detect what changed
-    const structuralChange = last.mode !== current.mode ||
-                              last.bids.length !== current.bids.length ||
-                              last.customLot !== current.customLot;
+    const structuralChange =
+      last.mode !== current.mode ||
+      last.bids.length !== current.bids.length ||
+      last.customLot !== current.customLot;
 
     // Immediate push for structural changes; debounced for input edits
     if (structuralChange) {
@@ -1632,7 +2096,19 @@ export default function PYSCAL() {
       pushSnapshot(true);
     }
     lastSnapshotRef.current = current;
-  }, [baseLot, targetTicks, targetProfit, bids, mode, existingAvg, existingLot, customLot, customLots, makeSnapshot, pushSnapshot]);
+  }, [
+    baseLot,
+    targetTicks,
+    targetProfit,
+    bids,
+    mode,
+    existingAvg,
+    existingLot,
+    customLot,
+    customLots,
+    makeSnapshot,
+    pushSnapshot,
+  ]);
 
   const undo = useCallback(() => {
     // Flush any pending debounced push first
@@ -1646,7 +2122,7 @@ export default function PYSCAL() {
       }
     }
     if (undoStackRef.current.length <= 1) {
-      showToast('Tidak ada yang bisa di-undo', 'error');
+      showToast("Tidak ada yang bisa di-undo", "error");
       return;
     }
     const popped = undoStackRef.current.pop();
@@ -1658,7 +2134,7 @@ export default function PYSCAL() {
 
   const redo = useCallback(() => {
     if (redoStackRef.current.length === 0) {
-      showToast('Tidak ada yang bisa di-redo', 'error');
+      showToast("Tidak ada yang bisa di-redo", "error");
       return;
     }
     const snap = redoStackRef.current.pop();
@@ -1670,20 +2146,46 @@ export default function PYSCAL() {
   // Compute
   const data = useMemo(() => {
     if (!bids.length || bids[0] <= 0 || baseLot < 1) return null;
-    const existing = mode === 'position' && existingAvg > 0 && existingLot > 0
-      ? { avg: existingAvg, lot: existingLot }
-      : null;
+    const existing =
+      mode === "position" && existingAvg > 0 && existingLot > 0
+        ? { avg: existingAvg, lot: existingLot }
+        : null;
     const customArr = customLot ? customLots : null;
-    return computeRows(bids, baseLot, targetTicks, targetProfit, feeBuy / 100, feeSell / 100, existing, customArr);
-  }, [bids, baseLot, targetTicks, targetProfit, feeBuy, feeSell, mode, existingAvg, existingLot, customLot, customLots]);
+    return computeRows(
+      bids,
+      baseLot,
+      targetTicks,
+      targetProfit,
+      feeBuy / 100,
+      feeSell / 100,
+      existing,
+      customArr,
+    );
+  }, [
+    bids,
+    baseLot,
+    targetTicks,
+    targetProfit,
+    feeBuy,
+    feeSell,
+    mode,
+    existingAvg,
+    existingLot,
+    customLot,
+    customLots,
+  ]);
 
   // Handlers
   const setBidAt = useCallback((i, v) => {
-    setBids(prev => { const next = [...prev]; next[i] = v; return next; });
+    setBids((prev) => {
+      const next = [...prev];
+      next[i] = v;
+      return next;
+    });
   }, []);
 
   const setLotAt = useCallback((i, v) => {
-    setCustomLots(prev => {
+    setCustomLots((prev) => {
       const next = [...prev];
       next[i] = Math.max(1, v || 0);
       return next;
@@ -1691,55 +2193,62 @@ export default function PYSCAL() {
   }, []);
 
   const addPapan = useCallback(() => {
-    setBids(prev => {
+    setBids((prev) => {
       const lastBid = prev[prev.length - 1];
       const tick = getTickSize(prev[0] || 100);
       const newBid = Math.max(1, lastBid - tick);
       return [...prev, newBid];
     });
-    setCustomLots(prev => {
+    setCustomLots((prev) => {
       // In custom mode, seed new papan with last lot value (or baseLot fallback)
       if (prev.length === 0) return prev;
       return [...prev, prev[prev.length - 1]];
     });
   }, []);
 
-  const removePapan = useCallback((i) => {
-    if (i === 0) return;
-    let removedBid, removedLot;
-    setBids(prev => {
-      removedBid = prev[i];
-      return prev.filter((_, idx) => idx !== i);
-    });
-    setCustomLots(prev => {
-      removedLot = prev[i];
-      return prev.filter((_, idx) => idx !== i);
-    });
-    // Toast with undo action
-    showToast(`Papan ${i + 1} dihapus`, 'success', {
-      timeout: 4000,
-      action: {
-        label: 'Undo',
-        handler: () => {
-          setBids(prev => {
-            const next = [...prev];
-            next.splice(i, 0, removedBid);
-            return next;
-          });
-          setCustomLots(prev => {
-            if (prev.length === 0) return prev;
-            const next = [...prev];
-            next.splice(i, 0, removedLot !== undefined ? removedLot : prev[prev.length - 1] || 100);
-            return next;
-          });
+  const removePapan = useCallback(
+    (i) => {
+      if (i === 0) return;
+      let removedBid, removedLot;
+      setBids((prev) => {
+        removedBid = prev[i];
+        return prev.filter((_, idx) => idx !== i);
+      });
+      setCustomLots((prev) => {
+        removedLot = prev[i];
+        return prev.filter((_, idx) => idx !== i);
+      });
+      // Toast with undo action
+      showToast(`Papan ${i + 1} dihapus`, "success", {
+        timeout: 4000,
+        action: {
+          label: "Undo",
+          handler: () => {
+            setBids((prev) => {
+              const next = [...prev];
+              next.splice(i, 0, removedBid);
+              return next;
+            });
+            setCustomLots((prev) => {
+              if (prev.length === 0) return prev;
+              const next = [...prev];
+              next.splice(
+                i,
+                0,
+                removedLot !== undefined ? removedLot : prev[prev.length - 1] || 100,
+              );
+              return next;
+            });
+          },
         },
-      },
-    });
-  }, [showToast]);
+      });
+    },
+    [showToast],
+  );
 
   const resetPapan = useCallback(() => {
-    setBids(prev => [prev[0]]);
-    setCustomLots(prev => prev.length > 0 ? [prev[0]] : []);
+    setBids((prev) => [prev[0]]);
+    setCustomLots((prev) => (prev.length > 0 ? [prev[0]] : []));
   }, []);
 
   // Toggle custom lot mode (no confirm - instant lock/unlock)
@@ -1748,24 +2257,22 @@ export default function PYSCAL() {
       // Turn OFF: clear customLots, recompute auto
       setCustomLot(false);
       setCustomLots([]);
-      showToast('Custom Lot dimatikan');
+      showToast("Custom Lot dimatikan");
     } else {
       // Turn ON: seed customLots from current computed lots
       if (data && data.results.length) {
-        const currentLots = data.results
-          .filter(r => !r.isExisting)
-          .map(r => r.lot);
+        const currentLots = data.results.filter((r) => !r.isExisting).map((r) => r.lot);
         setCustomLots(currentLots);
       }
       setCustomLot(true);
-      showToast('Custom Lot aktif');
+      showToast("Custom Lot aktif");
     }
   }, [customLot, data, showToast]);
 
   // Safety: sync customLots length to bids.length
   useEffect(() => {
     if (!customLot) return;
-    setCustomLots(prev => {
+    setCustomLots((prev) => {
       if (prev.length === bids.length) return prev;
       if (prev.length > bids.length) {
         // Trim
@@ -1789,8 +2296,8 @@ export default function PYSCAL() {
   }, [bids]);
 
   // Filter results to only buy rows for under-target check
-  const buyRows = data ? data.results.filter(r => !r.isExisting) : [];
-  const underTarget = buyRows.filter(r => r.pct < targetProfit - 0.001);
+  const buyRows = data ? data.results.filter((r) => !r.isExisting) : [];
+  const underTarget = buyRows.filter((r) => r.pct < targetProfit - 0.001);
 
   const totalLot = data ? data.results.reduce((s, r) => s + r.lot, 0) : 0;
   const totalBuyLot = buyRows.reduce((s, r) => s + r.lot, 0);
@@ -1798,76 +2305,110 @@ export default function PYSCAL() {
 
   // Live region summary — announces final avg/sell/PL when results change,
   // debounced so rapid input changes don't spam assistive tech.
-  const [liveSummary, setLiveSummary] = useState('');
+  const [liveSummary, setLiveSummary] = useState("");
   useEffect(() => {
-    if (!data || !data.results.length) { setLiveSummary(''); return; }
+    if (!data || !data.results.length) {
+      setLiveSummary("");
+      return;
+    }
     const last = data.results[data.results.length - 1];
     const t = setTimeout(() => {
       setLiveSummary(
         `${data.results.length} papan, total ${n(totalBuyLot)} lot. ` +
-        `Avg final ${last.avg.toFixed(2)}, sell target ${last.sell}, ` +
-        `estimasi P/L ${nDec(last.pl)} (${last.pct.toFixed(2)}%).`
+          `Avg final ${last.avg.toFixed(2)}, sell target ${last.sell}, ` +
+          `estimasi P/L ${nDec(last.pl)} (${last.pct.toFixed(2)}%).`,
       );
     }, 500);
     return () => clearTimeout(t);
   }, [data, totalBuyLot]);
 
   // Copy
-  const [copyState, setCopyState] = useState('idle');
-  const [saveTradeState, setSaveTradeState] = useState('idle'); // idle | saving | saved
+  const [copyState, setCopyState] = useState("idle");
+  const [saveTradeState, setSaveTradeState] = useState("idle"); // idle | saving | saved
   const copyResults = useCallback(() => {
     if (!data || !data.results.length) return;
     const lines = [];
-    lines.push(`📊 PYSCAL · ${mode === 'position' ? 'Position Mode' : 'Entry Mode'} · ${bids.length} papan`);
-    if (mode === 'position' && existingAvg > 0) {
+    lines.push(
+      `📊 PYSCAL · ${mode === "position" ? "Position Mode" : "Entry Mode"} · ${bids.length} papan`,
+    );
+    if (mode === "position" && existingAvg > 0) {
       lines.push(`Existing: ${existingLot} lot @ avg ${existingAvg}`);
     }
-    lines.push(`Bid Awal: ${bids[0]} · Lot: ${baseLot} · Target: +${targetTicks} tick · Min profit: ${targetProfit}%`);
-    lines.push('');
-    data.results.forEach(r => {
-      const label = r.isExisting ? 'EXISTING' : `${r.layer}.`;
-      lines.push(`${label} Bid ${r.bid} × ${n(r.lot)} lot → Avg ${r.avg.toFixed(2)}, Sell ${r.sell}, P/L ${nDec(r.pl)} (${r.pct.toFixed(2)}%)`);
+    lines.push(
+      `Bid Awal: ${bids[0]} · Lot: ${baseLot} · Target: +${targetTicks} tick · Min profit: ${targetProfit}%`,
+    );
+    lines.push("");
+    data.results.forEach((r) => {
+      const label = r.isExisting ? "EXISTING" : `${r.layer}.`;
+      lines.push(
+        `${label} Bid ${r.bid} × ${n(r.lot)} lot → Avg ${r.avg.toFixed(2)}, Sell ${r.sell}, P/L ${nDec(r.pl)} (${r.pct.toFixed(2)}%)`,
+      );
     });
-    lines.push('');
+    lines.push("");
     lines.push(`Total beli: ${n(totalBuyLot)} lot · Cost ${nShort(totalBuyCost)}`);
-    if (balance > 0) lines.push(`Balance util: ${Math.round(totalBuyCost / balance * 100)}%`);
-    const text = lines.join('\n');
+    if (balance > 0) lines.push(`Balance util: ${Math.round((totalBuyCost / balance) * 100)}%`);
+    const text = lines.join("\n");
 
     const fallback = () => {
-      const ta = document.createElement('textarea');
-      ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
-      document.body.appendChild(ta); ta.select();
-      try { document.execCommand('copy'); } catch {}
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand("copy");
+      } catch {}
       document.body.removeChild(ta);
     };
 
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(text).catch(fallback);
     } else fallback();
-    setCopyState('copied');
-    haptic('success');
-    setTimeout(() => setCopyState('idle'), 1500);
-  }, [data, bids, baseLot, targetTicks, targetProfit, totalBuyLot, totalBuyCost, balance, mode, existingAvg, existingLot]);
+    setCopyState("copied");
+    haptic("success");
+    setTimeout(() => setCopyState("idle"), 1500);
+  }, [
+    data,
+    bids,
+    baseLot,
+    targetTicks,
+    targetProfit,
+    totalBuyLot,
+    totalBuyCost,
+    balance,
+    mode,
+    existingAvg,
+    existingLot,
+  ]);
 
   // Save trade - 1 click, no modal
   const saveTrade = useCallback(() => {
     if (!data || !data.results.length) return;
-    if (saveTradeState === 'saving') return;
+    if (saveTradeState === "saving") return;
     // Blokir simpan kalau masih ada field invalid; scroll + fokus ke error pertama
     // agar user keyboard/SR tahu letak persisnya.
     if (focusFirstInvalidInput()) {
-      haptic('error');
-      showToast('Ada input yang belum valid. Fokus dipindah ke input bermasalah.', 'error');
+      haptic("error");
+      showToast("Ada input yang belum valid. Fokus dipindah ke input bermasalah.", "error");
       return;
     }
-    setSaveTradeState('saving');
+    setSaveTradeState("saving");
     const trade = {
-      id: 'tr_' + Date.now(),
+      id: "tr_" + Date.now(),
       timestamp: Date.now(),
       mode,
-      baseLot, targetTicks, targetProfit, feeBuy, feeSell, balance,
-      bids: [...bids], existingAvg, existingLot,
-      customLot, customLots: [...customLots],
+      baseLot,
+      targetTicks,
+      targetProfit,
+      feeBuy,
+      feeSell,
+      balance,
+      bids: [...bids],
+      existingAvg,
+      existingLot,
+      customLot,
+      customLots: [...customLots],
       planned: {
         totalLot: totalBuyLot,
         totalCost: totalBuyCost,
@@ -1878,80 +2419,124 @@ export default function PYSCAL() {
     };
     const next = [trade, ...history].slice(0, 500);
     persistHistory(next);
-    haptic('success');
-    setSaveTradeState('saved');
-    setTimeout(() => setSaveTradeState('idle'), 1400);
-    showToast(`Avg <strong>${escHtml(trade.planned.avgFinal.toFixed(2))}</strong> tersimpan di History`);
-  }, [data, bids, baseLot, targetTicks, targetProfit, feeBuy, feeSell, balance, mode, existingAvg, existingLot, customLot, customLots, totalBuyLot, totalBuyCost, history, showToast, saveTradeState]);
+    haptic("success");
+    setSaveTradeState("saved");
+    setTimeout(() => setSaveTradeState("idle"), 1400);
+    showToast(
+      `Avg <strong>${escHtml(trade.planned.avgFinal.toFixed(2))}</strong> tersimpan di History`,
+    );
+  }, [
+    data,
+    bids,
+    baseLot,
+    targetTicks,
+    targetProfit,
+    feeBuy,
+    feeSell,
+    balance,
+    mode,
+    existingAvg,
+    existingLot,
+    customLot,
+    customLots,
+    totalBuyLot,
+    totalBuyCost,
+    history,
+    showToast,
+    saveTradeState,
+  ]);
 
   // Recall a saved trade back into the calculator state (undo-able).
-  const recallTrade = useCallback((t) => {
-    if (!t) return;
-    if (!confirm('Muat papan ini ke kalkulator? State saat ini akan ter-replace (bisa di-undo).')) return;
-    const snap = {
-      baseLot: t.baseLot ?? baseLot,
-      targetTicks: t.targetTicks ?? targetTicks,
-      targetProfit: t.targetProfit ?? targetProfit,
-      bids: Array.isArray(t.bids) && t.bids.length ? [...t.bids] : [...bids],
-      mode: t.mode || 'entry',
-      existingAvg: t.existingAvg ?? 0,
-      existingLot: t.existingLot ?? 0,
-      customLot: !!t.customLot,
-      customLots: Array.isArray(t.customLots) ? [...t.customLots] : [],
-    };
-    applySnapshot(snap);
-    setShowHistory(false);
-    setViewingTradeId(null);
-    showToast(`Recalled: <strong>${escHtml(t.note ? t.note : 'Avg ' + t.planned.avgFinal.toFixed(2))}</strong>`);
-  }, [bids, baseLot, targetTicks, targetProfit, applySnapshot, showToast]);
+  const recallTrade = useCallback(
+    (t) => {
+      if (!t) return;
+      if (!confirm("Muat papan ini ke kalkulator? State saat ini akan ter-replace (bisa di-undo)."))
+        return;
+      const snap = {
+        baseLot: t.baseLot ?? baseLot,
+        targetTicks: t.targetTicks ?? targetTicks,
+        targetProfit: t.targetProfit ?? targetProfit,
+        bids: Array.isArray(t.bids) && t.bids.length ? [...t.bids] : [...bids],
+        mode: t.mode || "entry",
+        existingAvg: t.existingAvg ?? 0,
+        existingLot: t.existingLot ?? 0,
+        customLot: !!t.customLot,
+        customLots: Array.isArray(t.customLots) ? [...t.customLots] : [],
+      };
+      applySnapshot(snap);
+      setShowHistory(false);
+      setViewingTradeId(null);
+      showToast(
+        `Recalled: <strong>${escHtml(t.note ? t.note : "Avg " + t.planned.avgFinal.toFixed(2))}</strong>`,
+      );
+    },
+    [bids, baseLot, targetTicks, targetProfit, applySnapshot, showToast],
+  );
 
   const deleteTrade = (id) => {
-    const idx = history.findIndex(x => x.id === id);
+    const idx = history.findIndex((x) => x.id === id);
     if (idx < 0) return;
     const removed = history[idx];
     const next = history.slice(0, idx).concat(history.slice(idx + 1));
     persistHistory(next);
     if (viewingTradeId === id) setViewingTradeId(null);
-    const label = removed?.note ? removed.note : `Avg ${removed?.planned?.avgFinal?.toFixed?.(2) ?? '-'}`;
-    showToast(`Trade <strong>${escHtml(label)}</strong> dihapus`, 'success', {
+    const label = removed?.note
+      ? removed.note
+      : `Avg ${removed?.planned?.avgFinal?.toFixed?.(2) ?? "-"}`;
+    showToast(`Trade <strong>${escHtml(label)}</strong> dihapus`, "success", {
       timeout: 5000,
       action: {
-        label: 'Undo',
+        label: "Undo",
         handler: () => {
           // Restore at original position, capped at 500.
-          setHistory(prev => {
-            if (prev.some(x => x.id === removed.id)) return prev;
+          setHistory((prev) => {
+            if (prev.some((x) => x.id === removed.id)) return prev;
             const restored = prev.slice();
             restored.splice(Math.min(idx, restored.length), 0, removed);
             const capped = restored.slice(0, 500);
             saveHistory(capped);
             return capped;
           });
-          showToast('Trade dipulihkan', 'success', { timeout: 1800 });
+          showToast("Trade dipulihkan", "success", { timeout: 1800 });
         },
       },
     });
   };
 
   const renameTrade = (id, note) => {
-    const trimmed = (note || '').slice(0, 80);
-    persistHistory(history.map(t => t.id === id ? { ...t, note: trimmed } : t));
+    const trimmed = (note || "").slice(0, 80);
+    persistHistory(history.map((t) => (t.id === id ? { ...t, note: trimmed } : t)));
   };
 
   const togglePinTrade = (id) => {
-    persistHistory(history.map(t => t.id === id ? { ...t, pinned: !t.pinned } : t));
+    persistHistory(history.map((t) => (t.id === id ? { ...t, pinned: !t.pinned } : t)));
   };
 
   /* ==================== KEYBOARD HANDLER ==================== */
   useEffect(() => {
     const onKeyDown = (e) => {
       // Esc handling
-      if (e.key === 'Escape') {
-        if (showInfo) { setShowInfo(false); return; }
-        if (viewingTradeId) { setViewingTradeId(null); return; }
-        if (showHistory) { setShowHistory(false); return; }
-        if (showSettings) { setShowSettings(false); return; }
-        if (recordingShortcut) { setRecordingShortcut(null); return; }
+      if (e.key === "Escape") {
+        if (showInfo) {
+          setShowInfo(false);
+          return;
+        }
+        if (viewingTradeId) {
+          setViewingTradeId(null);
+          return;
+        }
+        if (showHistory) {
+          setShowHistory(false);
+          return;
+        }
+        if (showSettings) {
+          setShowSettings(false);
+          return;
+        }
+        if (recordingShortcut) {
+          setRecordingShortcut(null);
+          return;
+        }
         return;
       }
 
@@ -1959,7 +2544,7 @@ export default function PYSCAL() {
       if (recordingShortcut) {
         e.preventDefault();
         // Skip standalone modifier keys
-        if (['Control', 'Meta', 'Shift', 'Alt'].includes(e.key)) return;
+        if (["Control", "Meta", "Shift", "Alt"].includes(e.key)) return;
         const newShortcut = {
           key: e.key.toLowerCase(),
           mod: e.ctrlKey || e.metaKey,
@@ -1974,39 +2559,71 @@ export default function PYSCAL() {
 
       // Match shortcuts - redo checked BEFORE undo (shift variant must come first)
       if (eventMatchesShortcut(e, shortcuts.redo)) {
-        e.preventDefault(); redo(); return;
+        e.preventDefault();
+        redo();
+        return;
       }
       if (eventMatchesShortcut(e, shortcuts.undo)) {
-        e.preventDefault(); undo(); return;
+        e.preventDefault();
+        undo();
+        return;
       }
       if (eventMatchesShortcut(e, shortcuts.toggleSettings)) {
-        e.preventDefault(); setShowSettings(v => !v); return;
+        e.preventDefault();
+        setShowSettings((v) => !v);
+        return;
       }
       if (eventMatchesShortcut(e, shortcuts.addPapan)) {
-        e.preventDefault(); addPapan(); return;
+        e.preventDefault();
+        addPapan();
+        return;
       }
       if (eventMatchesShortcut(e, shortcuts.copyResults)) {
-        e.preventDefault(); copyResults(); return;
+        e.preventDefault();
+        copyResults();
+        return;
       }
       if (eventMatchesShortcut(e, shortcuts.resetPapan)) {
-        e.preventDefault(); if (bids.length > 1) resetPapan(); return;
+        e.preventDefault();
+        if (bids.length > 1) resetPapan();
+        return;
       }
       if (eventMatchesShortcut(e, shortcuts.saveTrade)) {
-        e.preventDefault(); saveTrade(); return;
+        e.preventDefault();
+        saveTrade();
+        return;
       }
       if (eventMatchesShortcut(e, shortcuts.showHistory)) {
-        e.preventDefault(); setShowHistory(true); return;
+        e.preventDefault();
+        setShowHistory(true);
+        return;
       }
       if (eventMatchesShortcut(e, shortcuts.focusBidAwal)) {
         e.preventDefault();
-        if (bidAwalRef.current) { bidAwalRef.current.focus(); bidAwalRef.current.select(); }
+        if (bidAwalRef.current) {
+          bidAwalRef.current.focus();
+          bidAwalRef.current.select();
+        }
         return;
       }
     };
 
-    document.addEventListener('keydown', onKeyDown);
-    return () => document.removeEventListener('keydown', onKeyDown);
-  }, [shortcuts, recordingShortcut, addPapan, copyResults, resetPapan, saveTrade, bids.length, viewingTradeId, showHistory, showSettings, undo, redo]);
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [
+    shortcuts,
+    recordingShortcut,
+    addPapan,
+    copyResults,
+    resetPapan,
+    saveTrade,
+    bids.length,
+    viewingTradeId,
+    showHistory,
+    showSettings,
+    undo,
+    redo,
+  ]);
 
   /* ==================== RENDER ==================== */
   return (
@@ -2018,7 +2635,6 @@ export default function PYSCAL() {
         <TelegramPopup />
         <div className="pyscal-inner">
           <div className="ctn">
-
             {/* Header */}
             <div className="hdr">
               <div className="brand">
@@ -2026,31 +2642,55 @@ export default function PYSCAL() {
                 <span>Pyramid Bid Calculator</span>
               </div>
               <div className="hdr-r" ref={settingsRef}>
-                <button className="gear-btn" onClick={() => setShowInfo(true)} aria-label="Cara pakai">
+                <button
+                  className="gear-btn"
+                  onClick={() => setShowInfo(true)}
+                  aria-label="Cara pakai"
+                >
                   <InfoIcon />
                 </button>
-                <button className="gear-btn" onClick={() => setShowHistory(true)} aria-label="Buka History">
+                <button
+                  className="gear-btn"
+                  onClick={() => setShowHistory(true)}
+                  aria-label="Buka History"
+                >
                   <HistoryIcon />
                 </button>
-                <button className={`gear-btn ${showSettings ? 'active' : ''}`}
-                  onClick={() => setShowSettings(v => !v)}
+                <button
+                  className={`gear-btn ${showSettings ? "active" : ""}`}
+                  onClick={() => setShowSettings((v) => !v)}
                   aria-label="Buka Settings"
-
                   aria-expanded={showSettings}
                 >
                   <GearIcon />
                 </button>
                 {showSettings && (
-                  <SettingsPanel {...{
-                    theme, setTheme, balance, setBalance,
-                    feeBuy, setFeeBuy, feeSell, setFeeSell,
-                    presets, presetName, setPresetName, savePreset, deletePreset, loadPreset,
-                    exportPresets, importPresets,
-                    exportAll, importAll,
-                    shortcuts, setShortcuts: persistShortcuts,
-                    recordingShortcut, setRecordingShortcut,
-                  }} />
-
+                  <SettingsPanel
+                    {...{
+                      theme,
+                      setTheme,
+                      balance,
+                      setBalance,
+                      feeBuy,
+                      setFeeBuy,
+                      feeSell,
+                      setFeeSell,
+                      presets,
+                      presetName,
+                      setPresetName,
+                      savePreset,
+                      deletePreset,
+                      loadPreset,
+                      exportPresets,
+                      importPresets,
+                      exportAll,
+                      importAll,
+                      shortcuts,
+                      setShortcuts: persistShortcuts,
+                      recordingShortcut,
+                      setRecordingShortcut,
+                    }}
+                  />
                 )}
               </div>
             </div>
@@ -2058,17 +2698,17 @@ export default function PYSCAL() {
             {/* Mode toggle */}
             <div className="mode-toggle">
               <button
-                className={mode === 'entry' ? 'active' : ''}
-                onClick={() => setMode('entry')}
-                aria-pressed={mode === 'entry'}
+                className={mode === "entry" ? "active" : ""}
+                onClick={() => setMode("entry")}
+                aria-pressed={mode === "entry"}
                 aria-label="Mode entry (New)"
               >
                 New
               </button>
               <button
-                className={mode === 'position' ? 'active' : ''}
-                onClick={() => setMode('position')}
-                aria-pressed={mode === 'position'}
+                className={mode === "position" ? "active" : ""}
+                onClick={() => setMode("position")}
+                aria-pressed={mode === "position"}
                 aria-label="Mode existing position"
               >
                 Existing
@@ -2082,8 +2722,9 @@ export default function PYSCAL() {
                   className="onboarding-close"
                   onClick={dismissHint}
                   aria-label="Tutup petunjuk"
-
-                ><XIcon /></button>
+                >
+                  <XIcon />
+                </button>
                 <div className="onboarding-title">Selamat datang di PYSCAL</div>
                 <div className="onboarding-sub">
                   Kalkulator pyramid bid untuk avg-down terukur. 4 hal yang perlu kamu tahu:
@@ -2106,14 +2747,16 @@ export default function PYSCAL() {
                   <li>
                     <span className="ob-num">3</span>
                     <div>
-                      <strong>Simpan ke History</strong> kalau plan sudah pas — bisa di-rename &amp; di-pin nanti.
+                      <strong>Simpan ke History</strong> kalau plan sudah pas — bisa di-rename &amp;
+                      di-pin nanti.
                       <span className="ob-kbd">{shortcutToString(shortcuts.saveTrade)}</span>
                     </div>
                   </li>
                   <li>
                     <span className="ob-num">4</span>
                     <div>
-                      <strong>Settings</strong> untuk fee broker, balance, preset, theme &amp; backup JSON.
+                      <strong>Settings</strong> untuk fee broker, balance, preset, theme &amp;
+                      backup JSON.
                       <span className="ob-kbd">{shortcutToString(shortcuts.toggleSettings)}</span>
                     </div>
                   </li>
@@ -2129,10 +2772,12 @@ export default function PYSCAL() {
             {/* Preset chips */}
             {presets.length > 0 && (
               <div className="preset-bar">
-                {presets.map(p => (
-                  <button key={p.name}
-                    className={`preset-chip ${activePreset === p.name ? 'active' : ''} ${flashingPreset === p.name ? 'flash' : ''}`}
-                    onClick={() => loadPreset(p)}>
+                {presets.map((p) => (
+                  <button
+                    key={p.name}
+                    className={`preset-chip ${activePreset === p.name ? "active" : ""} ${flashingPreset === p.name ? "flash" : ""}`}
+                    onClick={() => loadPreset(p)}
+                  >
                     {p.name}
                   </button>
                 ))}
@@ -2141,110 +2786,212 @@ export default function PYSCAL() {
 
             {/* Input card */}
             <div className="card">
-              {mode === 'position' && (
+              {mode === "position" && (
                 <div className="ig-2">
                   <div>
-                    <div className="il il-wrap">Avg Existing (inc fee)
-                      <span className="fld-help" tabIndex={0} role="button"
+                    <div className="il il-wrap">
+                      Avg Existing (inc fee)
+                      <span
+                        className="fld-help"
+                        tabIndex={0}
+                        role="button"
                         aria-label="Harga rata-rata posisi existing, sudah termasuk fee. Dipakai untuk hitung blended average."
-                        title="Harga rata-rata posisi existing (inc fee). Dipakai untuk blended average dengan pembelian baru.">?</span>
+                        title="Harga rata-rata posisi existing (inc fee). Dipakai untuk blended average dengan pembelian baru."
+                      >
+                        ?
+                      </span>
                     </div>
-                    <input className="if" type="number" value={existingAvg || ''} min={0} step={0.01}
-                      inputMode="decimal" enterKeyHint="next"
+                    <input
+                      className="if"
+                      type="number"
+                      value={existingAvg || ""}
+                      min={0}
+                      step={0.01}
+                      inputMode="decimal"
+                      enterKeyHint="next"
                       aria-label="Avg Existing (termasuk fee)"
                       aria-invalid={!!validateExistingAvg(existingAvg, mode).error}
                       aria-describedby="pyscal-hint-existing-avg"
-                      onChange={e => setExistingAvg(+e.target.value || 0)}
-                      data-kbdnav="setup" onKeyDown={handleSetupEnter} />
-                    <FieldHint id="pyscal-hint-existing-avg" status={validateExistingAvg(existingAvg, mode)} />
+                      onChange={(e) => setExistingAvg(+e.target.value || 0)}
+                      data-kbdnav="setup"
+                      onKeyDown={handleSetupEnter}
+                    />
+                    <FieldHint
+                      id="pyscal-hint-existing-avg"
+                      status={validateExistingAvg(existingAvg, mode)}
+                    />
                   </div>
                   <div>
-                    <div className="il il-wrap">Lot Existing
-                      <span className="fld-help" tabIndex={0} role="button"
+                    <div className="il il-wrap">
+                      Lot Existing
+                      <span
+                        className="fld-help"
+                        tabIndex={0}
+                        role="button"
                         aria-label="Jumlah lot posisi existing yang sudah kamu punya."
-                        title="Jumlah lot posisi existing yang sudah kamu punya (1 lot = 100 lembar).">?</span>
+                        title="Jumlah lot posisi existing yang sudah kamu punya (1 lot = 100 lembar)."
+                      >
+                        ?
+                      </span>
                     </div>
-                    <input className="if" type="number" value={existingLot || ''} min={0}
-                      inputMode="numeric" enterKeyHint="next"
+                    <input
+                      className="if"
+                      type="number"
+                      value={existingLot || ""}
+                      min={0}
+                      inputMode="numeric"
+                      enterKeyHint="next"
                       aria-label="Lot Existing"
                       aria-invalid={!!validateExistingLot(existingLot, mode).error}
                       aria-describedby="pyscal-hint-existing-lot"
-                      onChange={e => setExistingLot(+e.target.value || 0)}
-                      data-kbdnav="setup" onKeyDown={handleSetupEnter} />
-                    <FieldHint id="pyscal-hint-existing-lot" status={validateExistingLot(existingLot, mode)} />
+                      onChange={(e) => setExistingLot(+e.target.value || 0)}
+                      data-kbdnav="setup"
+                      onKeyDown={handleSetupEnter}
+                    />
+                    <FieldHint
+                      id="pyscal-hint-existing-lot"
+                      status={validateExistingLot(existingLot, mode)}
+                    />
                   </div>
                 </div>
               )}
               <div className="ig">
                 <div>
-                  <div className="il il-wrap">{mode === 'position' ? 'Bid Awal (beli baru)' : 'Bid Awal'}
-                    <span className="fld-help" tabIndex={0} role="button"
+                  <div className="il il-wrap">
+                    {mode === "position" ? "Bid Awal (beli baru)" : "Bid Awal"}
+                    <span
+                      className="fld-help"
+                      tabIndex={0}
+                      role="button"
                       aria-label="Harga limit order pertama. Sistem akan turunkan otomatis untuk averaging-down berikutnya."
-                      title="Harga limit order pertama. Bid berikutnya akan diturunkan untuk averaging-down.">?</span>
+                      title="Harga limit order pertama. Bid berikutnya akan diturunkan untuk averaging-down."
+                    >
+                      ?
+                    </span>
                   </div>
-                  <input ref={bidAwalRef} className="if" type="number" value={bids[0] || ''} min={1}
-                    inputMode="decimal" enterKeyHint="next"
-                    aria-label={mode === 'position' ? 'Bid Awal beli baru' : 'Bid Awal'}
+                  <input
+                    ref={bidAwalRef}
+                    className="if"
+                    type="number"
+                    value={bids[0] || ""}
+                    min={1}
+                    inputMode="decimal"
+                    enterKeyHint="next"
+                    aria-label={mode === "position" ? "Bid Awal beli baru" : "Bid Awal"}
                     aria-invalid={!!validateBid(bids[0]).error}
                     aria-describedby="pyscal-hint-bid-awal"
-                    onChange={e => setBidAt(0, +e.target.value)}
-                    data-kbdnav="setup" onKeyDown={handleSetupEnter} />
+                    onChange={(e) => setBidAt(0, +e.target.value)}
+                    data-kbdnav="setup"
+                    onKeyDown={handleSetupEnter}
+                  />
                   <FieldHint id="pyscal-hint-bid-awal" status={validateBid(bids[0])} />
                 </div>
                 <div>
-                  <div className="il il-wrap">Lot
-                    <span className="fld-help" tabIndex={0} role="button"
+                  <div className="il il-wrap">
+                    Lot
+                    <span
+                      className="fld-help"
+                      tabIndex={0}
+                      role="button"
                       aria-label="Jumlah lot dasar per papan. Lot berikutnya di-scale menurut aturan pyramid."
-                      title="Jumlah lot dasar per papan (1 lot = 100 lembar).">?</span>
+                      title="Jumlah lot dasar per papan (1 lot = 100 lembar)."
+                    >
+                      ?
+                    </span>
                   </div>
-                  <input className="if" type="number" value={baseLot} min={1}
-                    inputMode="numeric" enterKeyHint="next"
+                  <input
+                    className="if"
+                    type="number"
+                    value={baseLot}
+                    min={1}
+                    inputMode="numeric"
+                    enterKeyHint="next"
                     aria-label="Lot dasar"
                     aria-invalid={!!validateLot(baseLot).error}
                     aria-describedby="pyscal-hint-base-lot"
-                    onChange={e => setBaseLot(+e.target.value)}
-                    data-kbdnav="setup" onKeyDown={handleSetupEnter} />
+                    onChange={(e) => setBaseLot(+e.target.value)}
+                    data-kbdnav="setup"
+                    onKeyDown={handleSetupEnter}
+                  />
                   <FieldHint id="pyscal-hint-base-lot" status={validateLot(baseLot)} />
                 </div>
                 <div>
-                  <div className="il il-wrap">Target Tick
-                    <span className="fld-help" tabIndex={0} role="button"
+                  <div className="il il-wrap">
+                    Target Tick
+                    <span
+                      className="fld-help"
+                      tabIndex={0}
+                      role="button"
                       aria-label="Jumlah tick di atas average price sebagai target jual."
-                      title="Berapa tick di atas average price sebagai target jual. > 10 sudah tergolong agresif.">?</span>
+                      title="Berapa tick di atas average price sebagai target jual. > 10 sudah tergolong agresif."
+                    >
+                      ?
+                    </span>
                   </div>
-                  <input className="if" type="number" value={targetTicks} min={1} max={20}
-                    inputMode="numeric" enterKeyHint="next"
+                  <input
+                    className="if"
+                    type="number"
+                    value={targetTicks}
+                    min={1}
+                    max={20}
+                    inputMode="numeric"
+                    enterKeyHint="next"
                     aria-label="Target tick"
                     aria-invalid={!!validateTargetTicks(targetTicks).error}
                     aria-describedby="pyscal-hint-target-ticks"
-                    onChange={e => setTargetTicks(+e.target.value)}
-                    data-kbdnav="setup" onKeyDown={handleSetupEnter} />
-                  <FieldHint id="pyscal-hint-target-ticks" status={validateTargetTicks(targetTicks)} />
+                    onChange={(e) => setTargetTicks(+e.target.value)}
+                    data-kbdnav="setup"
+                    onKeyDown={handleSetupEnter}
+                  />
+                  <FieldHint
+                    id="pyscal-hint-target-ticks"
+                    status={validateTargetTicks(targetTicks)}
+                  />
                 </div>
                 <div>
-                  <div className="il il-wrap">Min Profit %
-                    <span className="fld-help" tabIndex={0} role="button"
+                  <div className="il il-wrap">
+                    Min Profit %
+                    <span
+                      className="fld-help"
+                      tabIndex={0}
+                      role="button"
                       aria-label="Persentase profit minimum yang harus tercapai setelah dikurangi fee buy dan sell."
-                      title="Target profit minimum setelah dikurangi fee buy + sell.">?</span>
+                      title="Target profit minimum setelah dikurangi fee buy + sell."
+                    >
+                      ?
+                    </span>
                   </div>
-                  <input className="if" type="number" value={targetProfit} min={0} step={0.1}
-                    inputMode="decimal" enterKeyHint="done"
+                  <input
+                    className="if"
+                    type="number"
+                    value={targetProfit}
+                    min={0}
+                    step={0.1}
+                    inputMode="decimal"
+                    enterKeyHint="done"
                     aria-label="Minimum profit persen"
                     aria-invalid={!!validateTargetProfit(targetProfit).error}
                     aria-describedby="pyscal-hint-target-profit"
-                    onChange={e => setTargetProfit(+e.target.value)}
-                    data-kbdnav="setup" onKeyDown={handleSetupEnter} />
-                  <FieldHint id="pyscal-hint-target-profit" status={validateTargetProfit(targetProfit)} />
+                    onChange={(e) => setTargetProfit(+e.target.value)}
+                    data-kbdnav="setup"
+                    onKeyDown={handleSetupEnter}
+                  />
+                  <FieldHint
+                    id="pyscal-hint-target-profit"
+                    status={validateTargetProfit(targetProfit)}
+                  />
                 </div>
               </div>
             </div>
 
             {/* Banners */}
-            {mode === 'position' && (existingAvg <= 0 || existingLot <= 0) && (
+            {mode === "position" && (existingAvg <= 0 || existingLot <= 0) && (
               <div className="caution">
                 <span className="caution-icon">⚠</span>
                 <div className="caution-text">
-                  Isi <span className="caution-val">avg existing</span> dan <span className="caution-val">lot existing</span> dulu untuk hitung pyramid avg-down.
+                  Isi <span className="caution-val">avg existing</span> dan{" "}
+                  <span className="caution-val">lot existing</span> dulu untuk hitung pyramid
+                  avg-down.
                 </div>
               </div>
             )}
@@ -2252,7 +2999,8 @@ export default function PYSCAL() {
               <div className="caution caution-red">
                 <span className="caution-icon">⚠</span>
                 <div className="caution-text">
-                  Total cost beli baru <span className="caution-val">Rp{nShort(totalBuyCost)}</span> melebihi balance <span className="caution-val">Rp{nShort(balance)}</span>.
+                  Total cost beli baru <span className="caution-val">Rp{nShort(totalBuyCost)}</span>{" "}
+                  melebihi balance <span className="caution-val">Rp{nShort(balance)}</span>.
                 </div>
               </div>
             )}
@@ -2260,8 +3008,9 @@ export default function PYSCAL() {
               <div className="caution">
                 <span className="caution-icon">⚠</span>
                 <div className="caution-text">
-                  Target <span className="caution-val">{targetProfit}%</span> tidak tercapai di <span className="caution-val">{underTarget.length} papan</span>.
-                  Turunkan min profit atau naikkan target tick.
+                  Target <span className="caution-val">{targetProfit}%</span> tidak tercapai di{" "}
+                  <span className="caution-val">{underTarget.length} papan</span>. Turunkan min
+                  profit atau naikkan target tick.
                 </div>
               </div>
             )}
@@ -2269,7 +3018,8 @@ export default function PYSCAL() {
               <div className="caution">
                 <span className="caution-icon">⚠</span>
                 <div className="caution-text">
-                  Papan <span className="caution-val">{bidRiseWarnings.join(', ')}</span> bid-nya naik (bukan avg down).
+                  Papan <span className="caution-val">{bidRiseWarnings.join(", ")}</span> bid-nya
+                  naik (bukan avg down).
                 </div>
               </div>
             )}
@@ -2283,36 +3033,59 @@ export default function PYSCAL() {
                     {customLot && <span className="custom-lot-badge">CUSTOM LOT</span>}
                   </div>
                   <div className="papan-actions">
-                    <button className={`ibtn ${customLot ? 'ibtn-active-amber' : ''}`}
-                      onClick={() => { haptic('light'); toggleCustomLot(); }}
-                      aria-label={customLot ? 'Matikan Custom Lot' : 'Aktifkan Custom Lot'}
+                    <button
+                      className={`ibtn ${customLot ? "ibtn-active-amber" : ""}`}
+                      onClick={() => {
+                        haptic("light");
+                        toggleCustomLot();
+                      }}
+                      aria-label={customLot ? "Matikan Custom Lot" : "Aktifkan Custom Lot"}
                       aria-pressed={customLot}
->
+                    >
                       {customLot ? <UnlockIcon /> : <LockIcon />}
                     </button>
                     <button
-                      className={`ibtn ${saveTradeState === 'saved' ? 'success' : ''} ${saveTradeState === 'saving' ? 'saving' : ''}`}
+                      className={`ibtn ${saveTradeState === "saved" ? "success" : ""} ${saveTradeState === "saving" ? "saving" : ""}`}
                       onClick={saveTrade}
-                      disabled={saveTradeState === 'saving'}
+                      disabled={saveTradeState === "saving"}
                       aria-label="Simpan ke History"
-                      aria-busy={saveTradeState === 'saving'}
+                      aria-busy={saveTradeState === "saving"}
                     >
-                      {saveTradeState === 'saving'
-                        ? <span className="ibtn-spin" aria-hidden="true" />
-                        : saveTradeState === 'saved'
-                          ? <CheckIcon />
-                          : <BookmarkIcon />}
+                      {saveTradeState === "saving" ? (
+                        <span className="ibtn-spin" aria-hidden="true" />
+                      ) : saveTradeState === "saved" ? (
+                        <CheckIcon />
+                      ) : (
+                        <BookmarkIcon />
+                      )}
                     </button>
-                    <button className={`ibtn ${copyState === 'copied' ? 'success' : ''}`}
-                      onClick={copyResults} aria-label="Copy hasil">
-                      {copyState === 'copied' ? <CheckIcon /> : <CopyIcon />}
+                    <button
+                      className={`ibtn ${copyState === "copied" ? "success" : ""}`}
+                      onClick={copyResults}
+                      aria-label="Copy hasil"
+                    >
+                      {copyState === "copied" ? <CheckIcon /> : <CopyIcon />}
                     </button>
                     {bids.length > 1 && (
-                      <button className="ibtn danger" onClick={() => { haptic('warning'); resetPapan(); }} aria-label="Reset semua papan">
+                      <button
+                        className="ibtn danger"
+                        onClick={() => {
+                          haptic("warning");
+                          resetPapan();
+                        }}
+                        aria-label="Reset semua papan"
+                      >
                         <RefreshIcon />
                       </button>
                     )}
-                    <button className="ibtn primary" onClick={() => { haptic('light'); addPapan(); }} aria-label="Tambah papan">
+                    <button
+                      className="ibtn primary"
+                      onClick={() => {
+                        haptic("light");
+                        addPapan();
+                      }}
+                      aria-label="Tambah papan"
+                    >
                       <PlusIcon />
                     </button>
                   </div>
@@ -2331,25 +3104,24 @@ export default function PYSCAL() {
                   removePapan={removePapan}
                   bidsCount={bids.length}
                 />
-                <div
-                  className="pyscal-sr-only"
-                  role="status"
-                  aria-live="polite"
-                  aria-atomic="true"
-                >
+                <div className="pyscal-sr-only" role="status" aria-live="polite" aria-atomic="true">
                   {liveSummary}
                 </div>
               </div>
             )}
-
           </div>
         </div>
 
         {/* History Modal */}
         {showHistory && (
           <HistoryModal
-            history={history} viewingId={viewingTradeId} setViewingId={setViewingTradeId}
-            onClose={() => { setShowHistory(false); setViewingTradeId(null); }}
+            history={history}
+            viewingId={viewingTradeId}
+            setViewingId={setViewingTradeId}
+            onClose={() => {
+              setShowHistory(false);
+              setViewingTradeId(null);
+            }}
             onDelete={deleteTrade}
             onRename={renameTrade}
             onTogglePin={togglePinTrade}
@@ -2369,24 +3141,40 @@ export default function PYSCAL() {
 
 /* ==================== SETTINGS PANEL ==================== */
 function SettingsPanel({
-  theme, setTheme, balance, setBalance, feeBuy, setFeeBuy, feeSell, setFeeSell,
-  presets, presetName, setPresetName, savePreset, deletePreset, loadPreset,
-  exportPresets, importPresets,
-  exportAll, importAll,
-  shortcuts, setShortcuts, recordingShortcut, setRecordingShortcut,
+  theme,
+  setTheme,
+  balance,
+  setBalance,
+  feeBuy,
+  setFeeBuy,
+  feeSell,
+  setFeeSell,
+  presets,
+  presetName,
+  setPresetName,
+  savePreset,
+  deletePreset,
+  loadPreset,
+  exportPresets,
+  importPresets,
+  exportAll,
+  importAll,
+  shortcuts,
+  setShortcuts,
+  recordingShortcut,
+  setRecordingShortcut,
 }) {
   const fileInputRef = useRef(null);
   const fullBackupInputRef = useRef(null);
   return (
-
     <div className="settings-panel">
       <div className="sp-section">
         <div className="sp-title">Tampilan</div>
         <div className="theme-pill">
-          <button className={theme === 'light' ? 'active' : ''} onClick={() => setTheme('light')}>
+          <button className={theme === "light" ? "active" : ""} onClick={() => setTheme("light")}>
             <SunIcon /> Light
           </button>
-          <button className={theme === 'dark' ? 'active' : ''} onClick={() => setTheme('dark')}>
+          <button className={theme === "dark" ? "active" : ""} onClick={() => setTheme("dark")}>
             <MoonIcon /> Dark
           </button>
         </div>
@@ -2394,10 +3182,16 @@ function SettingsPanel({
 
       <div className="sp-section">
         <div className="sp-title">Trading Balance</div>
-        <input className="sp-input" type="number" value={balance || ''} min={0}
+        <input
+          className="sp-input"
+          type="number"
+          value={balance || ""}
+          min={0}
           placeholder="Kosongkan jika tidak dibutuhkan"
-          inputMode="numeric" enterKeyHint="done"
-          onChange={e => setBalance(+e.target.value || 0)} />
+          inputMode="numeric"
+          enterKeyHint="done"
+          onChange={(e) => setBalance(+e.target.value || 0)}
+        />
       </div>
 
       <div className="sp-section">
@@ -2405,15 +3199,27 @@ function SettingsPanel({
         <div className="sp-row">
           <div>
             <div className="sp-label">Buy Fee %</div>
-            <input className="sp-input" type="number" value={feeBuy} step={0.01}
-              inputMode="decimal" enterKeyHint="next"
-              onChange={e => setFeeBuy(+e.target.value)} />
+            <input
+              className="sp-input"
+              type="number"
+              value={feeBuy}
+              step={0.01}
+              inputMode="decimal"
+              enterKeyHint="next"
+              onChange={(e) => setFeeBuy(+e.target.value)}
+            />
           </div>
           <div>
             <div className="sp-label">Sell Fee %</div>
-            <input className="sp-input" type="number" value={feeSell} step={0.01}
-              inputMode="decimal" enterKeyHint="done"
-              onChange={e => setFeeSell(+e.target.value)} />
+            <input
+              className="sp-input"
+              type="number"
+              value={feeSell}
+              step={0.01}
+              inputMode="decimal"
+              enterKeyHint="done"
+              onChange={(e) => setFeeSell(+e.target.value)}
+            />
           </div>
         </div>
       </div>
@@ -2423,10 +3229,24 @@ function SettingsPanel({
 
         {presets.length > 0 ? (
           <div className="sp-presets">
-            {presets.map(p => (
+            {presets.map((p) => (
               <div key={p.name} className="sp-preset-item">
-                <button className="sp-preset-load" onClick={() => loadPreset(p)} title={`Muat preset ${p.name}`}>{p.name}</button>
-                <button className="sp-preset-x" onClick={() => deletePreset(p.name)} aria-label={`Hapus preset ${p.name}`} title="Hapus preset" type="button"><XIcon /></button>
+                <button
+                  className="sp-preset-load"
+                  onClick={() => loadPreset(p)}
+                  title={`Muat preset ${p.name}`}
+                >
+                  {p.name}
+                </button>
+                <button
+                  className="sp-preset-x"
+                  onClick={() => deletePreset(p.name)}
+                  aria-label={`Hapus preset ${p.name}`}
+                  title="Hapus preset"
+                  type="button"
+                >
+                  <XIcon />
+                </button>
               </div>
             ))}
           </div>
@@ -2434,39 +3254,64 @@ function SettingsPanel({
           <div className="sp-empty">Belum ada preset</div>
         )}
         <div className="sp-preset-save">
-          <input placeholder="Scalping" value={presetName} maxLength={8}
-            onChange={e => setPresetName(e.target.value.toUpperCase())}
-            onKeyDown={e => { if (e.key === 'Enter') savePreset(); }} />
-          <button onClick={savePreset} disabled={!presetName.trim()}>Simpan</button>
+          <input
+            placeholder="Scalping"
+            value={presetName}
+            maxLength={8}
+            onChange={(e) => setPresetName(e.target.value.toUpperCase())}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") savePreset();
+            }}
+          />
+          <button onClick={savePreset} disabled={!presetName.trim()}>
+            Simpan
+          </button>
         </div>
         <div className="sp-import-export">
-          <button className="sp-ie-btn" onClick={exportPresets}>↓ Export</button>
-          <button className="sp-ie-btn" onClick={() => fileInputRef.current?.click()}>↑ Import</button>
-          <input ref={fileInputRef} type="file" accept="application/json,.json"
-            style={{ display: 'none' }}
+          <button className="sp-ie-btn" onClick={exportPresets}>
+            ↓ Export
+          </button>
+          <button className="sp-ie-btn" onClick={() => fileInputRef.current?.click()}>
+            ↑ Import
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="application/json,.json"
+            style={{ display: "none" }}
             onChange={(e) => {
               const file = e.target.files?.[0];
               if (file) importPresets(file);
-              e.target.value = '';
-            }} />
+              e.target.value = "";
+            }}
+          />
         </div>
       </div>
 
       <div className="sp-section">
         <div className="sp-title">Backup Lengkap</div>
         <div className="sp-empty" style={{ marginBottom: 6 }}>
-          State, preset, history, shortcut, tema dalam 1 file JSON. Untuk pindah device atau jaga-jaga.
+          State, preset, history, shortcut, tema dalam 1 file JSON. Untuk pindah device atau
+          jaga-jaga.
         </div>
         <div className="sp-import-export">
-          <button className="sp-ie-btn" onClick={exportAll}>↓ Export Semua</button>
-          <button className="sp-ie-btn" onClick={() => fullBackupInputRef.current?.click()}>↑ Restore</button>
-          <input ref={fullBackupInputRef} type="file" accept="application/json,.json"
-            style={{ display: 'none' }}
+          <button className="sp-ie-btn" onClick={exportAll}>
+            ↓ Export Semua
+          </button>
+          <button className="sp-ie-btn" onClick={() => fullBackupInputRef.current?.click()}>
+            ↑ Restore
+          </button>
+          <input
+            ref={fullBackupInputRef}
+            type="file"
+            accept="application/json,.json"
+            style={{ display: "none" }}
             onChange={(e) => {
               const file = e.target.files?.[0];
               if (file) importAll(file);
-              e.target.value = '';
-            }} />
+              e.target.value = "";
+            }}
+          />
         </div>
       </div>
 
@@ -2480,21 +3325,23 @@ function SettingsPanel({
         <button
           className="sp-ie-btn"
           type="button"
-          onClick={() => window.dispatchEvent(new Event('pyscal:restart-onboarding'))}
+          onClick={() => window.dispatchEvent(new Event("pyscal:restart-onboarding"))}
         >
           Ulangi onboarding
         </button>
       </div>
 
       <div className="sp-section">
-        <div className="sp-title"><KeyboardIcon /> Shortcut</div>
+        <div className="sp-title">
+          <KeyboardIcon /> Shortcut
+        </div>
         <div className="kbd-list">
           {Object.entries(shortcuts).map(([key, s]) => (
             <div key={key} className="kbd-row">
               <label>{s.label}</label>
               <input
-                className={`kbd-input ${recordingShortcut === key ? 'recording' : ''}`}
-                value={recordingShortcut === key ? 'TEKAN...' : shortcutToString(s)}
+                className={`kbd-input ${recordingShortcut === key ? "recording" : ""}`}
+                value={recordingShortcut === key ? "TEKAN..." : shortcutToString(s)}
                 readOnly
                 onFocus={() => setRecordingShortcut(key)}
                 onBlur={() => setRecordingShortcut(null)}
@@ -2511,8 +3358,20 @@ function SettingsPanel({
 }
 
 /* ==================== RESULTS TABLE ==================== */
-function ResultsTable({ results, bidRiseWarnings, targetProfit, totalLot, totalCost, balance, setBidAt, setLotAt, customLot, removePapan, bidsCount }) {
-  const layerIndex = (r, idx) => r.isExisting ? -1 : idx - (results[0]?.isExisting ? 1 : 0);
+function ResultsTable({
+  results,
+  bidRiseWarnings,
+  targetProfit,
+  totalLot,
+  totalCost,
+  balance,
+  setBidAt,
+  setLotAt,
+  customLot,
+  removePapan,
+  bidsCount,
+}) {
+  const layerIndex = (r, idx) => (r.isExisting ? -1 : idx - (results[0]?.isExisting ? 1 : 0));
 
   return (
     <>
@@ -2521,7 +3380,9 @@ function ResultsTable({ results, bidRiseWarnings, targetProfit, totalLot, totalC
         <table>
           <thead>
             <tr>
-              {["#","Bid","Lot","Avg","Sell","Cost","Profit","%",""].map((h,i) => <th key={i}>{h}</th>)}
+              {["#", "Bid", "Lot", "Avg", "Sell", "Cost", "Profit", "%", ""].map((h, i) => (
+                <th key={i}>{h}</th>
+              ))}
             </tr>
           </thead>
           <tbody>
@@ -2529,21 +3390,29 @@ function ResultsTable({ results, bidRiseWarnings, targetProfit, totalLot, totalC
               const li = layerIndex(r, i);
               const isWarn = !r.isExisting && bidRiseWarnings.includes(li + 1);
               const isUnder = !r.isExisting && r.pct < targetProfit - 0.001;
-              const bidErr = !r.isExisting ? validateBid(Number(r.bid)).error : '';
+              const bidErr = !r.isExisting ? validateBid(Number(r.bid)).error : "";
               return (
-                <tr key={i} className={r.isExisting ? "row-existing" : (isUnder ? "row-under" : "")} style={{ animationDelay: `${i * 50}ms` }}>
+                <tr
+                  key={i}
+                  className={r.isExisting ? "row-existing" : isUnder ? "row-under" : ""}
+                  style={{ animationDelay: `${i * 50}ms` }}
+                >
                   <td>{r.layer}</td>
                   <td className="c-bid">
                     {r.isExisting ? (
                       <span className="c-bid-static">{r.bid}</span>
                     ) : (
                       <BidStepInput
-                        className={`bid-edit ${isWarn ? 'bid-edit-w' : ''} ${bidErr ? 'bid-edit-e' : ''}`}
+                        className={`bid-edit ${isWarn ? "bid-edit-w" : ""} ${bidErr ? "bid-edit-e" : ""}`}
                         value={r.bid}
-                        onChange={v => setBidAt(li, v)}
+                        onChange={(v) => setBidAt(li, v)}
                         label={`Bid papan ${r.layer}`}
-                        error={bidErr || ''}
-                        warning={isWarn ? `Bid papan ${r.layer} tidak lebih rendah dari papan sebelumnya, bukan averaging down.` : ''}
+                        error={bidErr || ""}
+                        warning={
+                          isWarn
+                            ? `Bid papan ${r.layer} tidak lebih rendah dari papan sebelumnya, bukan averaging down.`
+                            : ""
+                        }
                         gridRow={li}
                         gridCol="bid"
                       />
@@ -2554,20 +3423,22 @@ function ResultsTable({ results, bidRiseWarnings, targetProfit, totalLot, totalC
                       <LotInput
                         className="lot-edit"
                         value={r.lot}
-                        onChange={v => setLotAt(li, v)}
+                        onChange={(v) => setLotAt(li, v)}
                         label={`Lot papan ${r.layer}`}
                         gridRow={li}
                         gridCol="lot"
-                        onKeyDown={e => handleGridNavKey(e, li, 'lot')}
+                        onKeyDown={(e) => handleGridNavKey(e, li, "lot")}
                       />
-                    ) : n(r.lot)}
+                    ) : (
+                      n(r.lot)
+                    )}
                   </td>
                   <td className="c-avg">{r.avg.toFixed(2)}</td>
                   <td className="c-sell">{r.sell}</td>
                   <td className="c-cost">{n(r.cost)}</td>
                   <td className={r.pl >= 0 ? "c-plp" : "c-pln"}>{fmtPL(r.pl)}</td>
                   <td>
-                    <span className={`pp ${isUnder ? "pp-u" : (r.pct >= 0 ? "pp-g" : "pp-r")}`}>
+                    <span className={`pp ${isUnder ? "pp-u" : r.pct >= 0 ? "pp-g" : "pp-r"}`}>
                       {isUnder && <span className="pp-icon">⚠</span>}
                       {fmtPct(r.pct)}
                     </span>
@@ -2579,20 +3450,29 @@ function ResultsTable({ results, bidRiseWarnings, targetProfit, totalLot, totalC
                         onClick={() => removePapan(li)}
                         aria-label={`Hapus papan ${r.layer}`}
                         title={`Hapus papan ${r.layer}`}
-                      ><XIcon /></button>
+                      >
+                        <XIcon />
+                      </button>
                     )}
                   </td>
                 </tr>
               );
             })}
             <tr className="total-row">
-              <td className="total-label">Total Beli</td><td></td>
-              <td className="c-lot">{n(totalLot)}</td><td></td><td></td>
+              <td className="total-label">Total Beli</td>
+              <td></td>
+              <td className="c-lot">{n(totalLot)}</td>
+              <td></td>
+              <td></td>
               <td style={{ fontFamily: "'JetBrains Mono', monospace" }}>
                 {nShort(totalCost)}
-                {balance > 0 && <span className="util"> ({Math.round(totalCost / balance * 100)}%)</span>}
+                {balance > 0 && (
+                  <span className="util"> ({Math.round((totalCost / balance) * 100)}%)</span>
+                )}
               </td>
-              <td></td><td></td><td></td>
+              <td></td>
+              <td></td>
+              <td></td>
             </tr>
           </tbody>
         </table>
@@ -2605,14 +3485,14 @@ function ResultsTable({ results, bidRiseWarnings, targetProfit, totalLot, totalC
             const li = layerIndex(r, i);
             const isUnder = !r.isExisting && r.pct < targetProfit - 0.001;
             const isWarn = !r.isExisting && bidRiseWarnings.includes(li + 1);
-            const bidErr = !r.isExisting ? validateBid(Number(r.bid)).error : '';
+            const bidErr = !r.isExisting ? validateBid(Number(r.bid)).error : "";
             const canSwipe = !r.isExisting && li > 0;
             return (
               <SwipeableCard
                 key={i}
                 canSwipe={canSwipe}
                 onDelete={() => removePapan(li)}
-                className={`mk ${r.isExisting ? 'mk-existing' : (isUnder ? 'mk-under' : '')}`}
+                className={`mk ${r.isExisting ? "mk-existing" : isUnder ? "mk-under" : ""}`}
                 style={{ animationDelay: `${i * 60}ms` }}
               >
                 {!r.isExisting && li > 0 && (
@@ -2621,7 +3501,9 @@ function ResultsTable({ results, bidRiseWarnings, targetProfit, totalLot, totalC
                     onClick={() => removePapan(li)}
                     aria-label={`Hapus papan ${r.layer}`}
                     title={`Hapus papan ${r.layer}`}
-                  ><XIcon /></button>
+                  >
+                    <XIcon />
+                  </button>
                 )}
                 <div className="mh">
                   <div className="mhi">
@@ -2633,10 +3515,14 @@ function ResultsTable({ results, bidRiseWarnings, targetProfit, totalLot, totalC
                         className="mhi-inp"
                         variant="mobile"
                         value={r.bid}
-                        onChange={v => setBidAt(li, v)}
+                        onChange={(v) => setBidAt(li, v)}
                         label={`Bid papan ${r.layer}`}
-                        error={bidErr || ''}
-                        warning={isWarn ? `Bid papan ${r.layer} tidak lebih rendah dari papan sebelumnya, bukan averaging down.` : ''}
+                        error={bidErr || ""}
+                        warning={
+                          isWarn
+                            ? `Bid papan ${r.layer} tidak lebih rendah dari papan sebelumnya, bukan averaging down.`
+                            : ""
+                        }
                         gridRow={li}
                         gridCol="bid"
                       />
@@ -2648,27 +3534,49 @@ function ResultsTable({ results, bidRiseWarnings, targetProfit, totalLot, totalC
                       <LotInput
                         className="mhi-inp lot-edit-m"
                         value={r.lot}
-                        onChange={v => setLotAt(li, v)}
+                        onChange={(v) => setLotAt(li, v)}
                         label={`Lot papan ${r.layer}`}
                         gridRow={li}
                         gridCol="lot"
-                        onKeyDown={e => handleGridNavKey(e, li, 'lot')}
+                        onKeyDown={(e) => handleGridNavKey(e, li, "lot")}
                       />
-                    ) : <span>{n(r.lot)}</span>}
+                    ) : (
+                      <span>{n(r.lot)}</span>
+                    )}
                   </div>
-                  <div className="mhi"><label>Sell</label><span>{r.sell}</span></div>
+                  <div className="mhi">
+                    <label>Sell</label>
+                    <span>{r.sell}</span>
+                  </div>
                 </div>
                 <div className="mg">
-                  <div className="mgi"><label>Avg</label><span>{r.avg.toFixed(2)}</span></div>
-                  <div className="mgi"><label>Cost</label><span>{n(r.cost)}</span></div>
+                  <div className="mgi">
+                    <label>Avg</label>
+                    <span>{r.avg.toFixed(2)}</span>
+                  </div>
+                  <div className="mgi">
+                    <label>Cost</label>
+                    <span>{n(r.cost)}</span>
+                  </div>
                   <div className="mgi mgi-profit">
                     <label>Profit</label>
-                    <span style={{ color: r.pl >= 0 ? "var(--green)" : "var(--red)" }}>{fmtPL(r.pl)}</span>
+                    <span style={{ color: r.pl >= 0 ? "var(--green)" : "var(--red)" }}>
+                      {fmtPL(r.pl)}
+                    </span>
                   </div>
                   <div className="mgi mgi-pct">
                     <label>%</label>
-                    <span style={{ color: isUnder ? "var(--brand)" : (r.pct >= 0 ? "var(--green)" : "var(--red)") }}>
-                      {isUnder && '⚠ '}{fmtPct(r.pct)}
+                    <span
+                      style={{
+                        color: isUnder
+                          ? "var(--brand)"
+                          : r.pct >= 0
+                            ? "var(--green)"
+                            : "var(--red)",
+                      }}
+                    >
+                      {isUnder && "⚠ "}
+                      {fmtPct(r.pct)}
                     </span>
                   </div>
                 </div>
@@ -2680,7 +3588,9 @@ function ResultsTable({ results, bidRiseWarnings, targetProfit, totalLot, totalC
               <div className="mt-label">Total Cost Beli</div>
               <div className="mt-val">
                 {nShort(totalCost)}
-                {balance > 0 && <span className="util-m"> {Math.round(totalCost / balance * 100)}%</span>}
+                {balance > 0 && (
+                  <span className="util-m"> {Math.round((totalCost / balance) * 100)}%</span>
+                )}
               </div>
             </div>
             <div style={{ textAlign: "right" }}>
@@ -2695,24 +3605,34 @@ function ResultsTable({ results, bidRiseWarnings, targetProfit, totalLot, totalC
 }
 
 /* ==================== HISTORY MODAL ==================== */
-function HistoryModal({ history, viewingId, setViewingId, onClose, onDelete, onRename, onTogglePin, onRecall }) {
-  const trade = viewingId ? history.find(t => t.id === viewingId) : null;
-  const [query, setQuery] = useState('');
+function HistoryModal({
+  history,
+  viewingId,
+  setViewingId,
+  onClose,
+  onDelete,
+  onRename,
+  onTogglePin,
+  onRecall,
+}) {
+  const trade = viewingId ? history.find((t) => t.id === viewingId) : null;
+  const [query, setQuery] = useState("");
   const [renamingId, setRenamingId] = useState(null);
-  const [renameDraft, setRenameDraft] = useState('');
+  const [renameDraft, setRenameDraft] = useState("");
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     const list = q
-      ? history.filter(t => {
-          const note = (t.note || '').toLowerCase();
-          const avg = String(t.planned?.avgFinal?.toFixed?.(2) ?? '');
-          const date = new Date(t.timestamp).toLocaleDateString('id-ID');
+      ? history.filter((t) => {
+          const note = (t.note || "").toLowerCase();
+          const avg = String(t.planned?.avgFinal?.toFixed?.(2) ?? "");
+          const date = new Date(t.timestamp).toLocaleDateString("id-ID");
           return note.includes(q) || avg.includes(q) || date.toLowerCase().includes(q);
         })
       : history.slice();
     return list.sort((a, b) => {
-      const pa = a.pinned ? 1 : 0, pb = b.pinned ? 1 : 0;
+      const pa = a.pinned ? 1 : 0,
+        pb = b.pinned ? 1 : 0;
       if (pa !== pb) return pb - pa;
       return b.timestamp - a.timestamp;
     });
@@ -2720,41 +3640,83 @@ function HistoryModal({ history, viewingId, setViewingId, onClose, onDelete, onR
 
   const startRename = (t) => {
     setRenamingId(t.id);
-    setRenameDraft(t.note || '');
+    setRenameDraft(t.note || "");
   };
   const commitRename = () => {
     if (renamingId) onRename(renamingId, renameDraft);
     setRenamingId(null);
-    setRenameDraft('');
+    setRenameDraft("");
   };
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal" onClick={e => e.stopPropagation()}
-        role="dialog" aria-modal="true" aria-labelledby="history-modal-title">
+      <div
+        className="modal"
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="history-modal-title"
+      >
         <div className="modal-header">
           <div className="modal-title" id="history-modal-title">
             {trade ? (
-              <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <button className="modal-close" onClick={() => setViewingId(null)} style={{ padding: '4px' }} aria-label="Kembali ke daftar">←</button>
+              <span style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <button
+                  className="modal-close"
+                  onClick={() => setViewingId(null)}
+                  style={{ padding: "4px" }}
+                  aria-label="Kembali ke daftar"
+                >
+                  ←
+                </button>
                 {trade.note ? trade.note : `Avg ${trade.planned.avgFinal.toFixed(2)}`}
-                <span style={{ fontSize: '12px', color: 'var(--text-m)', fontWeight: 500 }}>{fmtTime(trade.timestamp)}</span>
+                <span style={{ fontSize: "12px", color: "var(--text-m)", fontWeight: 500 }}>
+                  {fmtTime(trade.timestamp)}
+                </span>
               </span>
-            ) : `History · ${history.length} trade`}
+            ) : (
+              `History · ${history.length} trade`
+            )}
           </div>
-          <button className="modal-close" onClick={onClose} aria-label="Tutup"><XIcon /></button>
+          <button className="modal-close" onClick={onClose} aria-label="Tutup">
+            <XIcon />
+          </button>
         </div>
         <div className="modal-body">
           {trade ? (
-            <TradeDetail trade={trade} onDelete={() => { onDelete(trade.id); }} onRecall={() => onRecall && onRecall(trade)} />
+            <TradeDetail
+              trade={trade}
+              onDelete={() => {
+                onDelete(trade.id);
+              }}
+              onRecall={() => onRecall && onRecall(trade)}
+            />
           ) : history.length === 0 ? (
             <div className="history-empty">
-              <div style={{ fontStyle: 'normal', color: 'var(--text)', fontWeight: 600, marginBottom: 4 }}>
+              <div
+                style={{
+                  fontStyle: "normal",
+                  color: "var(--text)",
+                  fontWeight: 600,
+                  marginBottom: 4,
+                }}
+              >
                 Belum ada trade tersimpan
               </div>
               <div style={{ fontSize: 12 }}>
-                Hitung pyramid dulu, lalu klik <strong>tombol bookmark</strong> di header papan
-                — atau tekan <kbd style={{ fontFamily: 'JetBrains Mono,monospace', background: 'var(--inp-bg)', border: '1px solid var(--border)', padding: '1px 6px', borderRadius: 3 }}>Ctrl + Shift + S</kbd>
+                Hitung pyramid dulu, lalu klik <strong>tombol bookmark</strong> di header papan —
+                atau tekan{" "}
+                <kbd
+                  style={{
+                    fontFamily: "JetBrains Mono,monospace",
+                    background: "var(--inp-bg)",
+                    border: "1px solid var(--border)",
+                    padding: "1px 6px",
+                    borderRadius: 3,
+                  }}
+                >
+                  Ctrl + Shift + S
+                </kbd>
               </div>
             </div>
           ) : (
@@ -2774,40 +3736,63 @@ function HistoryModal({ history, viewingId, setViewingId, onClose, onDelete, onR
                 <div className="history-empty">Tidak ada trade cocok "{query}"</div>
               ) : (
                 <div className="history-list">
-                  {filtered.map(t => {
+                  {filtered.map((t) => {
                     const isRenaming = renamingId === t.id;
                     return (
                       <div
                         key={t.id}
-                        className={`history-item${t.pinned ? ' pinned' : ''}`}
-                        onClick={() => { if (!isRenaming) setViewingId(t.id); }}
+                        className={`history-item${t.pinned ? " pinned" : ""}`}
+                        onClick={() => {
+                          if (!isRenaming) setViewingId(t.id);
+                        }}
                       >
                         <div className="history-info">
-                          <div className="history-avg" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                            {t.pinned && <Pin size={12} strokeWidth={2.25} aria-label="Ter-pin" style={{ color: 'var(--brand)', fill: 'currentColor' }} />}
+                          <div
+                            className="history-avg"
+                            style={{ display: "flex", alignItems: "center", gap: 6 }}
+                          >
+                            {t.pinned && (
+                              <Pin
+                                size={12}
+                                strokeWidth={2.25}
+                                aria-label="Ter-pin"
+                                style={{ color: "var(--brand)", fill: "currentColor" }}
+                              />
+                            )}
                             {isRenaming ? (
                               <input
                                 autoFocus
                                 className="sp-input"
-                                style={{ fontSize: 14, padding: '6px 8px', flex: 1 }}
+                                style={{ fontSize: 14, padding: "6px 8px", flex: 1 }}
                                 value={renameDraft}
                                 onClick={(e) => e.stopPropagation()}
                                 onChange={(e) => setRenameDraft(e.target.value)}
                                 onBlur={commitRename}
                                 onKeyDown={(e) => {
-                                  if (e.key === 'Enter') { e.preventDefault(); commitRename(); }
-                                  if (e.key === 'Escape') { e.preventDefault(); setRenamingId(null); setRenameDraft(''); }
+                                  if (e.key === "Enter") {
+                                    e.preventDefault();
+                                    commitRename();
+                                  }
+                                  if (e.key === "Escape") {
+                                    e.preventDefault();
+                                    setRenamingId(null);
+                                    setRenameDraft("");
+                                  }
                                 }}
                                 placeholder="Beri nama trade…"
                                 maxLength={80}
                                 aria-label="Nama trade"
                               />
                             ) : (
-                              <span>{t.note ? t.note : `Avg ${t.planned.avgFinal.toFixed(2)}`}</span>
+                              <span>
+                                {t.note ? t.note : `Avg ${t.planned.avgFinal.toFixed(2)}`}
+                              </span>
                             )}
                           </div>
                           <div className="history-meta">
-                            {t.bids.length} papan · {n(t.planned.totalLot)} lot · {nShort(t.planned.totalCost)} · {t.mode === 'position' ? 'Existing' : 'New'}
+                            {t.bids.length} papan · {n(t.planned.totalLot)} lot ·{" "}
+                            {nShort(t.planned.totalCost)} ·{" "}
+                            {t.mode === "position" ? "Existing" : "New"}
                           </div>
                           <div className="history-time">{fmtTime(t.timestamp)}</div>
                         </div>
@@ -2816,22 +3801,33 @@ function HistoryModal({ history, viewingId, setViewingId, onClose, onDelete, onR
                             className="history-act"
                             onClick={() => onRecall && onRecall(t)}
                             aria-label="Recall trade"
-
-                          >↻</button>
+                          >
+                            ↻
+                          </button>
                           <button
                             className="history-act"
                             onClick={() => onTogglePin(t.id)}
                             aria-pressed={!!t.pinned}
-                            aria-label={t.pinned ? 'Lepas pin' : 'Pin trade'}
-
-                          ><Pin size={14} strokeWidth={2.25} style={t.pinned ? { fill: 'currentColor' } : undefined} /></button>
+                            aria-label={t.pinned ? "Lepas pin" : "Pin trade"}
+                          >
+                            <Pin
+                              size={14}
+                              strokeWidth={2.25}
+                              style={t.pinned ? { fill: "currentColor" } : undefined}
+                            />
+                          </button>
                           <button
                             className="history-act"
-                            onClick={() => isRenaming ? commitRename() : startRename(t)}
-                            aria-label={isRenaming ? 'Simpan nama' : 'Rename trade'}
-
-                          >{isRenaming ? '✓' : '✎'}</button>
-                          <button className="history-del" onClick={() => onDelete(t.id)} aria-label="Hapus trade">
+                            onClick={() => (isRenaming ? commitRename() : startRename(t))}
+                            aria-label={isRenaming ? "Simpan nama" : "Rename trade"}
+                          >
+                            {isRenaming ? "✓" : "✎"}
+                          </button>
+                          <button
+                            className="history-del"
+                            onClick={() => onDelete(t.id)}
+                            aria-label="Hapus trade"
+                          >
                             <XIcon />
                           </button>
                         </div>
@@ -2855,36 +3851,82 @@ function TradeDetail({ trade, onDelete, onRecall }) {
       <div className="hd-section">
         <div className="hd-section-title">Plan Snapshot</div>
         <div className="hd-grid">
-          <div className="hd-field"><label>Mode</label><span>{trade.mode === 'position' ? 'Existing' : 'New'}</span></div>
-          <div className="hd-field"><label>Bid Awal</label><span>{trade.bids[0]}</span></div>
-          <div className="hd-field"><label>Papan</label><span>{trade.bids.length}</span></div>
-          <div className="hd-field"><label>Target Tick</label><span>+{trade.targetTicks}</span></div>
-          <div className="hd-field"><label>Min Profit</label><span>{trade.targetProfit}%</span></div>
-          <div className="hd-field"><label>Total Lot Beli</label><span>{n(trade.planned.totalLot)}</span></div>
-          <div className="hd-field"><label>Total Cost</label><span>{nShort(trade.planned.totalCost)}</span></div>
-          <div className="hd-field"><label>Avg Final</label><span>{trade.planned.avgFinal.toFixed(2)}</span></div>
-          <div className="hd-field"><label>Sell Target</label><span>{trade.planned.sellFinal}</span></div>
-          <div className="hd-field"><label>Est. Profit</label><span style={{ color: trade.planned.plFinal >= 0 ? 'var(--green)' : 'var(--red)' }}>{fmtPL(trade.planned.plFinal)}</span></div>
+          <div className="hd-field">
+            <label>Mode</label>
+            <span>{trade.mode === "position" ? "Existing" : "New"}</span>
+          </div>
+          <div className="hd-field">
+            <label>Bid Awal</label>
+            <span>{trade.bids[0]}</span>
+          </div>
+          <div className="hd-field">
+            <label>Papan</label>
+            <span>{trade.bids.length}</span>
+          </div>
+          <div className="hd-field">
+            <label>Target Tick</label>
+            <span>+{trade.targetTicks}</span>
+          </div>
+          <div className="hd-field">
+            <label>Min Profit</label>
+            <span>{trade.targetProfit}%</span>
+          </div>
+          <div className="hd-field">
+            <label>Total Lot Beli</label>
+            <span>{n(trade.planned.totalLot)}</span>
+          </div>
+          <div className="hd-field">
+            <label>Total Cost</label>
+            <span>{nShort(trade.planned.totalCost)}</span>
+          </div>
+          <div className="hd-field">
+            <label>Avg Final</label>
+            <span>{trade.planned.avgFinal.toFixed(2)}</span>
+          </div>
+          <div className="hd-field">
+            <label>Sell Target</label>
+            <span>{trade.planned.sellFinal}</span>
+          </div>
+          <div className="hd-field">
+            <label>Est. Profit</label>
+            <span style={{ color: trade.planned.plFinal >= 0 ? "var(--green)" : "var(--red)" }}>
+              {fmtPL(trade.planned.plFinal)}
+            </span>
+          </div>
         </div>
-        {trade.mode === 'position' && trade.existingAvg > 0 && (
-          <div style={{ marginTop: '10px', fontSize: '12px', color: 'var(--text-m)' }}>
+        {trade.mode === "position" && trade.existingAvg > 0 && (
+          <div style={{ marginTop: "10px", fontSize: "12px", color: "var(--text-m)" }}>
             Existing: {n(trade.existingLot)} lot @ {trade.existingAvg}
           </div>
         )}
-        <div className="hd-mini-table" style={{ marginTop: '14px' }}>
+        <div className="hd-mini-table" style={{ marginTop: "14px" }}>
           {trade.bids.map((b, i) => (
-            <div key={i}><span>Papan {i + 1}</span><span style={{ color: 'var(--text)', fontWeight: 700 }}>Bid {b}</span></div>
+            <div key={i}>
+              <span>Papan {i + 1}</span>
+              <span style={{ color: "var(--text)", fontWeight: 700 }}>Bid {b}</span>
+            </div>
           ))}
         </div>
       </div>
 
-      <div className="hd-section" style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
-        <button className="btn-primary-pyscal" onClick={() => onRecall && onRecall()}
-          style={{ padding: '8px 14px' }}>
+      <div
+        className="hd-section"
+        style={{ display: "flex", justifyContent: "space-between", gap: 8 }}
+      >
+        <button
+          className="btn-primary-pyscal"
+          onClick={() => onRecall && onRecall()}
+          style={{ padding: "8px 14px" }}
+        >
           ↻ Recall ke Kalkulator
         </button>
-        <button className="btn-secondary" onClick={() => { if (confirm(`Hapus trade ini?`)) onDelete(); }}
-          style={{ borderColor: 'var(--red)', color: 'var(--red)' }}>
+        <button
+          className="btn-secondary"
+          onClick={() => {
+            if (confirm(`Hapus trade ini?`)) onDelete();
+          }}
+          style={{ borderColor: "var(--red)", color: "var(--red)" }}
+        >
           Hapus Trade
         </button>
       </div>
@@ -2896,20 +3938,30 @@ function TradeDetail({ trade, onDelete, onRecall }) {
 function InfoModal({ onClose, shortcuts }) {
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal" onClick={e => e.stopPropagation()}
-        role="dialog" aria-modal="true" aria-labelledby="info-modal-title">
+      <div
+        className="modal"
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="info-modal-title"
+      >
         <div className="modal-header">
-          <div className="modal-title" id="info-modal-title">Tentang PYSCAL</div>
-          <button className="modal-close" onClick={onClose} aria-label="Tutup"><XIcon /></button>
+          <div className="modal-title" id="info-modal-title">
+            Tentang PYSCAL
+          </div>
+          <button className="modal-close" onClick={onClose} aria-label="Tutup">
+            <XIcon />
+          </button>
         </div>
         <div className="modal-body info-body">
           <section className="info-sec">
             <h3 className="info-h">Apa itu PYSCAL?</h3>
             <p className="info-p">
-              Kalkulator <strong>pyramid bid</strong> (averaging-down berlapis) untuk trader saham{' '}
+              Kalkulator <strong>pyramid bid</strong> (averaging-down berlapis) untuk trader saham{" "}
               <strong>IDX / BEI</strong>. Rencanakan bid berjenjang, hitung <em>average price</em>,
               alokasi modal, dan lot per layer sesuai <em>tick size</em> dan fee broker Indonesia.
-              Semua data disimpan lokal di browser — tanpa signup, tanpa server, aman dipakai offline.
+              Semua data disimpan lokal di browser — tanpa signup, tanpa server, aman dipakai
+              offline.
             </p>
           </section>
 
@@ -2917,8 +3969,8 @@ function InfoModal({ onClose, shortcuts }) {
             <h3 className="info-h">Untuk siapa?</h3>
             <p className="info-p">
               Trader IDX yang pakai strategi <em>staggered buy</em>, <em>pyramid averaging</em>,
-              atau siap-siap DCA di area support. PYSCAL memastikan tiap layer sesuai{' '}
-              <strong>fraksi harga (tick size) BEI</strong> dan menghitung <em>break-even</em>{' '}
+              atau siap-siap DCA di area support. PYSCAL memastikan tiap layer sesuai{" "}
+              <strong>fraksi harga (tick size) BEI</strong> dan menghitung <em>break-even</em>{" "}
               setelah fee jual-beli otomatis.
             </p>
           </section>
@@ -2927,17 +3979,21 @@ function InfoModal({ onClose, shortcuts }) {
             <h3 className="info-h">Cara pakai</h3>
             <ol className="info-ol">
               <li>
-                Masukkan <strong>bid awal</strong>, target profit / tick, dan fee beli–jual broker Anda.
+                Masukkan <strong>bid awal</strong>, target profit / tick, dan fee beli–jual broker
+                Anda.
               </li>
               <li>
-                Tambah <strong>papan bid</strong> berikutnya — harga turun berlapis untuk averaging-down.
+                Tambah <strong>papan bid</strong> berikutnya — harga turun berlapis untuk
+                averaging-down.
                 <span className="ob-kbd info-kbd">{shortcutToString(shortcuts.addPapan)}</span>
               </li>
               <li>
-                PYSCAL menghitung <strong>average price</strong>, total lot, modal terpakai, dan target jual otomatis.
+                PYSCAL menghitung <strong>average price</strong>, total lot, modal terpakai, dan
+                target jual otomatis.
               </li>
               <li>
-                Simpan hasil ke <strong>History</strong>, atau simpan skema ke <strong>Preset</strong> per ticker lewat Settings.
+                Simpan hasil ke <strong>History</strong>, atau simpan skema ke{" "}
+                <strong>Preset</strong> per ticker lewat Settings.
                 <span className="ob-kbd info-kbd">{shortcutToString(shortcuts.saveTrade)}</span>
               </li>
             </ol>

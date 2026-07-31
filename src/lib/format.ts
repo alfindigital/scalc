@@ -26,8 +26,7 @@ export const terbilang = (v: number): string => {
   if (billions > 0) parts.push(`${billions} miliar`);
   if (millions > 0) parts.push(`${millions} juta`);
   if (thousands > 0) parts.push(`${thousands} ribu`);
-  if (ones > 0 && trillions === 0 && billions === 0 && millions === 0)
-    parts.push(ones.toString());
+  if (ones > 0 && trillions === 0 && billions === 0 && millions === 0) parts.push(ones.toString());
   return parts.join(" ");
 };
 

@@ -221,8 +221,7 @@ function commitWrite(key: string, value: unknown): void {
   } catch (err) {
     try {
       const name = (err as { name?: string })?.name || "";
-      const isQuota =
-        name === "QuotaExceededError" || name === "NS_ERROR_DOM_QUOTA_REACHED";
+      const isQuota = name === "QuotaExceededError" || name === "NS_ERROR_DOM_QUOTA_REACHED";
       window.dispatchEvent(
         new CustomEvent("pyscal:storage-error", {
           detail: { key, kind: isQuota ? "quota" : "unavailable" },
@@ -380,11 +379,15 @@ function repairTrade(t: unknown): Record<string, unknown> | null {
   const obj = t as Record<string, unknown>;
 
   const id = typeof obj.id === "string" && obj.id ? obj.id : null;
-  const timestamp = typeof obj.timestamp === "number" && isFinite(obj.timestamp) ? obj.timestamp : null;
+  const timestamp =
+    typeof obj.timestamp === "number" && isFinite(obj.timestamp) ? obj.timestamp : null;
   const bids = Array.isArray(obj.bids)
     ? obj.bids.filter((b) => typeof b === "number" && isFinite(b))
     : [];
-  const planned = obj.planned && typeof obj.planned === "object" ? (obj.planned as Record<string, unknown>) : null;
+  const planned =
+    obj.planned && typeof obj.planned === "object"
+      ? (obj.planned as Record<string, unknown>)
+      : null;
 
   if (!id || timestamp == null || !planned) return null;
 
@@ -451,7 +454,12 @@ export function savePresets<T = unknown>(presets: T[]): void {
 
 export function loadHistory<T = unknown>(): T[] {
   if (typeof window === "undefined") return [];
-  const loaded = loadVersioned("pyscal_history", SCHEMA_VERSION.history, [], migrateHistory) as unknown[];
+  const loaded = loadVersioned(
+    "pyscal_history",
+    SCHEMA_VERSION.history,
+    [],
+    migrateHistory,
+  ) as unknown[];
   // Selalu validasi ulang meski versi sudah terbaru — data bisa rusak akibat edit manual,
   // sync antar-tab, atau bug lama. Auto-repair + rewrite kalau ada yang di-drop/diubah.
   const repaired: unknown[] = [];

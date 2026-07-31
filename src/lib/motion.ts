@@ -43,7 +43,9 @@ function apply(setting: MotionSetting) {
 }
 
 export function setMotionSetting(setting: MotionSetting) {
-  try { localStorage.setItem(STORAGE_KEY, setting); } catch {}
+  try {
+    localStorage.setItem(STORAGE_KEY, setting);
+  } catch {}
   apply(setting);
   if (typeof window !== "undefined") {
     window.dispatchEvent(new CustomEvent(EVENT, { detail: setting }));
@@ -52,16 +54,26 @@ export function setMotionSetting(setting: MotionSetting) {
 
 // Subscribe to changes from any source: this tab, other tabs, or the OS
 // media query when the user is in "auto" mode.
-export function subscribeMotion(fn: (eff: MotionEffective, setting: MotionSetting) => void): () => void {
+export function subscribeMotion(
+  fn: (eff: MotionEffective, setting: MotionSetting) => void,
+): () => void {
   if (typeof window === "undefined") return () => {};
   const emit = () => {
     const s = getMotionSetting();
     fn(computeEffective(s), s);
   };
   const onEvent = () => emit();
-  const onStorage = (e: StorageEvent) => { if (e.key === STORAGE_KEY) { apply(getMotionSetting()); emit(); } };
+  const onStorage = (e: StorageEvent) => {
+    if (e.key === STORAGE_KEY) {
+      apply(getMotionSetting());
+      emit();
+    }
+  };
   const mq = window.matchMedia?.("(prefers-reduced-motion: reduce)");
-  const onMq = () => { apply(getMotionSetting()); emit(); };
+  const onMq = () => {
+    apply(getMotionSetting());
+    emit();
+  };
   window.addEventListener(EVENT, onEvent);
   window.addEventListener("storage", onStorage);
   mq?.addEventListener?.("change", onMq);

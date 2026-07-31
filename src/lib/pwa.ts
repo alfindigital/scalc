@@ -26,12 +26,12 @@ export function applyUpdate(): void {
   const w = waitingWorker;
   // Reload once the new worker takes control.
   let reloaded = false;
-  navigator.serviceWorker.addEventListener('controllerchange', () => {
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
     if (reloaded) return;
     reloaded = true;
     window.location.reload();
   });
-  w.postMessage({ type: 'SKIP_WAITING' });
+  w.postMessage({ type: "SKIP_WAITING" });
 }
 
 export function setupPWA(): void {
@@ -39,7 +39,11 @@ export function setupPWA(): void {
   if (!("serviceWorker" in navigator)) return;
 
   const inIframe = (() => {
-    try { return window.self !== window.top; } catch { return true; }
+    try {
+      return window.self !== window.top;
+    } catch {
+      return true;
+    }
   })();
   const host = window.location.hostname;
   // E2E escape hatch: allow forcing SW on localhost/127.0.0.1 via ?e2e-sw=1 (persisted in sessionStorage for reloads).

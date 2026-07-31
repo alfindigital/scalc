@@ -1,7 +1,14 @@
 import { describe, it, expect } from "vitest";
 import {
-  validateBid, validateLot, validateTargetTicks, validateTargetProfit,
-  validateFee, validateBalance, validateExistingAvg, validateExistingLot, hasError,
+  validateBid,
+  validateLot,
+  validateTargetTicks,
+  validateTargetProfit,
+  validateFee,
+  validateBalance,
+  validateExistingAvg,
+  validateExistingLot,
+  hasError,
 } from "./validation";
 
 describe("validation", () => {

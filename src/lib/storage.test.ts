@@ -149,7 +149,9 @@ describe("schema versioning", () => {
   });
 
   it("loadHistory mempertahankan pinned/note yang sudah ada di v2", () => {
-    saveHistory([{ id: "tr_2", timestamp: 2, planned: { avgFinal: 200 }, pinned: true, note: "BBRI" }]);
+    saveHistory([
+      { id: "tr_2", timestamp: 2, planned: { avgFinal: 200 }, pinned: true, note: "BBRI" },
+    ]);
     flushPendingWrites();
     const h = loadHistory<{ pinned: boolean; note: string }>();
     expect(h[0].pinned).toBe(true);
@@ -188,10 +190,7 @@ describe("multi-version migration", () => {
   });
 
   it("state: wrapped versi lama (v0) tetap dimigrasikan ke versi target", () => {
-    localStorage.setItem(
-      "pyscal_state",
-      JSON.stringify({ version: 0, data: { baseLot: 700 } }),
-    );
+    localStorage.setItem("pyscal_state", JSON.stringify({ version: 0, data: { baseLot: 700 } }));
     const s = loadStateVersioned();
     expect(s.baseLot).toBe(700);
     const raw = JSON.parse(localStorage.getItem("pyscal_state") as string);
@@ -278,9 +277,7 @@ describe("cross-tab sync (storage event payload)", () => {
   // kembali via loader — kontrak minimum untuk sinkronisasi.
   it("tulis di 'tab lain' terbaca oleh loadHistory di tab ini", () => {
     // tab A menulis via API resmi
-    saveHistory([
-      { id: "x", timestamp: 1, planned: { avgFinal: 5 }, pinned: false, note: "" },
-    ]);
+    saveHistory([{ id: "x", timestamp: 1, planned: { avgFinal: 5 }, pinned: false, note: "" }]);
     flushPendingWrites();
     // tab B menimpa storage secara mentah (mirip event.newValue)
     const newPayload = {
@@ -405,10 +402,7 @@ describe("data corruption resilience", () => {
   });
 
   it("shortcuts wrapped berisi data non-object → default", () => {
-    localStorage.setItem(
-      "pyscal_shortcuts",
-      JSON.stringify({ version: 1, data: 42 }),
-    );
+    localStorage.setItem("pyscal_shortcuts", JSON.stringify({ version: 1, data: 42 }));
     // versi berbeda → migrator dipanggil; menerima 42 dan kembalikan DEFAULT.
     const s = loadShortcutsVersioned();
     expect(s).toEqual(DEFAULT_SHORTCUTS);

@@ -66,7 +66,9 @@ export function TelegramPopup() {
   }, []);
 
   const close = () => {
-    try { localStorage.setItem(STORAGE_KEY, "1"); } catch {}
+    try {
+      localStorage.setItem(STORAGE_KEY, "1");
+    } catch {}
     setOpen(false);
   };
 
@@ -74,12 +76,19 @@ export function TelegramPopup() {
     if (!open) return;
     ctaRef.current?.focus();
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") { e.preventDefault(); close(); }
+      if (e.key === "Escape") {
+        e.preventDefault();
+        close();
+      }
     };
     document.addEventListener("keydown", onKey);
     const iv = window.setInterval(() => {
       setLeft((v) => {
-        if (v <= 1) { window.clearInterval(iv); close(); return 0; }
+        if (v <= 1) {
+          window.clearInterval(iv);
+          close();
+          return 0;
+        }
         return v - 1;
       });
     }, 1000);
@@ -103,12 +112,21 @@ export function TelegramPopup() {
           aria-describedby="tgp-body"
           onClick={(e) => e.stopPropagation()}
         >
-          <button type="button" className="tgp-close" onClick={close} aria-label="Tutup popup Telegram">&times;</button>
+          <button
+            type="button"
+            className="tgp-close"
+            onClick={close}
+            aria-label="Tutup popup Telegram"
+          >
+            &times;
+          </button>
           <div className="tgp-badge">Gratis &middot; Telegram</div>
-          <div className="tgp-title" id="tgp-title">Bid-mu masih nebak-nebak?</div>
+          <div className="tgp-title" id="tgp-title">
+            Bid-mu masih nebak-nebak?
+          </div>
           <div className="tgp-body" id="tgp-body">
-            Gabung <strong>@lotmetrik</strong> &mdash; watchlist &amp; area bid harian buat trader IDX.
-            Sekali klik, langsung ikut.
+            Gabung <strong>@lotmetrik</strong> &mdash; watchlist &amp; area bid harian buat trader
+            IDX. Sekali klik, langsung ikut.
           </div>
           <a
             ref={ctaRef}
@@ -120,7 +138,9 @@ export function TelegramPopup() {
           >
             Join Channel Sekarang &rarr;
           </a>
-          <button type="button" className="tgp-later" onClick={close}>Nanti aja</button>
+          <button type="button" className="tgp-later" onClick={close}>
+            Nanti aja
+          </button>
           <div
             className="tgp-timer"
             role="progressbar"
@@ -133,7 +153,9 @@ export function TelegramPopup() {
             <span className="tgp-track" aria-hidden="true">
               <span className="tgp-fill" style={{ width: `${(left / DURATION) * 100}%` }} />
             </span>
-            <span className="tgp-secs" aria-hidden="true">{left}s</span>
+            <span className="tgp-secs" aria-hidden="true">
+              {left}s
+            </span>
           </div>
         </div>
       </div>
