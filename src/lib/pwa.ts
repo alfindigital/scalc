@@ -26,12 +26,12 @@ export function applyUpdate(): void {
   const w = waitingWorker;
   // Reload once the new worker takes control.
   let reloaded = false;
-  navigator.serviceWorker.addEventListener('controllerchange', () => {
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
     if (reloaded) return;
     reloaded = true;
     window.location.reload();
   });
-  w.postMessage({ type: 'SKIP_WAITING' });
+  w.postMessage({ type: "SKIP_WAITING" });
 }
 
 export function setupPWA(): void {
@@ -39,7 +39,11 @@ export function setupPWA(): void {
   if (!("serviceWorker" in navigator)) return;
 
   const inIframe = (() => {
-    try { return window.self !== window.top; } catch { return true; }
+    try {
+      return window.self !== window.top;
+    } catch {
+      return true;
+    }
   })();
   const host = window.location.hostname;
   // E2E escape hatch: allow forcing SW on localhost/127.0.0.1 via ?e2e-sw=1 (persisted in sessionStorage for reloads).
@@ -50,7 +54,9 @@ export function setupPWA(): void {
       sessionStorage.setItem("__pyscal_e2e_sw", "1");
     }
     forceSW = sessionStorage.getItem("__pyscal_e2e_sw") === "1";
-  } catch {}
+  } catch {
+    /* noop */
+  }
   const isPreviewHost =
     host.includes("id-preview--") ||
     host.includes("lovableproject.com") ||
@@ -106,14 +112,19 @@ export interface InstallPromptHandle {
   prompt: () => Promise<"accepted" | "dismissed" | "unavailable">;
 }
 
-let deferredPrompt: any = null;
+interface BeforeInstallPromptEvent extends Event {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
+}
+
+let deferredPrompt: BeforeInstallPromptEvent | null = null;
 const listeners = new Set<() => void>();
 
 export function bindInstallPrompt(): () => void {
   if (typeof window === "undefined") return () => {};
   const onPrompt = (e: Event) => {
     e.preventDefault();
-    deferredPrompt = e;
+    deferredPrompt = e as BeforeInstallPromptEvent;
     listeners.forEach((cb) => cb());
   };
   const onInstalled = () => {
@@ -155,7 +166,7 @@ export function isStandalone(): boolean {
   return (
     window.matchMedia?.("(display-mode: standalone)").matches ||
     // iOS Safari
-    (window.navigator as any).standalone === true
+    (window.navigator as Navigator & { standalone?: boolean }).standalone === true
   );
 }
 
@@ -178,7 +189,7 @@ export function detectPlatform(): PlatformInfo {
   const isIPad =
     /iPad/.test(ua) ||
     // iPadOS 13+ reports as Mac; detect via touch points.
-    (navigator.platform === "MacIntel" && (navigator as any).maxTouchPoints > 1);
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
   const isIOS = /iPhone|iPod/.test(ua) || isIPad;
   const isAndroid = /Android/i.test(ua);
   const isSafari = /^((?!chrome|android|crios|fxios|edgios).)*safari/i.test(ua);

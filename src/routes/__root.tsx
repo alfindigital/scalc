@@ -78,20 +78,27 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
       { name: "apple-mobile-web-app-title", content: "PYSCAL" },
       { title: "PYSCAL — Pyramid Bid Calculator untuk Trader IDX" },
-      { name: "description", content: "PYSCAL adalah kalkulator pyramid averaging-down untuk trader saham IDX. Hitung bid berlapis, simpan history, dan jalankan offline — gratis dan tanpa daftar." },
+      {
+        name: "description",
+        content:
+          "PYSCAL adalah kalkulator pyramid averaging-down untuk trader saham IDX. Hitung bid berlapis, simpan history, dan jalankan offline — gratis dan tanpa daftar.",
+      },
       { property: "og:title", content: "PYSCAL — Pyramid Bid Calculator untuk Trader IDX" },
-      { property: "og:description", content: "Kalkulator pyramid averaging-down untuk trader IDX. Hitung bid berlapis, simpan history, jalankan offline — gratis & tanpa signup." },
+      {
+        property: "og:description",
+        content:
+          "Kalkulator pyramid averaging-down untuk trader IDX. Hitung bid berlapis, simpan history, jalankan offline — gratis & tanpa signup.",
+      },
       { property: "og:url", content: "https://scalc.alfindigital.com/" },
       { property: "og:site_name", content: "PYSCAL" },
       { property: "og:type", content: "website" },
       { property: "og:locale", content: "id_ID" },
       { name: "twitter:title", content: "PYSCAL — Pyramid Bid Calculator untuk Trader IDX" },
-      { name: "twitter:description", content: "Kalkulator pyramid averaging-down untuk trader IDX. Hitung bid berlapis, simpan history, jalankan offline." },
-      { property: "og:image", content: "https://scalc.alfindigital.com/og-image.jpg" },
-      { property: "og:image:width", content: "1216" },
-      { property: "og:image:height", content: "640" },
-      { property: "og:image:alt", content: "PYSCAL — Pyramid Bid Calculator untuk trader saham IDX" },
-      { name: "twitter:image", content: "https://scalc.alfindigital.com/og-image.jpg" },
+      {
+        name: "twitter:description",
+        content:
+          "Kalkulator pyramid averaging-down untuk trader IDX. Hitung bid berlapis, simpan history, jalankan offline.",
+      },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "google-site-verification", content: "J-Czc4w4Dto_XXTUZfW8lAMoT45CpTWqZ72Nt91yFbw" },
     ],
@@ -150,7 +157,9 @@ function RootShell({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        <a href="#main" className="pyscal-sr-only">Langsung ke konten</a>
+        <a href="#main" className="pyscal-sr-only">
+          Langsung ke konten
+        </a>
         {children}
         <Scripts />
       </body>

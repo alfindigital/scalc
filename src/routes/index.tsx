@@ -11,12 +11,22 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "PYSCAL — Pyramid Bid Calculator untuk Trader IDX" },
-      { name: "description", content: "Kalkulator pyramid averaging-down untuk trader saham IDX. Hitung bid berlapis, simpan history, dan jalankan offline tanpa daftar." },
+      {
+        name: "description",
+        content:
+          "Kalkulator pyramid averaging-down untuk trader saham IDX. Hitung bid berlapis, simpan history, dan jalankan offline tanpa daftar.",
+      },
       { property: "og:url", content: "https://scalc.alfindigital.com/" },
+      { property: "og:image", content: "https://scalc.alfindigital.com/og-image.jpg" },
+      { property: "og:image:width", content: "1216" },
+      { property: "og:image:height", content: "640" },
+      {
+        property: "og:image:alt",
+        content: "PYSCAL — Pyramid Bid Calculator untuk trader saham IDX",
+      },
+      { name: "twitter:image", content: "https://scalc.alfindigital.com/og-image.jpg" },
     ],
-    links: [
-      { rel: "canonical", href: "https://scalc.alfindigital.com/" },
-    ],
+    links: [{ rel: "canonical", href: "https://scalc.alfindigital.com/" }],
   }),
 });
 
@@ -29,7 +39,8 @@ function Index() {
     const unsubUpdate = onUpdateAvailable(() => {
       toast("Versi baru PYSCAL tersedia", {
         id: "sw-update-toast",
-        description: "Reload untuk pakai versi terbaru. Kalkulator offline tetap jalan sampai kamu reload.",
+        description:
+          "Reload untuk pakai versi terbaru. Kalkulator offline tetap jalan sampai kamu reload.",
         duration: Infinity,
         action: {
           label: "Reload sekarang",

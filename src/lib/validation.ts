@@ -28,7 +28,8 @@ export function validateLot(value: number): FieldStatus {
   }
   if (!Number.isFinite(value)) return { error: "Lot harus berupa angka" };
   if (value < 1) return { error: "Lot minimal 1" };
-  if (!Number.isInteger(value)) return { error: "Lot harus bilangan bulat (satuan lot, tanpa desimal)" };
+  if (!Number.isInteger(value))
+    return { error: "Lot harus bilangan bulat (satuan lot, tanpa desimal)" };
   if (value > 1_000_000) return { warning: "Lot > 1.000.000 tidak realistis untuk retail" };
   return ok;
 }
@@ -61,14 +62,16 @@ export function validateBalance(value: number): FieldStatus {
 
 export function validateExistingAvg(value: number, mode: "entry" | "position"): FieldStatus {
   if (mode !== "position") return ok;
-  if (!Number.isFinite(value) || value <= 0) return { error: "Avg existing wajib > 0 di mode Existing" };
+  if (!Number.isFinite(value) || value <= 0)
+    return { error: "Avg existing wajib > 0 di mode Existing" };
   if (value < 50 || value > 50000) return { warning: "Avg di luar range IDX umum (50–50.000)" };
   return ok;
 }
 
 export function validateExistingLot(value: number, mode: "entry" | "position"): FieldStatus {
   if (mode !== "position") return ok;
-  if (!Number.isFinite(value) || value < 1) return { error: "Lot existing wajib ≥ 1 di mode Existing" };
+  if (!Number.isFinite(value) || value < 1)
+    return { error: "Lot existing wajib ≥ 1 di mode Existing" };
   return ok;
 }
 

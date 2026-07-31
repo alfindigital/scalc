@@ -60,7 +60,11 @@ export function OnboardingTour() {
   // Allow manual restart from Settings via a global event.
   useEffect(() => {
     const handler = () => {
-      try { localStorage.removeItem(STORAGE_KEY); } catch {}
+      try {
+        localStorage.removeItem(STORAGE_KEY);
+      } catch {
+        /* noop */
+      }
       setStep(0);
       setOpen(true);
     };
@@ -71,7 +75,9 @@ export function OnboardingTour() {
   const finish = () => {
     try {
       localStorage.setItem(STORAGE_KEY, dontShowAgain ? "dismissed" : "1");
-    } catch {}
+    } catch {
+      /* noop */
+    }
     setOpen(false);
   };
 
@@ -103,7 +109,7 @@ export function OnboardingTour() {
       }
       if (e.key === "Tab" && dialogRef.current) {
         const focusables = dialogRef.current.querySelectorAll<HTMLElement>(
-          'button, [href], [tabindex]:not([tabindex="-1"])'
+          'button, [href], [tabindex]:not([tabindex="-1"])',
         );
         if (focusables.length === 0) return;
         const first = focusables[0];
@@ -168,10 +174,7 @@ export function OnboardingTour() {
   };
 
   return (
-    <div
-      className="onb-overlay"
-      onClick={finish}
-    >
+    <div className="onb-overlay" onClick={finish}>
       <div
         ref={dialogRef}
         className="onb-card"
@@ -183,17 +186,16 @@ export function OnboardingTour() {
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
-        style={swipeDx !== 0 ? { transform: `translateX(${swipeDx}px)`, transition: "none" } : undefined}
+        style={
+          swipeDx !== 0 ? { transform: `translateX(${swipeDx}px)`, transition: "none" } : undefined
+        }
       >
-        <button
-          type="button"
-          className="onb-close"
-          onClick={finish}
-          aria-label="Lewati onboarding"
-        >
+        <button type="button" className="onb-close" onClick={finish} aria-label="Lewati onboarding">
           Lewati
         </button>
-        <div className="onb-hint" aria-hidden="true">{s.hint}</div>
+        <div className="onb-hint" aria-hidden="true">
+          {s.hint}
+        </div>
         <div className="pyscal-sr-only" aria-live="polite" aria-atomic="true">
           {stepLabel}: {s.title}
         </div>
@@ -206,7 +208,9 @@ export function OnboardingTour() {
           aria-valuetext={`Langkah ${step + 1} dari ${STEPS.length}`}
           aria-label="Progres onboarding"
         >
-          <span className="onb-count" aria-hidden="true">{step + 1} / {STEPS.length}</span>
+          <span className="onb-count" aria-hidden="true">
+            {step + 1} / {STEPS.length}
+          </span>
           <span className="onb-bar" aria-hidden="true">
             <span
               className="onb-bar-fill"
@@ -214,8 +218,12 @@ export function OnboardingTour() {
             />
           </span>
         </div>
-        <div className="onb-title" id="onb-title">{s.title}</div>
-        <div className="onb-body" id="onb-body">{s.body}</div>
+        <div className="onb-title" id="onb-title">
+          {s.title}
+        </div>
+        <div className="onb-body" id="onb-body">
+          {s.body}
+        </div>
         <label className="onb-dont-show" htmlFor={checkboxId}>
           <input
             id={checkboxId}
@@ -226,11 +234,7 @@ export function OnboardingTour() {
           />
           <span>Jangan tampilkan lagi</span>
         </label>
-        <div
-          className="onb-dots"
-          role="tablist"
-          aria-label="Progres onboarding"
-        >
+        <div className="onb-dots" role="tablist" aria-label="Progres onboarding">
           {STEPS.map((st, i) => (
             <button
               key={i}
@@ -270,7 +274,9 @@ export function OnboardingTour() {
               type="button"
               onClick={() => (isLast ? finish() : setStep((v) => v + 1))}
               aria-label={
-                isLast ? "Selesai, tutup onboarding" : `Lanjut ke ${stepLabel.replace(String(step + 1), String(step + 2))}`
+                isLast
+                  ? "Selesai, tutup onboarding"
+                  : `Lanjut ke ${stepLabel.replace(String(step + 1), String(step + 2))}`
               }
             >
               {isLast ? "Selesai" : "Lanjut"}

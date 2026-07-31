@@ -51,16 +51,7 @@ describe("computeRows entry mode", () => {
   });
 
   it("custom lot override binary search", () => {
-    const { results } = computeRows(
-      [100, 95],
-      50,
-      1,
-      0.5,
-      0.0015,
-      0.0025,
-      null,
-      [50, 77],
-    );
+    const { results } = computeRows([100, 95], 50, 1, 0.5, 0.0015, 0.0025, null, [50, 77]);
     expect(results[1].lot).toBe(77);
   });
 
@@ -75,15 +66,7 @@ describe("computeRows entry mode", () => {
 
 describe("computeRows position mode", () => {
   it("baris pertama = posisi existing dengan layer 'E'", () => {
-    const { results } = computeRows(
-      [180],
-      100,
-      1,
-      0.5,
-      0.0015,
-      0.0025,
-      { avg: 200, lot: 100 },
-    );
+    const { results } = computeRows([180], 100, 1, 0.5, 0.0015, 0.0025, { avg: 200, lot: 100 });
     expect(results[0].layer).toBe("E");
     expect(results[0].isExisting).toBe(true);
     expect(results[0].lot).toBe(100);
