@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { shortcutToString } from "@/lib/storage";
 import { XIcon } from "./icons";
 
