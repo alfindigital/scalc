@@ -22,7 +22,7 @@ export function InfoModal({ onClose, shortcuts }) {
         </div>
         <div className="modal-body info-body">
           <section className="info-sec">
-            <h3 className="info-h">Apa itu PYSCAL?</h3>
+            <h2 className="info-h">Apa itu PYSCAL?</h2>
             <p className="info-p">
               Kalkulator <strong>pyramid bid</strong> (averaging-down berlapis) untuk trader saham{" "}
               <strong>IDX / BEI</strong>. Rencanakan bid berjenjang, hitung <em>average price</em>,
@@ -32,7 +32,7 @@ export function InfoModal({ onClose, shortcuts }) {
             </p>
           </section>
           <section className="info-sec">
-            <h3 className="info-h">Untuk siapa?</h3>
+            <h2 className="info-h">Untuk siapa?</h2>
             <p className="info-p">
               Trader IDX yang pakai strategi <em>staggered buy</em>, <em>pyramid averaging</em>,
               atau siap-siap DCA di area support. PYSCAL memastikan tiap layer sesuai{" "}
@@ -41,7 +41,7 @@ export function InfoModal({ onClose, shortcuts }) {
             </p>
           </section>
           <section className="info-sec">
-            <h3 className="info-h">Cara pakai</h3>
+            <h2 className="info-h">Cara pakai</h2>
             <ol className="info-ol">
               <li>
                 Masukkan <strong>bid awal</strong>, target profit / tick, dan fee beli–jual broker
