@@ -2656,7 +2656,9 @@ export default function PYSCAL() {
             {/* Header */}
             <div className="hdr">
               <div className="brand">
-                <h1>PYSCAL</h1>
+                <h1>
+                  PYSCAL<span className="pyscal-sr-only"> — Pyramid Bid Calculator</span>
+                </h1>
                 <span>Pyramid Bid Calculator</span>
               </div>
               <div className="hdr-r" ref={settingsRef}>
@@ -3973,7 +3975,7 @@ function InfoModal({ onClose, shortcuts }) {
         </div>
         <div className="modal-body info-body">
           <section className="info-sec">
-            <h3 className="info-h">Apa itu PYSCAL?</h3>
+            <h2 className="info-h">Apa itu PYSCAL?</h2>
             <p className="info-p">
               Kalkulator <strong>pyramid bid</strong> (averaging-down berlapis) untuk trader saham{" "}
               <strong>IDX / BEI</strong>. Rencanakan bid berjenjang, hitung <em>average price</em>,
@@ -3984,7 +3986,7 @@ function InfoModal({ onClose, shortcuts }) {
           </section>
 
           <section className="info-sec">
-            <h3 className="info-h">Untuk siapa?</h3>
+            <h2 className="info-h">Untuk siapa?</h2>
             <p className="info-p">
               Trader IDX yang pakai strategi <em>staggered buy</em>, <em>pyramid averaging</em>,
               atau siap-siap DCA di area support. PYSCAL memastikan tiap layer sesuai{" "}
@@ -3994,7 +3996,7 @@ function InfoModal({ onClose, shortcuts }) {
           </section>
 
           <section className="info-sec">
-            <h3 className="info-h">Cara pakai</h3>
+            <h2 className="info-h">Cara pakai</h2>
             <ol className="info-ol">
               <li>
                 Masukkan <strong>bid awal</strong>, target profit / tick, dan fee beli–jual broker
