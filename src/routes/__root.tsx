@@ -89,7 +89,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         content:
           "Kalkulator pyramid averaging-down untuk trader IDX. Hitung bid berlapis, simpan history, jalankan offline — gratis & tanpa signup.",
       },
-      { property: "og:url", content: "https://scalc.alfindigital.com/" },
+      { property: "og:url", content: "https://s-calc.lovable.app/" },
       { property: "og:site_name", content: "PYSCAL" },
       { property: "og:type", content: "website" },
       { property: "og:locale", content: "id_ID" },
@@ -129,7 +129,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
             "Kalkulator pyramid averaging-down untuk trader saham IDX. Hitung bid berlapis, simpan history, jalankan offline.",
           applicationCategory: "FinanceApplication",
           operatingSystem: "Web",
-          url: "https://scalc.alfindigital.com/",
+          url: "https://s-calc.lovable.app/",
           inLanguage: "id-ID",
           offers: { "@type": "Offer", price: "0", priceCurrency: "IDR" },
         }),
