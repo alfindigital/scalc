@@ -3048,6 +3048,7 @@ export default function PYSCAL() {
             {/* Results */}
             {data && data.results.length > 0 && (
               <div className="card" style={{ padding: 0 }}>
+                <h2 className="pyscal-sr-only">Hasil papan bid berlapis</h2>
                 <div className="papan-bar">
                   <div className="papan-label-wrap">
                     <span className="papan-label">Papan · {bids.length}</span>
