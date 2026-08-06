@@ -230,6 +230,7 @@ export function ResultsTable({
             );
           })}
           <div className="mt">
+            <h2 className="pyscal-sr-only">Ringkasan total pembelian</h2>
             <div>
               <div className="mt-label">Total Cost Beli</div>
               <div className="mt-val">
