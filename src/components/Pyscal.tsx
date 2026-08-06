@@ -2806,6 +2806,7 @@ export default function PYSCAL() {
 
             {/* Input card */}
             <div className="card">
+              <h2 className="pyscal-sr-only">Input parameter kalkulasi</h2>
               {mode === "position" && (
                 <div className="ig-2">
                   <div>
