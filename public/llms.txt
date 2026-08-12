@@ -7,3 +7,4 @@ PYSCAL membantu trader merencanakan bid berlapis (pyramid / averaging-down) deng
 ## Pages
 
 - [Home](/): Kalkulator pyramid bid utama, history, dan settings.
+- [FAQ](/faq): Tanya jawab pyramid bid, average price, tick size IDX, break-even setelah fee, dan cara pakai PYSCAL.
