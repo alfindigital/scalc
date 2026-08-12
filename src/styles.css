@@ -304,3 +304,64 @@ html[data-pyscal-theme="dark"] .afd-sicon:focus-visible { outline-color: #FFFFFF
 html[data-pyscal-motion-effective="reduce"] .afd-sicon {
   transition: none !important;
 }
+
+/* ==================== FAQ PAGE ==================== */
+.faq-page {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 28px 18px 48px;
+  font-family: "Funnel Sans", system-ui, sans-serif;
+  color: var(--foreground);
+}
+.faq-crumb {
+  display: flex;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--muted-foreground);
+  margin-bottom: 14px;
+}
+.faq-crumb a { color: inherit; text-decoration: none; }
+.faq-crumb a:hover { text-decoration: underline; }
+.faq-title { font-size: 26px; line-height: 1.25; font-weight: 800; letter-spacing: -0.02em; }
+.faq-lead { margin-top: 10px; font-size: 14px; line-height: 1.6; color: var(--muted-foreground); }
+.faq-h2 { margin-top: 30px; font-size: 17px; font-weight: 700; }
+.faq-steps { margin: 12px 0 0; padding-left: 20px; display: grid; gap: 8px; font-size: 14px; line-height: 1.6; }
+.faq-list { margin-top: 12px; display: grid; gap: 8px; }
+.faq-item {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--card);
+  padding: 10px 14px;
+}
+.faq-item summary {
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.faq-item summary::-webkit-details-marker { display: none; }
+.faq-item summary::after {
+  content: "+";
+  font-size: 16px;
+  color: var(--muted-foreground);
+  flex: none;
+}
+.faq-item[open] summary::after { content: "\2212"; }
+.faq-item summary h3 { font-size: 14px; font-weight: 600; margin: 0; }
+.faq-item p { margin-top: 8px; font-size: 13.5px; line-height: 1.65; color: var(--muted-foreground); }
+.faq-cta { margin-top: 28px; font-size: 14px; font-weight: 600; }
+.faq-cta a { color: var(--primary, #CA8A04); }
+.afd-faq {
+  font-size: 12px;
+  color: var(--muted-foreground);
+  text-decoration: none;
+  margin-left: 10px;
+}
+.afd-faq:hover { text-decoration: underline; }
+html[data-pyscal-theme="dark"] .afd-faq { color: #8A95AD; }
+@media (max-width: 480px) {
+  .faq-title { font-size: 21px; }
+  .afd-faq { font-size: 10px; margin-left: 6px; }
+}

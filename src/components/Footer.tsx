@@ -39,6 +39,9 @@ export default function Footer() {
           lotmetrik
         </a>
       </span>
+      <a className="afd-faq" href="/faq">
+        FAQ
+      </a>
       <nav className="afd-social" aria-label="Sosial media lotmetrik">
         {SOCIALS.map((s) => (
           <a
