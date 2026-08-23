@@ -63,6 +63,11 @@ export function InfoModal({ onClose, shortcuts }) {
               </li>
             </ol>
           </section>
+          <div className="info-faq">
+            <a className="info-faq-link" href="/faq">
+              Buka halaman FAQ →
+            </a>
+          </div>
         </div>
       </div>
     </div>
