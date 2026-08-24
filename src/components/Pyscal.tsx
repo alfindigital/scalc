@@ -9,6 +9,7 @@ const escHtml = (s) =>
 import { useState, useMemo, useCallback, useEffect, useRef, useId } from "react";
 import { Pin } from "lucide-react";
 import logoUrl from "@/assets/logo-pyscal.webp";
+import { InfoModal } from "@/components/pyscal/InfoModal";
 import { OnboardingTour } from "@/components/pyscal/OnboardingTour";
 import { TelegramPopup } from "@/components/pyscal/TelegramPopup";
 import { getTickSize, ceilTick, computeRows } from "@/lib/compute";
@@ -814,6 +815,13 @@ tbody td:last-child{padding:14px 8px;width:1%}
 .info-ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px;
   color:var(--text);font-size:14px;line-height:1.55}
 .info-kbd{margin-left:6px}
+.info-faq{display:flex;justify-content:flex-end}
+.info-faq-link{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:10px 16px;
+  border:1px solid var(--border);border-radius:10px;background:var(--surface);
+  font-family:'Funnel Sans',sans-serif;font-size:13px;font-weight:600;color:var(--text);
+  text-decoration:none;transition:border-color .15s,color .15s,background .15s}
+.info-faq-link:hover{border-color:var(--brand);color:var(--brand)}
+.info-faq-link:focus,.info-faq-link:focus-visible{outline:2px solid var(--brand);outline-offset:2px;color:var(--brand)}
 .btn-secondary{background:transparent;border:1px solid var(--border);color:var(--text);
   font-family:'Funnel Sans',sans-serif;font-size:13px;font-weight:600;padding:10px 18px;cursor:pointer;transition:all .15s}
 .btn-secondary:hover{border-color:var(--brand);color:var(--brand)}
@@ -3956,72 +3964,3 @@ function TradeDetail({ trade, onDelete, onRecall }) {
   );
 }
 
-/* ==================== INFO MODAL ==================== */
-function InfoModal({ onClose, shortcuts }) {
-  return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div
-        className="modal"
-        onClick={(e) => e.stopPropagation()}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="info-modal-title"
-      >
-        <div className="modal-header">
-          <div className="modal-title" id="info-modal-title">
-            Tentang PYSCAL
-          </div>
-          <button className="modal-close" onClick={onClose} aria-label="Tutup">
-            <XIcon />
-          </button>
-        </div>
-        <div className="modal-body info-body">
-          <section className="info-sec">
-            <h2 className="info-h">Apa itu PYSCAL?</h2>
-            <p className="info-p">
-              Kalkulator <strong>pyramid bid</strong> (averaging-down berlapis) untuk trader saham{" "}
-              <strong>IDX / BEI</strong>. Rencanakan bid berjenjang, hitung <em>average price</em>,
-              alokasi modal, dan lot per layer sesuai <em>tick size</em> dan fee broker Indonesia.
-              Semua data disimpan lokal di browser — tanpa signup, tanpa server, aman dipakai
-              offline.
-            </p>
-          </section>
-
-          <section className="info-sec">
-            <h2 className="info-h">Untuk siapa?</h2>
-            <p className="info-p">
-              Trader IDX yang pakai strategi <em>staggered buy</em>, <em>pyramid averaging</em>,
-              atau siap-siap DCA di area support. PYSCAL memastikan tiap layer sesuai{" "}
-              <strong>fraksi harga (tick size) BEI</strong> dan menghitung <em>break-even</em>{" "}
-              setelah fee jual-beli otomatis.
-            </p>
-          </section>
-
-          <section className="info-sec">
-            <h2 className="info-h">Cara pakai</h2>
-            <ol className="info-ol">
-              <li>
-                Masukkan <strong>bid awal</strong>, target profit / tick, dan fee beli–jual broker
-                Anda.
-              </li>
-              <li>
-                Tambah <strong>papan bid</strong> berikutnya — harga turun berlapis untuk
-                averaging-down.
-                <span className="ob-kbd info-kbd">{shortcutToString(shortcuts.addPapan)}</span>
-              </li>
-              <li>
-                PYSCAL menghitung <strong>average price</strong>, total lot, modal terpakai, dan
-                target jual otomatis.
-              </li>
-              <li>
-                Simpan hasil ke <strong>History</strong>, atau simpan skema ke{" "}
-                <strong>Preset</strong> per ticker lewat Settings.
-                <span className="ob-kbd info-kbd">{shortcutToString(shortcuts.saveTrade)}</span>
-              </li>
-            </ol>
-          </section>
-        </div>
-      </div>
-    </div>
-  );
-}
