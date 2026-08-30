@@ -2673,10 +2673,13 @@ export default function PYSCAL() {
                 <button
                   className="gear-btn"
                   onClick={() => setShowInfo(true)}
-                  aria-label="Cara pakai"
+                  aria-label="Info: cara pakai PYSCAL"
+                  aria-haspopup="dialog"
+                  aria-expanded={showInfo}
                 >
                   <InfoIcon />
                 </button>
+
                 <button
                   className="gear-btn"
                   onClick={() => setShowHistory(true)}
