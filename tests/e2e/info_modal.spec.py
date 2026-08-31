@@ -112,6 +112,8 @@ async def run(page):
             "(t) => document.documentElement.setAttribute('data-pyscal-theme', t)", theme
         )
         await open_modal(page)
+        # let the open/theme transition settle so axe samples final colors
+        await page.wait_for_timeout(450)
         await page.add_script_tag(content=AXE)
         res = await page.evaluate(
             """async (rules) => await axe.run(document.querySelector('[role="dialog"]'), {
