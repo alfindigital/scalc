@@ -1,26 +1,45 @@
-# .SCALC
+# SCalc — Simple Stock Calculator IDX
 
-cek app terlampir. saya mau kamu roasting dan evaluasi apa yang perlu dibenahi utk publicity pay one time payment, dgn konsep simple calc, local storage, no opex, dan dengan fungsi jelas. serta berikan point2 improvement/tambahan fitur/uiux/mobile fitur/dll. jika app terlampir sudah perfect, bisakah kamu buat percis dengan seperti itu? buat plan detilnya . serta tanyakan yg perlu ditanyakan
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178c6?logo=typescript)](https://typescriptlang.org)
 
-This project was built with [Lovable](https://lovable.dev).
+Kalkulator saham sederhana untuk investor IDX/BEI. Hitung lot, nilai investasi, P&L, dan titik BEP dengan cepat tanpa perlu signup atau koneksi internet.
 
-**Live app**: https://s-calc.lovable.app
+**Live:** https://s-calc.lovable.app
 
-## Build with Lovable
+---
 
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/f5757e02-acee-4620-9e57-0f4aeb12bc48).
+## Fitur
 
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
+- 💰 **Kalkulasi Lot & Nilai** — Dari harga per lembar ke nilai total
+- 📈 **P&L Calculator** — Profit & Loss realtime
+- 🔢 **BEP Calculator** — Break-even point
+- 💾 **Local Storage** — Simpan kalkulasi tanpa akun
+- ⌨️ **Keyboard Friendly** — Operasi cepat
+- 📲 **PWA** — Installable di HP
 
-## Development
+---
 
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
+## Quick Start
 
-```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
+```bash
+git clone https://github.com/alfindigital/scalc.git
+cd scalc
+npm install
 npm run dev
+npm run build
 ```
+
+---
+
+## Stack
+
+- TanStack Start + TypeScript 5
+- Tailwind CSS + shadcn/ui
+- PWA ready
+
+---
+
+## Lisensi
+
+[MIT](LICENSE)
