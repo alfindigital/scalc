@@ -112,6 +112,8 @@ async def run(page):
             "(t) => document.documentElement.setAttribute('data-pyscal-theme', t)", theme
         )
         await open_modal(page)
+        # let the open/theme transition settle so axe samples final colors
+        await page.wait_for_timeout(450)
         await page.add_script_tag(content=AXE)
         res = await page.evaluate(
             """async (rules) => await axe.run(document.querySelector('[role="dialog"]'), {
@@ -122,7 +124,7 @@ async def run(page):
         )
         viols = res.get("violations", [])
         rec(f"axe clean/{theme}", not viols,
-            "; ".join(f"{v['id']}[{v['impact']}]" for v in viols))
+            "; ".join(f"{v['id']}[{v['impact']}] " + " ".join(str(n['target']) + '=>' + n.get('failureSummary','').replace(chr(10),' ')[:200] for n in v['nodes']) for v in viols))
         await page.keyboard.press("Escape")
         await page.wait_for_selector('[role="dialog"]', state="detached")
 
