@@ -122,7 +122,7 @@ async def run(page):
         )
         viols = res.get("violations", [])
         rec(f"axe clean/{theme}", not viols,
-            "; ".join(f"{v['id']}[{v['impact']}]" for v in viols))
+            "; ".join(f"{v['id']}[{v['impact']}] " + " ".join(str(n['target']) + '=>' + n.get('failureSummary','').replace(chr(10),' ')[:200] for n in v['nodes']) for v in viols))
         await page.keyboard.press("Escape")
         await page.wait_for_selector('[role="dialog"]', state="detached")
 
